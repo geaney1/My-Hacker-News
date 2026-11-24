@@ -1,0 +1,18 @@
+<details class="comment" open>
+  <summary>
+    @if (comment().by; as author) {
+      <a class="author" [routerLink]="['/user', author]">{{ author }}</a>
+    }
+    <span class="time">{{ comment().time | timeAgo }}</span>
+  </summary>
+
+  <div class="text hn-text" [innerHTML]="comment().text"></div>
+
+  @if (comment().replies.length) {
+    <ul class="replies">
+      @for (reply of comment().replies; track reply.id) {
+        <li><app-story-comment [comment]="reply" /></li>
+      }
+    </ul>
+  }
+</details>

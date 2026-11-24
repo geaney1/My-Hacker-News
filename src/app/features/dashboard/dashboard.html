@@ -1,0 +1,33 @@
+﻿<div class="layout">
+  <app-side-menu />
+
+  <main class="page">
+    <header class="page-header">
+      <h1>Hacker News</h1>
+      @if (login()) {
+        <div class="header-actions">
+          <!-- Log Out comes last, so it sits where the Log In button was. -->
+          <a
+            class="avatar"
+            routerLink="/user-profile"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+            [attr.aria-label]="'Profile for ' + username()"
+          >
+            {{ initial() }}
+          </a>
+          <button type="button" class="button sign-out" (click)="signOut()">Log Out</button>
+        </div>
+      } @else if (!onSignInPage()) {
+        <a class="button sign-in" routerLink="/log-in">Log In</a>
+      }
+    </header>
+
+    <!-- While the log-in or create-user dialog is open, the stories stay visible behind it. -->
+    @if (onSignInPage()) {
+      <app-stories-page [list]="backgroundList()" />
+    }
+
+    <router-outlet />
+  </main>
+</div>

@@ -1,0 +1,40 @@
+:host {
+  display: block;
+}
+
+.comment {
+  padding: 0.5rem 0;
+}
+
+summary {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.author {
+  color: var(--color-text);
+  font-weight: 700;
+
+  &:hover {
+    color: var(--color-accent);
+  }
+}
+
+.time {
+  color: var(--color-text-muted);
+}
+
+// The look of the comment's own HTML (links, code) is in the shared `hn-text` styles.
+.text {
+  margin-top: 0.25rem;
+}
+
+.replies {
+  margin: 0.25rem 0 0 0.5rem;
+  padding: 0 0 0 0.75rem;
+  border-left: 2px solid var(--color-border);
+  list-style: none;
+}

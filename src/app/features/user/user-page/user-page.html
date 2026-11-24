@@ -1,0 +1,55 @@
+<button type="button" class="button back" (click)="goBack()">← Back</button>
+
+<article class="user-card">
+  <header class="header">
+    <div class="avatar" aria-hidden="true">{{ initial() }}</div>
+    <h2>{{ id() }}</h2>
+  </header>
+
+  @if (user.isLoading()) {
+    <p role="status">Loading profile…</p>
+  } @else if (user.error()) {
+    <p class="error" role="alert">
+      Could not load this profile.
+      <button type="button" class="button" (click)="user.reload()">Try again</button>
+    </p>
+  } @else if (user.value(); as hnUser) {
+    <dl class="stats">
+      <div class="stat">
+        <dt>Created</dt>
+        <dd>{{ hnUser.created | timeAgo }}</dd>
+      </div>
+      <div class="stat">
+        <dt>Karma</dt>
+        <dd>{{ hnUser.karma }}</dd>
+      </div>
+      <div class="stat">
+        <dt>Submissions</dt>
+        <dd>{{ hnUser.submitted?.length ?? 0 }}</dd>
+      </div>
+    </dl>
+
+    @if (hnUser.about) {
+      <section aria-labelledby="about-heading">
+        <h3 id="about-heading">About</h3>
+        <div class="about hn-text" [innerHTML]="hnUser.about"></div>
+      </section>
+    }
+
+    <p class="note">
+      @if (isOwnProfile()) {
+        <a routerLink="/user-profile">Edit your settings</a>
+        ·
+      }
+      <a
+        [href]="'https://news.ycombinator.com/user?id=' + hnUser.id"
+        target="_blank"
+        rel="noopener"
+      >
+        View on Hacker News
+      </a>
+    </p>
+  } @else {
+    <p role="alert">No Hacker News user named {{ id() }} was found.</p>
+  }
+</article>

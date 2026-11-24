@@ -1,0 +1,78 @@
+<div class="toolbar">
+  <div class="heading">
+    <h2 id="stories-heading">Stories</h2>
+    @if (!store.error() && !store.isLoading()) {
+      <p class="summary" role="status">
+        Showing {{ store.stories().length }} of {{ store.totalStories() }} stories
+      </p>
+    }
+  </div>
+
+  <div class="filters" role="group" aria-label="Filters">
+    <div class="field">
+      <label for="search">Search this page</label>
+      <input id="search" type="search" [formField]="filterForm.searchTerm" />
+    </div>
+    <div class="field">
+      <label for="min-score">Minimum score</label>
+      <input id="min-score" type="number" [formField]="filterForm.minScore" />
+    </div>
+  </div>
+</div>
+
+<section class="stories" aria-labelledby="stories-heading" [attr.aria-busy]="store.isLoading()">
+  @if (store.error()) {
+    <p class="error" role="alert">
+      Could not load stories.
+      <button type="button" class="button" (click)="store.reload()">Try again</button>
+    </p>
+  } @else if (store.isLoading()) {
+    <p role="status">Loading stories…</p>
+  } @else {
+    @if (store.changedStoryCount(); as changed) {
+      <p class="updates-notice" role="status">
+        {{ changed }} {{ changed === 1 ? 'story has' : 'stories have' }} been updated on Hacker News.
+        <button type="button" class="button" (click)="store.reload()">Refresh</button>
+      </p>
+    }
+    <ul class="story-list">
+      @for (story of store.stories(); track story.id) {
+        <li>
+          <article class="story">
+            <h3 class="story-title">
+              @if (story.url) {
+                <a [href]="story.url" target="_blank" rel="noopener">{{ story.title }}</a>
+              } @else {
+                <a [routerLink]="['/item', story.id]">{{ story.title }}</a>
+              }
+            </h3>
+            <p class="story-meta">
+              {{ story.score ?? 0 }} points · by
+              @if (story.by; as author) {
+                <a class="author-link" [routerLink]="['/user', author]">{{ author }}</a>
+              }
+              · {{ story.time | timeAgo }}
+              <!-- Job posts have no discussion, so there is nothing to link to. -->
+              @if (story.type !== 'job') {
+                ·
+                <a class="comments-link" [routerLink]="['/item', story.id]">
+                  {{ story.descendants ?? 0 }} comments
+                </a>
+              }
+            </p>
+          </article>
+        </li>
+      } @empty {
+        <li class="empty">No stories match your filters.</li>
+      }
+    </ul>
+  }
+
+  <app-pagination
+    class="pagination"
+    [page]="store.page()"
+    [totalPages]="store.totalPages()"
+    [resetKey]="store.selectedList()"
+    (pageChange)="store.goToPage($event)"
+  />
+</section>

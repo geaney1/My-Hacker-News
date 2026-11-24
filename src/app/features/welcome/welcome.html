@@ -1,0 +1,23 @@
+<article>
+  @if (welcome.hasValue()) {
+    <h2>{{ welcome.value().title }}</h2>
+
+    @for (paragraph of welcome.value().paragraphs; track $index) {
+      <p>
+        @for (segment of paragraph; track $index) {
+          @if (segment.route) {
+            <a [routerLink]="segment.route">{{ segment.text }}</a>
+          } @else if (segment.href) {
+            <a [href]="segment.href" target="_blank" rel="noopener">{{ segment.text }}</a>
+          } @else {
+            {{ segment.text }}
+          }
+        }
+      </p>
+    }
+  } @else if (welcome.error()) {
+    <p role="alert">Could not load the welcome page. Please try again later.</p>
+  } @else {
+    <p role="status">Loading…</p>
+  }
+</article>

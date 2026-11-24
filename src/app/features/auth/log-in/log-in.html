@@ -1,0 +1,36 @@
+﻿<app-auth-card heading="Log in" [modal]="true">
+  <form class="auth-form" novalidate (submit)="onSubmit($event)">
+    <app-form-text-field
+      fieldId="username"
+      label="Username"
+      autocomplete="username"
+      [field]="logInForm.username"
+    />
+
+    <app-form-text-field
+      fieldId="password"
+      label="Password"
+      autocomplete="current-password"
+      [type]="showPassword() ? 'text' : 'password'"
+      [field]="logInForm.password"
+    />
+
+    <label class="show-password">
+      <input type="checkbox" [checked]="showPassword()" (change)="toggleShowPassword()" />
+      Show password
+    </label>
+
+    @if (formError(); as message) {
+      <p class="form-error" role="alert">{{ message }}</p>
+    }
+
+    <button type="submit" class="button primary" [disabled]="logInForm().invalid()">
+      Log in
+    </button>
+  </form>
+
+  <p class="alternative">
+    New here?
+    <a routerLink="/create-user" [queryParams]="{ returnUrl: returnUrl() }">Create a new user</a>
+  </p>
+</app-auth-card>

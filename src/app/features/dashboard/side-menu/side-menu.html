@@ -1,0 +1,23 @@
+<nav class="side-menu" aria-label="Story lists">
+  <ul class="list-tabs">
+    @for (option of listOptions(); track option.value) {
+      <li>
+        <a
+          class="tab"
+          [routerLink]="['/', option.value]"
+          [class.active]="highlightedList() === option.value"
+          [attr.aria-current]="listBeingShown() === option.value ? 'page' : null"
+        >
+          {{ option.label }}
+        </a>
+      </li>
+    }
+    @if (login()) {
+      <li>
+        <a class="tab" routerLink="/welcome" routerLinkActive="active" ariaCurrentWhenActive="page">
+          Welcome
+        </a>
+      </li>
+    }
+  </ul>
+</nav>

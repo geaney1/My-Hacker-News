@@ -1,0 +1,52 @@
+﻿<app-auth-card heading="Create a new user" [modal]="true">
+  <form class="auth-form" novalidate (submit)="onSubmit($event)">
+    <app-form-text-field
+      fieldId="username"
+      label="Username"
+      autocomplete="username"
+      [field]="createUserForm.username"
+    />
+
+    <app-form-text-field
+      fieldId="password"
+      label="Password"
+      autocomplete="new-password"
+      [type]="showPassword() ? 'text' : 'password'"
+      [field]="createUserForm.password"
+    />
+
+    <app-form-text-field
+      fieldId="confirm-password"
+      label="Verify password"
+      autocomplete="new-password"
+      [type]="showPassword() ? 'text' : 'password'"
+      [field]="createUserForm.confirmPassword"
+    />
+
+    <label class="show-password">
+      <input type="checkbox" [checked]="showPassword()" (change)="toggleShowPassword()" />
+      Show passwords
+    </label>
+
+    @if (formError(); as message) {
+      <p class="form-error" role="alert">{{ message }}</p>
+    }
+
+    <button type="submit" class="button primary" [disabled]="createUserForm().invalid()">
+      Create user
+    </button>
+  </form>
+
+  <p class="note">
+    This creates an account for this app only. It is not a Hacker News account. To post on
+    Hacker News itself,
+    <a href="https://news.ycombinator.com/login" target="_blank" rel="noopener">
+      create one on news.ycombinator.com<span class="visually-hidden"> (opens in a new tab)</span>
+    </a>.
+  </p>
+
+  <p class="alternative">
+    Already have a user?
+    <a routerLink="/log-in" [queryParams]="{ returnUrl: returnUrl() }">Log in</a>
+  </p>
+</app-auth-card>

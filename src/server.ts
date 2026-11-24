@@ -6,6 +6,13 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import { authRouter } from './auth-routes';
+import { BadRequestError } from './hn-fetch';
+import { getStoryPage, parseItemId } from './stories-proxy';
+import { getThread } from './thread-proxy';
+import { getUpdates } from './updates-proxy';
+import { getUser } from './users-proxy';
+import { getWelcomeContent } from './welcome-proxy';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
@@ -13,16 +20,92 @@ const app = express();
 const angularApp = new AngularNodeAppEngine();
 
 /**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
+ * Accounts and sessions: sign up, log in, log out and "who am I". Request bodies are small JSON.
  */
+app.use('/api/auth', express.json({ limit: '10kb' }), authRouter);
+
+/**
+ * Proxies the Hacker News welcome page, which the browser cannot fetch directly (CORS).
+ */
+app.get('/api/welcome', async (_request, response) => {
+  try {
+    response.json(await getWelcomeContent());
+  } catch (error) {
+    console.error('Failed to load the welcome page', error);
+    response.status(502).json({ message: 'Could not load the welcome page' });
+  }
+});
+
+/**
+ * Loads a page of a story list in one call, instead of the browser making one request per story.
+ */
+app.get('/api/stories/:list', async (request, response) => {
+  try {
+    const { page, pageSize } = request.query;
+    response.json(await getStoryPage(request.params.list, page, pageSize));
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      response.status(400).json({ message: error.message });
+      return;
+    }
+    console.error('Failed to load stories', error);
+    response.status(502).json({ message: 'Could not load the stories' });
+  }
+});
+
+/**
+ * The items and profiles that changed recently, so the app can tell when what it shows is stale.
+ */
+app.get('/api/updates', async (_request, response) => {
+  try {
+    response.json(await getUpdates());
+  } catch (error) {
+    console.error('Failed to load the updates', error);
+    response.status(502).json({ message: 'Could not load the updates' });
+  }
+});
+
+/**
+ * Loads an item together with its comment tree. Answers 404 when the item does not exist.
+ */
+app.get('/api/items/:id/thread', async (request, response) => {
+  try {
+    const thread = await getThread(parseItemId(request.params.id));
+    if (!thread) {
+      response.status(404).json({ message: 'Item not found' });
+      return;
+    }
+    response.json(thread);
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      response.status(400).json({ message: error.message });
+      return;
+    }
+    console.error('Failed to load the thread', error);
+    response.status(502).json({ message: 'Could not load the comments' });
+  }
+});
+
+/**
+ * Loads a user's public profile. Answers 404 when the user does not exist.
+ */
+app.get('/api/users/:id', async (request, response) => {
+  try {
+    const user = await getUser(request.params.id);
+    if (!user) {
+      response.status(404).json({ message: 'User not found' });
+      return;
+    }
+    response.json(user);
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      response.status(400).json({ message: error.message });
+      return;
+    }
+    console.error('Failed to load the user', error);
+    response.status(502).json({ message: 'Could not load the user' });
+  }
+});
 
 /**
  * Serve static files from /browser

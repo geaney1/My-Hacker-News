@@ -1,0 +1,72 @@
+<nav class="pagination" aria-label="Pagination">
+  <p class="status">Page {{ page() }} of {{ totalPages() }}</p>
+
+  <div class="controls">
+    <button
+      type="button"
+      class="button arrow"
+      aria-label="Previous page"
+      [disabled]="page() <= 1"
+      (click)="select(page() - 1)"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M15 6l-6 6 6 6" />
+      </svg>
+    </button>
+
+    <ol class="pages">
+      @for (item of items(); track item.kind === 'page' ? item.page : item.key) {
+        <li>
+          @if (item.kind === 'page') {
+            <button
+              type="button"
+              class="button page"
+              [class.current]="item.page === page()"
+              [attr.aria-current]="item.page === page() ? 'page' : null"
+              [attr.aria-label]="'Page ' + item.page"
+              (click)="select(item.page)"
+            >
+              {{ item.page }}
+            </button>
+          } @else {
+            <span class="gap" aria-hidden="true">…</span>
+          }
+        </li>
+      }
+    </ol>
+
+    <button
+      type="button"
+      class="button arrow"
+      aria-label="Next page"
+      [disabled]="page() >= totalPages()"
+      (click)="select(page() + 1)"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 6l6 6-6 6" />
+      </svg>
+    </button>
+
+    <form class="go-to" (submit)="onGoToPage($event)">
+      <label for="go-to-page">Go to page</label>
+      <input
+        id="go-to-page"
+        type="number"
+        inputmode="numeric"
+        [attr.aria-invalid]="goToPageError() ? 'true' : null"
+        [attr.aria-describedby]="goToPageError() ? 'go-to-page-error' : null"
+        [formField]="goToPageForm.page"
+      />
+      <button
+        type="submit"
+        class="button"
+        [disabled]="goToPageForm.page().value() === null || goToPageForm.page().invalid()"
+      >
+        Go
+      </button>
+      @if (goToPageError(); as error) {
+        <p class="go-to-error" id="go-to-page-error" role="alert">{{ error }}</p>
+      }
+    </form>
+  </div>
+</nav>

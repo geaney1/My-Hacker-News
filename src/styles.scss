@@ -1,1 +1,95 @@
-/* You can add global styles to this file, and also import other style files */
+/* Shared theme: components use these tokens so the look can be changed in one place. */
+:root {
+  --color-background: #f6f6ef;
+  --color-surface: #ffffff;
+  --color-text: #1f1f1f;
+  --color-text-muted: #595959;
+  --color-border: #c9c9c0;
+  --color-accent: #b84300;
+  --color-accent-contrast: #ffffff;
+  --color-focus: #0b57d0;
+  --color-error: #b00020;
+
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --radius: 0.5rem;
+  --spacing: 1rem;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-family);
+}
+
+.button {
+  display: inline-block;
+  text-decoration: none;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/*
+ * Keep room for the vertical scrollbar even when a page is short. Without this, the centred layout
+ * slides sideways by half a scrollbar whenever the scrollbar appears or disappears, for example
+ * when moving between a long list and a short story.
+ */
+html {
+  scrollbar-gutter: stable;
+}
+
+/*
+ * Hacker News sends comments, story text and "about" text as HTML. Angular's component styles do
+ * not reach HTML inserted with [innerHTML], so the styling for it lives here and is switched on
+ * with the `hn-text` class.
+ */
+.hn-text {
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+
+  > :first-child {
+    margin-top: 0;
+  }
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+
+  // Long lines of code scroll inside their own box instead of stretching the whole page.
+  pre {
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius);
+    background: var(--color-background);
+  }
+
+  code {
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.9em;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}

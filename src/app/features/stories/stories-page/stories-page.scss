@@ -1,0 +1,184 @@
+// Takes the height left under the page header, so the pagination bar can sit at the bottom.
+:host {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.stories {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// One flat bar holding the heading, the result summary and the filters. It has no box of its
+// own, only an accent rule underneath, so it reads as a page header and not as a card.
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--spacing);
+  margin: 0 0 var(--spacing);
+  padding: 0 0 0.75rem;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.heading {
+  min-width: 10rem;
+}
+
+.filters {
+  display: flex;
+  flex: 1 1 24rem;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: flex-end;
+  gap: var(--spacing);
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+
+    &:first-child {
+      flex: 1 1 14rem;
+      max-width: 28rem;
+    }
+  }
+
+  // Rounded, pill-shaped fields set the filters apart from the square-ish story cards.
+  input {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-weight: 400;
+  }
+}
+
+h2 {
+  margin: 0 0 0.125rem;
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+.summary {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.error {
+  color: var(--color-error);
+}
+
+// Shown when Hacker News reports that stories on this page have changed since they were loaded.
+.updates-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem var(--spacing);
+  margin: 0 0 var(--spacing);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #f2dccb;
+  border-radius: var(--radius);
+  background: #fff6ee;
+}
+
+// Stories flow into as many columns as fit, so they only stack on small screens.
+.story-list {
+  margin-bottom: calc(var(--spacing) * 1.5);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: 0.75rem;
+}
+
+.story {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+
+  &:hover,
+  &:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 6px rgb(0 0 0 / 10%);
+  }
+}
+
+.story-title {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+
+  a {
+    color: var(--color-text);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--color-accent);
+      text-decoration: underline;
+    }
+  }
+}
+
+.story-meta {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.author-link {
+  color: inherit;
+
+  &:hover {
+    color: var(--color-accent);
+  }
+}
+
+.comments-link {
+  color: var(--color-accent);
+}
+
+.empty {
+  grid-column: 1 / -1;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+// A footer bar pinned to the bottom of the screen: pushed down on short lists, and stuck to
+// the bottom edge while the stories scroll behind it on long ones.
+.pagination {
+  position: sticky;
+  bottom: var(--spacing);
+  z-index: 1;
+  margin-top: auto;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 25%);
+}

@@ -1,0 +1,56 @@
+:host {
+  display: block;
+}
+
+.auth-page {
+  position: relative;
+  max-width: 24rem;
+  margin: 1rem auto 3rem;
+  padding: calc(var(--spacing) * 1.5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+
+  h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+  }
+}
+
+.close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: inline-flex;
+  padding: 0.25rem;
+  border-radius: var(--radius);
+  color: inherit;
+
+  svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+// The modal version: a dialog centred over a dimmed page. The dialog itself is invisible, so a
+// click on it (outside the card) can be told apart from a click on the card and closes it.
+.auth-dialog {
+  max-width: none;
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  overflow: auto;
+  border: none;
+  background: transparent;
+  color: inherit;
+
+  &::backdrop {
+    background: rgb(31 31 31 / 45%);
+  }
+
+  .auth-page {
+    width: min(24rem, calc(100vw - 2rem));
+    margin: 0;
+    box-sizing: border-box;
+    box-shadow: 0 12px 40px rgb(0 0 0 / 30%);
+  }
+}

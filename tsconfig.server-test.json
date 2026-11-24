@@ -1,0 +1,9 @@
+/* Used by editors for the server tests in src/*.test.ts. They are not part of the Angular build. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "vitest/globals"]
+  },
+  "files": [],
+  "include": ["src/*.ts"]
+}
