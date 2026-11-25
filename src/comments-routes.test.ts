@@ -63,15 +63,16 @@ describe('comments routes', () => {
     const result = await post(storyId, { text: 'Great story' });
     expect(result.status).toBe(201);
     expect(result.body?.['id']).toBeGreaterThan(3_000_000_000);
-    expect((await getLocalComments(storyId)).map((comment) => [comment.by, comment.text])).toContainEqual([
-      'Anna',
-      'Great story',
-    ]);
+    expect(
+      (await getLocalComments(storyId)).map((comment) => [comment.by, comment.text]),
+    ).toContainEqual(['Anna', 'Great story']);
   });
 
   it('takes the author from the session, not from the request', async () => {
     await post(storyId, { text: 'Not Billy', username: 'Billy', by: 'Billy' });
-    expect((await getLocalComments(storyId)).find((comment) => comment.text === 'Not Billy')?.by).toBe('Anna');
+    expect(
+      (await getLocalComments(storyId)).find((comment) => comment.text === 'Not Billy')?.by,
+    ).toBe('Anna');
   });
 
   it('answers 401 without a session', async () => {
@@ -80,7 +81,9 @@ describe('comments routes', () => {
   });
 
   it('answers 415 when the body is not JSON', async () => {
-    expect((await post(storyId, 'text=x', cookie, 'application/x-www-form-urlencoded')).status).toBe(415);
+    expect(
+      (await post(storyId, 'text=x', cookie, 'application/x-www-form-urlencoded')).status,
+    ).toBe(415);
   });
 
   it.each([
@@ -102,15 +105,31 @@ describe('comments routes', () => {
   it('hides a comment from others for the author Delay, but not from the author', async () => {
     const { saveProfile } = await import('./profiles-store');
     await saveProfile('Anna', {
-      about: '', email: 'anna@example.com', showdead: 'no', noprocrast: 'no', maxvisit: 20, minaway: 180, delay: 600,
+      about: '',
+      email: 'anna@example.com',
+      showdead: 'no',
+      noprocrast: 'no',
+      maxvisit: 20,
+      minaway: 180,
+      delay: 600,
     });
     await post(storyId, { text: 'Held back' });
 
-    expect((await getLocalComments(storyId, 'Anna')).map((comment) => comment.text)).toContain('Held back');
-    expect((await getLocalComments(storyId, 'Ben')).map((comment) => comment.text)).not.toContain('Held back');
+    expect((await getLocalComments(storyId, 'Anna')).map((comment) => comment.text)).toContain(
+      'Held back',
+    );
+    expect((await getLocalComments(storyId, 'Ben')).map((comment) => comment.text)).not.toContain(
+      'Held back',
+    );
 
     await saveProfile('Anna', {
-      about: '', email: 'anna@example.com', showdead: 'no', noprocrast: 'no', maxvisit: 20, minaway: 180, delay: 0,
+      about: '',
+      email: 'anna@example.com',
+      showdead: 'no',
+      noprocrast: 'no',
+      maxvisit: 20,
+      minaway: 180,
+      delay: 0,
     });
   });
 

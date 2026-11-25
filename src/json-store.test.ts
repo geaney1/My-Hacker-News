@@ -18,7 +18,8 @@ describe('json store', () => {
     rmSync(directory, { recursive: true, force: true });
   });
 
-  const fileOn = (name: string) => JSON.parse(readFileSync(join(directory, name), 'utf8')) as unknown;
+  const fileOn = (name: string) =>
+    JSON.parse(readFileSync(join(directory, name), 'utf8')) as unknown;
 
   it('starts with what the store says is empty, when there is no file yet', async () => {
     const store = createJsonStore<string[]>({ file: 'list.json', empty: () => [] });
@@ -74,7 +75,10 @@ describe('json store', () => {
       empty: () => [],
       upgrade: (items) => items.forEach((item, index) => (item.id ??= index + 1)),
     });
-    expect(await store.load()).toEqual([{ name: 'a', id: 1 }, { name: 'b', id: 2 }]);
+    expect(await store.load()).toEqual([
+      { name: 'a', id: 1 },
+      { name: 'b', id: 2 },
+    ]);
   });
 
   it('keeps stores for different files apart', async () => {

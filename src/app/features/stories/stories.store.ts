@@ -1,4 +1,17 @@
-import { afterNextRender, computed, DestroyRef, DOCUMENT, effect, inject, linkedSignal, PLATFORM_ID, resource, Service, signal, untracked } from '@angular/core';
+import {
+  afterNextRender,
+  computed,
+  DestroyRef,
+  DOCUMENT,
+  effect,
+  inject,
+  linkedSignal,
+  PLATFORM_ID,
+  resource,
+  Service,
+  signal,
+  untracked,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HnApi } from '../../core/api/hn-api';
 import { ProfileStore } from '../../core/profile/profile.store';
@@ -47,7 +60,9 @@ export class StoriesStore {
     source: () => this.pageResource.value(),
     computation: (storyPage, previous) => storyPage?.total ?? previous?.value ?? 0,
   });
-  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalStories() / this.pageSize())));
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.totalStories() / this.pageSize())),
+  );
   readonly hasNextPage = computed(() => this.page() < this.totalPages());
 
   /** The current page of stories, narrowed by the search term and minimum score. */

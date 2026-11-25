@@ -4,7 +4,9 @@ import { createUserAndLogIn, uniqueName } from './helpers';
 test.describe('the story-list menu on a small screen is a hamburger drawer', () => {
   test.use({ viewport: { width: 390, height: 800 } });
 
-  test('is closed behind a hamburger button, and the button says what it does', async ({ page }) => {
+  test('is closed behind a hamburger button, and the button says what it does', async ({
+    page,
+  }) => {
     await page.goto('/top');
     await expect(page.locator('article.story').first()).toBeVisible();
 
@@ -15,7 +17,9 @@ test.describe('the story-list menu on a small screen is a hamburger drawer', () 
     await expect(page.getByRole('navigation', { name: 'Story lists' })).toBeHidden();
   });
 
-  test('opens a drawer with the lists, moves the focus into it, and dims the page behind it', async ({ page }) => {
+  test('opens a drawer with the lists, moves the focus into it, and dims the page behind it', async ({
+    page,
+  }) => {
     await page.goto('/top');
     await expect(page.locator('article.story').first()).toBeVisible();
     const button = page.getByRole('button', { name: 'Menu' });
@@ -41,12 +45,20 @@ test.describe('the story-list menu on a small screen is a hamburger drawer', () 
     await expect(page.locator('article.story').first()).toBeVisible();
 
     await page.getByRole('button', { name: 'Menu' }).click();
-    await page.getByRole('navigation', { name: 'Story lists' }).getByRole('link', { name: 'New', exact: true }).click();
+    await page
+      .getByRole('navigation', { name: 'Story lists' })
+      .getByRole('link', { name: 'New', exact: true })
+      .click();
 
     await expect(page).toHaveURL(/\/new$/);
     await expect(page.getByRole('navigation', { name: 'Story lists' })).toBeHidden();
-    await expect(page.getByRole('button', { name: 'Menu' })).toHaveAttribute('aria-expanded', 'false');
-    await expect(page.locator('article.story', { hasText: 'Fresh Hacker News story' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Menu' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+    await expect(
+      page.locator('article.story', { hasText: 'Fresh Hacker News story' }),
+    ).toBeVisible();
   });
 
   test('Escape closes it and puts the focus back on the hamburger button', async ({ page }) => {
@@ -101,7 +113,9 @@ test.describe('the story-list menu on a small screen is a hamburger drawer', () 
   test('the page has no sideways scrolling', async ({ page }) => {
     await page.goto('/top');
     await expect(page.locator('article.story').first()).toBeVisible();
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
     expect(overflow).toBeLessThanOrEqual(0);
   });
 });

@@ -12,7 +12,9 @@
 } @else if (thread.error()) {
   <app-banner kind="error">
     Could not load this story.
-    <button bannerAction type="button" class="button button-outline" (click)="thread.reload()">Try again</button>
+    <button bannerAction type="button" class="button button-outline" (click)="thread.reload()">
+      Try again
+    </button>
   </app-banner>
   <ng-container [ngTemplateOutlet]="backButton" />
 } @else if (thread.value(); as loaded) {
@@ -45,7 +47,10 @@
               <div class="poll-option-text hn-text" [innerHTML]="option.text"></div>
               <div class="poll-option-votes">
                 <span class="poll-bar" aria-hidden="true">
-                  <span class="poll-bar-fill" [style.width.%]="votePercent(option, loaded.pollOptions)"></span>
+                  <span
+                    class="poll-bar-fill"
+                    [style.width.%]="votePercent(option, loaded.pollOptions)"
+                  ></span>
                 </span>
                 <span>{{ option.score ?? 0 }} points</span>
               </div>
@@ -58,37 +63,37 @@
 
   <!-- Job posts have no discussion. -->
   @if (loaded.item.type !== 'job') {
-  <section class="comments" aria-labelledby="comments-heading">
-    <!-- The comment count, and beside it a prompt to log in when nobody is. -->
-    <div class="comments-header">
-      <h3 id="comments-heading">
-        {{ (loaded.item.descendants ?? 0) + newComments().length }} comments
-      </h3>
-      @if (!login()) {
-        <p class="login-prompt"><a routerLink="/log-in">Log in</a> to add a comment.</p>
-      }
-    </div>
-
-    <app-add-comment [itemId]="id()" (saved)="thread.reload()">
-      <ng-container [ngTemplateOutlet]="backButton" />
-    </app-add-comment>
-
-    @if (newComments().length || loaded.comments.length) {
-      <ul class="comment-list">
-        @for (comment of newComments(); track comment.id) {
-          <li><app-story-comment [comment]="comment" /></li>
+    <section class="comments" aria-labelledby="comments-heading">
+      <!-- The comment count, and beside it a prompt to log in when nobody is. -->
+      <div class="comments-header">
+        <h3 id="comments-heading">
+          {{ (loaded.item.descendants ?? 0) + newComments().length }} comments
+        </h3>
+        @if (!login()) {
+          <p class="login-prompt"><a routerLink="/log-in">Log in</a> to add a comment.</p>
         }
-        @for (comment of loaded.comments; track comment.id) {
-          <li><app-story-comment [comment]="comment" /></li>
+      </div>
+
+      <app-add-comment [itemId]="id()" (saved)="thread.reload()">
+        <ng-container [ngTemplateOutlet]="backButton" />
+      </app-add-comment>
+
+      @if (newComments().length || loaded.comments.length) {
+        <ul class="comment-list">
+          @for (comment of newComments(); track comment.id) {
+            <li><app-story-comment [comment]="comment" /></li>
+          }
+          @for (comment of loaded.comments; track comment.id) {
+            <li><app-story-comment [comment]="comment" /></li>
+          }
+        </ul>
+        @if (loaded.truncated) {
+          <p class="note">Showing the first comments only.</p>
         }
-      </ul>
-      @if (loaded.truncated) {
-        <p class="note">Showing the first comments only.</p>
+      } @else {
+        <p class="note">No comments yet.</p>
       }
-    } @else {
-      <p class="note">No comments yet.</p>
-    }
-  </section>
+    </section>
   } @else {
     <ng-container [ngTemplateOutlet]="backButton" />
   }

@@ -9,7 +9,15 @@ import { ThemeStore } from '../../core/theme/theme.store';
 import { StoriesStore } from '../stories/stories.store';
 import { UserProfile } from './user-profile';
 
-const defaults = { about: '', email: '', showdead: 'no', noprocrast: 'no', maxvisit: 20, minaway: 180, delay: 0 };
+const defaults = {
+  about: '',
+  email: '',
+  showdead: 'no',
+  noprocrast: 'no',
+  maxvisit: 20,
+  minaway: 180,
+  delay: 0,
+};
 
 describe('UserProfile', () => {
   let fixture: ComponentFixture<UserProfile>;
@@ -34,7 +42,9 @@ describe('UserProfile', () => {
   });
 
   afterEach(() => {
-    http.match((request) => request.url.startsWith('/api/stories/') || request.url.startsWith('/api/users/'));
+    http.match(
+      (request) => request.url.startsWith('/api/stories/') || request.url.startsWith('/api/users/'),
+    );
     http.verify();
     vi.restoreAllMocks();
   });
@@ -46,7 +56,8 @@ describe('UserProfile', () => {
   }
 
   const page = () => fixture.nativeElement as HTMLElement;
-  const updateButton = () => page().querySelector<HTMLButtonElement>('button[type="submit"]') as HTMLButtonElement;
+  const updateButton = () =>
+    page().querySelector<HTMLButtonElement>('button[type="submit"]') as HTMLButtonElement;
 
   async function typeEmail(value: string) {
     const input = page().querySelector<HTMLInputElement>('input#email') as HTMLInputElement;
@@ -56,7 +67,9 @@ describe('UserProfile', () => {
   }
 
   async function submit() {
-    page().querySelector('form')?.dispatchEvent(new Event('submit', { cancelable: true }));
+    page()
+      .querySelector('form')
+      ?.dispatchEvent(new Event('submit', { cancelable: true }));
     await settle();
   }
 
@@ -75,7 +88,10 @@ describe('UserProfile', () => {
   });
 
   describe('the theme button', () => {
-    const themeButton = () => page().querySelector<HTMLButtonElement>('.actions button.button-outline') as HTMLButtonElement;
+    const themeButton = () =>
+      page().querySelector<HTMLButtonElement>(
+        '.actions button.button-outline',
+      ) as HTMLButtonElement;
 
     beforeEach(() => {
       localStorage.removeItem('hacker-news.theme');
@@ -117,7 +133,9 @@ describe('UserProfile', () => {
     expect(link?.textContent?.trim()).toBe('Change password');
     expect(link?.getAttribute('href')).toBe('/change-password');
     expect(link?.classList.contains('button')).toBe(true);
-    expect(row.querySelector('button.button-outline')?.textContent?.trim()).toMatch(/^Switch to (Dark|Light) theme$/);
+    expect(row.querySelector('button.button-outline')?.textContent?.trim()).toMatch(
+      /^Switch to (Dark|Light) theme$/,
+    );
     expect(page().querySelector('nav')).toBeNull();
   });
 
@@ -195,7 +213,9 @@ describe('UserProfile', () => {
     http.expectOne('/api/profile').flush({ message: 'No' }, { status: 500, statusText: 'Error' });
     await settle();
     expect(navigate).not.toHaveBeenCalled();
-    expect(page().querySelector('app-banner [role="alert"]')?.textContent).toContain('Something went wrong');
+    expect(page().querySelector('app-banner [role="alert"]')?.textContent).toContain(
+      'Something went wrong',
+    );
   });
 
   it('asks the user to log in again when the session has ended', async () => {
@@ -203,7 +223,9 @@ describe('UserProfile', () => {
     await submit();
     http.expectOne('/api/profile').flush({}, { status: 401, statusText: 'Unauthorized' });
     await settle();
-    expect(page().querySelector('app-banner [role="alert"]')?.textContent).toContain('Log in again');
+    expect(page().querySelector('app-banner [role="alert"]')?.textContent).toContain(
+      'Log in again',
+    );
     expect(navigate).not.toHaveBeenCalled();
   });
 
@@ -211,7 +233,9 @@ describe('UserProfile', () => {
     await typeEmail('not-an-email');
     await submit();
     expect(navigate).not.toHaveBeenCalled();
-    expect(page().querySelector('#email-error')?.textContent?.trim()).toBe('Enter a valid email address');
+    expect(page().querySelector('#email-error')?.textContent?.trim()).toBe(
+      'Enter a valid email address',
+    );
     expect(updateButton().disabled).toBe(false);
     expect(document.activeElement?.id).toBe('email');
   });

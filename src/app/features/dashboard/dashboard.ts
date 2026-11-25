@@ -1,4 +1,16 @@
-import { afterNextRender, Component, computed, effect, ElementRef, inject, Injector, PLATFORM_ID, signal, untracked, viewChild } from '@angular/core';
+import {
+  afterNextRender,
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  Injector,
+  PLATFORM_ID,
+  signal,
+  untracked,
+  viewChild,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';

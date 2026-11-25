@@ -1,7 +1,8 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { createUserAndLogIn, uniqueName } from './helpers';
 
-const transformOf = (control: Locator) => control.evaluate((element) => getComputedStyle(element).transform);
+const transformOf = (control: Locator) =>
+  control.evaluate((element) => getComputedStyle(element).transform);
 
 /** The width of the control as it is drawn, scaled or not. */
 const drawnWidth = async (control: Locator) => (await control.boundingBox())!.width;
@@ -37,7 +38,11 @@ test.describe('inputs grow slightly when hovered, and not when clicked into', ()
     await expect(page.locator('article.story').first()).toBeVisible();
 
     await expectGrowsOnHoverButNotWhenClickedInto(page, page.getByRole('searchbox'), 'search');
-    await expectGrowsOnHoverButNotWhenClickedInto(page, page.getByRole('spinbutton', { name: /minimum score/i }), 'minimum score');
+    await expectGrowsOnHoverButNotWhenClickedInto(
+      page,
+      page.getByRole('spinbutton', { name: /minimum score/i }),
+      'minimum score',
+    );
   });
 
   test('the fields of the log-in dialog, but not the checkbox', async ({ page }) => {
@@ -45,7 +50,11 @@ test.describe('inputs grow slightly when hovered, and not when clicked into', ()
     const dialog = page.getByRole('dialog', { name: 'Log in' });
     await expect(dialog).toBeVisible();
     await expectGrowsOnHoverButNotWhenClickedInto(page, dialog.getByLabel('Username'), 'username');
-    await expectGrowsOnHoverButNotWhenClickedInto(page, dialog.getByLabel('Password', { exact: true }), 'password');
+    await expectGrowsOnHoverButNotWhenClickedInto(
+      page,
+      dialog.getByLabel('Password', { exact: true }),
+      'password',
+    );
 
     const checkbox = dialog.getByRole('checkbox');
     await checkbox.hover();
@@ -58,15 +67,31 @@ test.describe('inputs grow slightly when hovered, and not when clicked into', ()
     await createUserAndLogIn(page, username);
 
     await page.goto('/item/101');
-    await expectGrowsOnHoverButNotWhenClickedInto(page, page.getByLabel('Add a comment'), 'comment box');
+    await expectGrowsOnHoverButNotWhenClickedInto(
+      page,
+      page.getByLabel('Add a comment'),
+      'comment box',
+    );
 
     await page.goto('/top');
     await page.getByRole('link', { name: `Profile for ${username}` }).click();
     const dialog = page.getByRole('dialog', { name: 'Profile' });
-    await expectGrowsOnHoverButNotWhenClickedInto(page, dialog.getByRole('textbox', { name: 'About You' }), 'About You');
-    await expectGrowsOnHoverButNotWhenClickedInto(page, dialog.getByRole('combobox', { name: 'Show Dead' }), 'Show Dead');
+    await expectGrowsOnHoverButNotWhenClickedInto(
+      page,
+      dialog.getByRole('textbox', { name: 'About You' }),
+      'About You',
+    );
+    await expectGrowsOnHoverButNotWhenClickedInto(
+      page,
+      dialog.getByRole('combobox', { name: 'Show Dead' }),
+      'Show Dead',
+    );
     await dialog.getByRole('combobox', { name: 'No Procrast' }).selectOption('yes');
-    await expectGrowsOnHoverButNotWhenClickedInto(page, dialog.getByRole('spinbutton', { name: 'Max Visit' }), 'Max Visit');
+    await expectGrowsOnHoverButNotWhenClickedInto(
+      page,
+      dialog.getByRole('spinbutton', { name: 'Max Visit' }),
+      'Max Visit',
+    );
   });
 
   test('a field that is turned off does not react to the mouse', async ({ page }) => {

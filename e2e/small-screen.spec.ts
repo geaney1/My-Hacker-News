@@ -7,7 +7,9 @@ const sidewaysOverflow = (page: import('@playwright/test').Page) =>
   page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
 test.describe('the layout on a phone', () => {
-  test('the header is one line: the title does not wrap, and the buttons do not either', async ({ page }) => {
+  test('the header is one line: the title does not wrap, and the buttons do not either', async ({
+    page,
+  }) => {
     await page.goto('/top');
     await expect(page.locator('article.story').first()).toBeVisible();
 
@@ -23,7 +25,9 @@ test.describe('the layout on a phone', () => {
     }
   });
 
-  test('the avatar stays a circle, and Log Out stays on one line, once logged in', async ({ page }) => {
+  test('the avatar stays a circle, and Log Out stays on one line, once logged in', async ({
+    page,
+  }) => {
     const username = uniqueName('ph');
     await createUserAndLogIn(page, username);
 
@@ -37,7 +41,9 @@ test.describe('the layout on a phone', () => {
     expect(Math.abs(title!.y - avatar!.y)).toBeLessThan(20);
   });
 
-  test('the search and the minimum score are one under the other, the full width', async ({ page }) => {
+  test('the search and the minimum score are one under the other, the full width', async ({
+    page,
+  }) => {
     await page.goto('/top');
     await expect(page.locator('article.story').first()).toBeVisible();
 
@@ -50,7 +56,9 @@ test.describe('the layout on a phone', () => {
     expect(search!.width).toBeGreaterThan(390 - 60);
   });
 
-  test('the paging bar has the previous and next arrows without the numbered pages between them', async ({ page }) => {
+  test('the paging bar has the previous and next arrows without the numbered pages between them', async ({
+    page,
+  }) => {
     await page.goto('/job');
     await expect(page.locator('article.story').first()).toBeVisible();
 
@@ -69,7 +77,9 @@ test.describe('the layout on a phone', () => {
     await expect(page.locator('app-pagination .status')).toHaveText('Page 3 of 3');
   });
 
-  test('the paging bar is all on one line: the page, the arrows and the box to go to a page', async ({ page }) => {
+  test('the paging bar is all on one line: the page, the arrows and the box to go to a page', async ({
+    page,
+  }) => {
     await page.goto('/top');
     await expect(page.locator('article.story').first()).toBeVisible();
 
@@ -81,7 +91,12 @@ test.describe('the layout on a phone', () => {
     const go = await page.getByRole('button', { name: 'Go', exact: true }).boundingBox();
 
     const centre = (box: { y: number; height: number }) => box.y + box.height / 2;
-    for (const [name, box] of [['arrow', previous], ['next', next], ['box', goTo], ['Go', go]] as const) {
+    for (const [name, box] of [
+      ['arrow', previous],
+      ['next', next],
+      ['box', goTo],
+      ['Go', go],
+    ] as const) {
       expect(Math.abs(centre(box!) - centre(status!)), name).toBeLessThan(8);
     }
     // In order, left to right, and all inside the bar.
@@ -94,7 +109,9 @@ test.describe('the layout on a phone', () => {
     expect(bar!.height).toBeLessThan(75);
   });
 
-  test('the words "Go to page" are for screen readers only, and the box still has its name', async ({ page }) => {
+  test('the words "Go to page" are for screen readers only, and the box still has its name', async ({
+    page,
+  }) => {
     await page.goto('/top');
     await expect(page.locator('article.story').first()).toBeVisible();
 
@@ -118,7 +135,9 @@ test.describe('the layout on a phone', () => {
     expect(bar!.width).toBeCloseTo(layout!.width, 0);
   });
 
-  test('the paging bar stays on the very bottom while a long list scrolls behind it', async ({ page }) => {
+  test('the paging bar stays on the very bottom while a long list scrolls behind it', async ({
+    page,
+  }) => {
     // The Jobs list has 45 jobs in the fake Hacker News, so the page is long.
     await page.goto('/job');
     await expect(page.locator('article.story').first()).toBeVisible();
@@ -143,7 +162,9 @@ test.describe('the layout on a phone', () => {
     });
   }
 
-  test('the profile on a phone: nearly the full width, settings in two columns, and the buttons grouped', async ({ page }) => {
+  test('the profile on a phone: nearly the full width, settings in two columns, and the buttons grouped', async ({
+    page,
+  }) => {
     const username = uniqueName('prof');
     await createUserAndLogIn(page, username);
     await page.getByRole('link', { name: `Profile for ${username}` }).click();
@@ -169,7 +190,9 @@ test.describe('the layout on a phone', () => {
     // as each other. The theme button is named for the theme it gives.
     await dialog.getByRole('button', { name: 'Update' }).scrollIntoViewIfNeeded();
     const update = await dialog.getByRole('button', { name: 'Update' }).boundingBox();
-    const theme = await dialog.getByRole('button', { name: /^(Switch to )?Dark theme$/ }).boundingBox();
+    const theme = await dialog
+      .getByRole('button', { name: /^(Switch to )?Dark theme$/ })
+      .boundingBox();
     const password = await dialog.getByRole('link', { name: 'Change password' }).boundingBox();
     expect(theme!.y).toBeGreaterThan(update!.y + update!.height - 1);
     expect(Math.abs(theme!.y - password!.y)).toBeLessThan(2);
@@ -178,7 +201,9 @@ test.describe('the layout on a phone', () => {
     expect(await sidewaysOverflow(page)).toBeLessThanOrEqual(0);
   });
 
-  test('the profile buttons stay in view at the bottom of the dialog, and can be used while it is not scrolled', async ({ page }) => {
+  test('the profile buttons stay in view at the bottom of the dialog, and can be used while it is not scrolled', async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 390, height: 700 });
     const username = uniqueName('stk');
     await createUserAndLogIn(page, username);
@@ -200,7 +225,9 @@ test.describe('the layout on a phone', () => {
     // (A button grows a little under the mouse, so the mouse is moved off it before looking.)
     await page.mouse.move(200, 100);
     await page.waitForTimeout(300);
-    await expect(dialog.getByRole('button', { name: /^(Switch to )?Light theme$/ })).toBeInViewport({ ratio: 1 });
+    await expect(dialog.getByRole('button', { name: /^(Switch to )?Light theme$/ })).toBeInViewport(
+      { ratio: 1 },
+    );
 
     // And they are still in view after the settings are scrolled to the end.
     await dialog.evaluate((element) => element.scrollTo(0, element.scrollHeight));
@@ -211,7 +238,9 @@ test.describe('the layout on a phone', () => {
     expect(bar!.y + bar!.height).toBeLessThanOrEqual(bottom!.y + bottom!.height);
   });
 
-  test('the profile and Submit dialogs fit the screen and scroll inside themselves', async ({ page }) => {
+  test('the profile and Submit dialogs fit the screen and scroll inside themselves', async ({
+    page,
+  }) => {
     const username = uniqueName('dlg');
     await createUserAndLogIn(page, username);
 

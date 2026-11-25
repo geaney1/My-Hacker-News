@@ -4,7 +4,15 @@ import { HnComment } from '../../../models/hn-comment';
 import { StoryComment } from './story-comment';
 
 function comment(id: number, overrides: Partial<HnComment> = {}): HnComment {
-  return { id, type: 'comment', by: `user${id}`, time: 1_700_000_000, text: `Comment ${id}`, replies: [], ...overrides };
+  return {
+    id,
+    type: 'comment',
+    by: `user${id}`,
+    time: 1_700_000_000,
+    text: `Comment ${id}`,
+    replies: [],
+    ...overrides,
+  };
 }
 
 describe('StoryComment', () => {
@@ -37,8 +45,10 @@ describe('StoryComment', () => {
     expect(page().querySelector('.text')?.textContent).toContain('Hello there');
   });
 
-  it('shows the comment\'s HTML as HTML, with the shared text styling switched on', async () => {
-    await show(comment(1, { text: 'Read <a href="https://example.com">this</a><p>Then <i>think</i>' }));
+  it("shows the comment's HTML as HTML, with the shared text styling switched on", async () => {
+    await show(
+      comment(1, { text: 'Read <a href="https://example.com">this</a><p>Then <i>think</i>' }),
+    );
 
     const text = page().querySelector('.text') as HTMLElement;
     // Component styles cannot reach inserted HTML, so the shared `hn-text` class has to be present.
@@ -53,7 +63,7 @@ describe('StoryComment', () => {
     expect(page().querySelector('.text pre code')?.textContent).toHaveLength(500);
   });
 
-  it('removes scripts and event handlers from the comment\'s HTML', async () => {
+  it("removes scripts and event handlers from the comment's HTML", async () => {
     await show(comment(1, { text: 'Hi<script>alert(1)</script><img src="x" onerror="alert(2)">' }));
 
     expect(page().querySelector('script')).toBeNull();
@@ -63,19 +73,21 @@ describe('StoryComment', () => {
   it('shows replies nested under the comment, each with its own author', async () => {
     await show(
       comment(1, {
-        replies: [comment(2, { by: 'ben', replies: [comment(3, { by: 'cara' })] }), comment(4, { by: 'dan' })],
+        replies: [
+          comment(2, { by: 'ben', replies: [comment(3, { by: 'cara' })] }),
+          comment(4, { by: 'dan' }),
+        ],
       }),
     );
 
     const replies = page().querySelectorAll('ul.replies');
     expect(replies).toHaveLength(2);
-    expect(Array.from(page().querySelectorAll('a.author')).map((link) => link.textContent?.trim())).toEqual([
-      'user1',
-      'ben',
-      'cara',
-      'dan',
-    ]);
-    expect(page().querySelector('ul.replies > li:first-child ul.replies a.author')?.textContent?.trim()).toBe('cara');
+    expect(
+      Array.from(page().querySelectorAll('a.author')).map((link) => link.textContent?.trim()),
+    ).toEqual(['user1', 'ben', 'cara', 'dan']);
+    expect(
+      page().querySelector('ul.replies > li:first-child ul.replies a.author')?.textContent?.trim(),
+    ).toBe('cara');
   });
 
   it('has no replies list when there are no replies', async () => {
@@ -84,8 +96,10 @@ describe('StoryComment', () => {
   });
 
   describe('folding', () => {
-    const toggle = () => page().querySelector<HTMLButtonElement>('button.toggle') as HTMLButtonElement;
-    const withReply = () => comment(1, { by: 'anna', replies: [comment(2, { by: 'ben', text: 'A reply' })] });
+    const toggle = () =>
+      page().querySelector<HTMLButtonElement>('button.toggle') as HTMLButtonElement;
+    const withReply = () =>
+      comment(1, { by: 'anna', replies: [comment(2, { by: 'ben', text: 'A reply' })] });
 
     it('starts open, with a button that says what it does', async () => {
       await show(withReply());

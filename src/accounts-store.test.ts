@@ -31,7 +31,10 @@ describe('accounts store', () => {
 
     it('gives nothing but the username and the date: never the password hash or salt', async () => {
       await store.createAccount('Private', 'correct-horse');
-      expect(Object.keys((await store.findAccount('Private')) ?? {}).sort()).toEqual(['createdAt', 'username']);
+      expect(Object.keys((await store.findAccount('Private')) ?? {}).sort()).toEqual([
+        'createdAt',
+        'username',
+      ]);
     });
 
     it('is null when there is no such account', async () => {

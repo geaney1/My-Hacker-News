@@ -11,7 +11,9 @@
   } @else if (user.error()) {
     <app-banner kind="error">
       Could not load this profile.
-      <button bannerAction type="button" class="button button-outline" (click)="user.reload()">Try again</button>
+      <button bannerAction type="button" class="button button-outline" (click)="user.reload()">
+        Try again
+      </button>
     </app-banner>
   } @else if (user.value(); as hnUser) {
     <dl class="stats">

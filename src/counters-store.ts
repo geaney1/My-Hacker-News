@@ -1,7 +1,10 @@
 import { createJsonStore } from './json-store';
 
 /** The last id handed out for each kind of thing, by name. */
-const countersStore = createJsonStore<Record<string, number>>({ file: 'counters.json', empty: () => ({}) });
+const countersStore = createJsonStore<Record<string, number>>({
+  file: 'counters.json',
+  empty: () => ({}),
+});
 
 /**
  * The next id for `name`: always higher than any handed out before, so an id is never used twice,

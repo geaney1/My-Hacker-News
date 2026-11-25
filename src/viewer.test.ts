@@ -15,10 +15,13 @@ const profile = {
 
 describe('viewerOf', () => {
   let directory: string;
-  let viewerOf: (request: Request) => Promise<{ username?: string; showDead: boolean; delaySeconds: number }>;
+  let viewerOf: (
+    request: Request,
+  ) => Promise<{ username?: string; showDead: boolean; delaySeconds: number }>;
   let sessionCookie: string;
 
-  const requestWith = (cookie?: string) => ({ headers: cookie ? { cookie } : {} }) as unknown as Request;
+  const requestWith = (cookie?: string) =>
+    ({ headers: cookie ? { cookie } : {} }) as unknown as Request;
 
   beforeAll(async () => {
     directory = mkdtempSync(join(tmpdir(), 'hn-viewer-'));
@@ -37,7 +40,10 @@ describe('viewerOf', () => {
 
   it('is a visitor with nothing special turned on when there is no session', async () => {
     expect(await viewerOf(requestWith())).toEqual({ showDead: false, delaySeconds: 0 });
-    expect(await viewerOf(requestWith('hn_session=nope'))).toEqual({ showDead: false, delaySeconds: 0 });
+    expect(await viewerOf(requestWith('hn_session=nope'))).toEqual({
+      showDead: false,
+      delaySeconds: 0,
+    });
   });
 
   it('is the logged-in user, with the Show Dead and Delay they saved', async () => {
@@ -51,6 +57,10 @@ describe('viewerOf', () => {
   it('has the defaults for a logged-in user who has not saved a profile', async () => {
     const { createSession } = await import('./sessions-store');
     const fresh = `hn_session=${await createSession('Newbie')}`;
-    expect(await viewerOf(requestWith(fresh))).toEqual({ username: 'Newbie', showDead: false, delaySeconds: 0 });
+    expect(await viewerOf(requestWith(fresh))).toEqual({
+      username: 'Newbie',
+      showDead: false,
+      delaySeconds: 0,
+    });
   });
 });

@@ -10,7 +10,15 @@ const localStoryId = 2_000_000_001;
 
 function thread(id: number, comments: ItemThread['comments'] = []): ItemThread {
   return {
-    item: { id, type: 'story', title: 'A story', by: 'Billy', time: 1, score: 1, descendants: comments.length },
+    item: {
+      id,
+      type: 'story',
+      title: 'A story',
+      by: 'Billy',
+      time: 1,
+      score: 1,
+      descendants: comments.length,
+    },
     comments,
     pollOptions: [],
     truncated: false,
@@ -33,7 +41,9 @@ describe('ItemPage comments', () => {
 
   afterEach(() => {
     // Logging in also loads the user's profile in the background: not what these tests are about.
-    http.match((request) => request.url === '/api/profile' || request.url.startsWith('/api/stories/'));
+    http.match(
+      (request) => request.url === '/api/profile' || request.url.startsWith('/api/stories/'),
+    );
     http.verify();
   });
 
@@ -54,11 +64,15 @@ describe('ItemPage comments', () => {
   const page = () => fixture.nativeElement as HTMLElement;
 
   async function write(text: string) {
-    const box = page().querySelector<HTMLTextAreaElement>('textarea#new-comment') as HTMLTextAreaElement;
+    const box = page().querySelector<HTMLTextAreaElement>(
+      'textarea#new-comment',
+    ) as HTMLTextAreaElement;
     box.value = text;
     box.dispatchEvent(new Event('input'));
     await settle();
-    page().querySelector('form')?.dispatchEvent(new Event('submit', { cancelable: true }));
+    page()
+      .querySelector('form')
+      ?.dispatchEvent(new Event('submit', { cancelable: true }));
     await settle();
   }
 
@@ -67,7 +81,14 @@ describe('ItemPage comments', () => {
       await open(
         localStoryId,
         thread(localStoryId, [
-          { id: 3_000_000_001, type: 'comment', by: 'Ben', time: 1, text: 'Saved earlier', replies: [] },
+          {
+            id: 3_000_000_001,
+            type: 'comment',
+            by: 'Ben',
+            time: 1,
+            text: 'Saved earlier',
+            replies: [],
+          },
         ]),
       );
       expect(page().textContent).toContain('Saved earlier');
@@ -75,7 +96,7 @@ describe('ItemPage comments', () => {
       expect(page().querySelector('.comment-list a.author')?.textContent).toBe('Ben');
     });
 
-    it('says comments are saved on the app\'s server', async () => {
+    it("says comments are saved on the app's server", async () => {
       await open(localStoryId, thread(localStoryId));
       expect(page().querySelector('#new-comment-hint')?.textContent).toContain('saved on this app');
     });
@@ -92,7 +113,14 @@ describe('ItemPage comments', () => {
 
       http.expectOne(`/api/items/${localStoryId}/thread`).flush(
         thread(localStoryId, [
-          { id: 3_000_000_001, type: 'comment', by: 'Anna', time: 1, text: 'My comment', replies: [] },
+          {
+            id: 3_000_000_001,
+            type: 'comment',
+            by: 'Anna',
+            time: 1,
+            text: 'My comment',
+            replies: [],
+          },
         ]),
       );
       await settle();
@@ -103,11 +131,17 @@ describe('ItemPage comments', () => {
     it('keeps what was typed, and says why, when the comment could not be saved', async () => {
       await open(localStoryId, thread(localStoryId));
       await write('My comment');
-      http.expectOne(`/api/items/${localStoryId}/comments`).flush({}, { status: 500, statusText: 'Error' });
+      http
+        .expectOne(`/api/items/${localStoryId}/comments`)
+        .flush({}, { status: 500, statusText: 'Error' });
       await settle();
 
-      expect(page().querySelector('app-banner [role="alert"]')?.textContent).toContain('Something went wrong');
-      expect(page().querySelector<HTMLTextAreaElement>('textarea#new-comment')?.value).toBe('My comment');
+      expect(page().querySelector('app-banner [role="alert"]')?.textContent).toContain(
+        'Something went wrong',
+      );
+      expect(page().querySelector<HTMLTextAreaElement>('textarea#new-comment')?.value).toBe(
+        'My comment',
+      );
     });
   });
 
@@ -118,7 +152,9 @@ describe('ItemPage comments', () => {
 
       expect(http.match((request) => request.url.endsWith('/comments'))).toHaveLength(0);
       expect(page().querySelector('.comment-list')?.textContent).toContain('Just for me');
-      expect(page().querySelector('#new-comment-hint')?.textContent).toContain('until you reload it');
+      expect(page().querySelector('#new-comment-hint')?.textContent).toContain(
+        'until you reload it',
+      );
     });
   });
 });

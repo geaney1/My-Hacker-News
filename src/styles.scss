@@ -37,7 +37,8 @@
   --color-tint-border: #f2dccb;
   --color-track: #ecece5;
 
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-family:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --radius: 0.5rem;
   --spacing: 1rem;
 }
@@ -236,7 +237,9 @@ textarea {
  * the card they sit in), the links inside Hacker News's own text (long, and wrap over lines) and
  * links with words beside them (see below).
  */
-a:not(.button):not(.avatar):not(.tab):not(.close):not(.skip-link):not(.story-title a):not(h2 a):not(.hn-text a):not(p a):not(.comment-header a) {
+a:not(.button):not(.avatar):not(.tab):not(.close):not(.skip-link):not(.story-title a):not(h2 a):not(
+    .hn-text a
+  ):not(p a):not(.comment-header a) {
   display: inline-block;
   transform-origin: left center;
   transition: transform 0.15s;

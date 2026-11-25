@@ -14,7 +14,11 @@ class Host {}
 
 @Component({
   imports: [InfoTip],
-  template: `<app-info-tip label="Delay" text="Only used when **No Procrast** is yes, after **Max Visit** minutes." tipId="marked-info" />`,
+  template: `<app-info-tip
+    label="Delay"
+    text="Only used when **No Procrast** is yes, after **Max Visit** minutes."
+    tipId="marked-info"
+  />`,
 })
 class MarkedHost {}
 
@@ -27,7 +31,8 @@ describe('InfoTip', () => {
   });
 
   const page = () => fixture.nativeElement as HTMLElement;
-  const button = () => page().querySelector<HTMLButtonElement>('button.info-button') as HTMLButtonElement;
+  const button = () =>
+    page().querySelector<HTMLButtonElement>('button.info-button') as HTMLButtonElement;
   const text = () => page().querySelector<HTMLElement>('#field-info') as HTMLElement;
 
   async function press() {

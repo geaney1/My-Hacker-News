@@ -61,7 +61,11 @@ describe('data files', () => {
         return name;
       };
 
-      const results = await Promise.all([enqueue(job('a', 30)), enqueue(job('b', 5)), enqueue(job('c', 1))]);
+      const results = await Promise.all([
+        enqueue(job('a', 30)),
+        enqueue(job('b', 5)),
+        enqueue(job('c', 1)),
+      ]);
 
       expect(results).toEqual(['a', 'b', 'c']);
       expect(log).toEqual(['a start', 'a end', 'b start', 'b end', 'c start', 'c end']);

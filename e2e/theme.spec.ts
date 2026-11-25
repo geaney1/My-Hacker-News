@@ -5,7 +5,9 @@ const page_background = (page: import('@playwright/test').Page) =>
   page.evaluate(() => getComputedStyle(document.body).backgroundColor);
 
 test.describe('the light and dark themes', () => {
-  test('the profile has a button that switches to the dark theme and back again', async ({ page }) => {
+  test('the profile has a button that switches to the dark theme and back again', async ({
+    page,
+  }) => {
     const username = uniqueName('theme');
     await createUserAndLogIn(page, username);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
@@ -26,20 +28,31 @@ test.describe('the light and dark themes', () => {
     expect(await page_background(page)).toBe(lightBackground);
   });
 
-  test('the choice is remembered after a reload, and a dark page is dark from the first paint', async ({ page }) => {
+  test('the choice is remembered after a reload, and a dark page is dark from the first paint', async ({
+    page,
+  }) => {
     const username = uniqueName('remember');
     await createUserAndLogIn(page, username);
     await page.getByRole('link', { name: `Profile for ${username}` }).click();
-    await page.getByRole('dialog', { name: 'Profile' }).getByRole('button', { name: /^(Switch to )?Dark theme$/ }).click();
+    await page
+      .getByRole('dialog', { name: 'Profile' })
+      .getByRole('button', { name: /^(Switch to )?Dark theme$/ })
+      .click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
     // The page is the profile, so the dialog is open again after the reload.
     await page.reload();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await expect(page.getByRole('dialog', { name: 'Profile' }).getByRole('button', { name: /^(Switch to )?Light theme$/ })).toBeVisible();
+    await expect(
+      page
+        .getByRole('dialog', { name: 'Profile' })
+        .getByRole('button', { name: /^(Switch to )?Light theme$/ }),
+    ).toBeVisible();
   });
 
-  test('the theme is set before the page is painted: the first thing in the page is dark', async ({ page }) => {
+  test('the theme is set before the page is painted: the first thing in the page is dark', async ({
+    page,
+  }) => {
     await page.addInitScript(() => localStorage.setItem('hacker-news.theme', 'dark'));
     // Stop the app's own scripts, so only what the HTML itself does is seen.
     await page.route('**/*.js', (route) => route.abort());
@@ -71,11 +84,15 @@ test.describe('the light and dark themes', () => {
     await context.close();
   });
 
-  test('every page is readable in the dark theme: the story cards have the dark surface', async ({ page }) => {
+  test('every page is readable in the dark theme: the story cards have the dark surface', async ({
+    page,
+  }) => {
     await page.addInitScript(() => localStorage.setItem('hacker-news.theme', 'dark'));
     await page.goto('/top');
     const card = page.locator('article.story').first();
     await expect(card).toBeVisible();
-    expect(await card.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe('rgb(47, 47, 47)');
+    expect(await card.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
+      'rgb(47, 47, 47)',
+    );
   });
 });

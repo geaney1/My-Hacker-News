@@ -116,7 +116,9 @@ describe('AuthCard', () => {
     });
 
     it('stays open when the card itself is clicked', () => {
-      page().querySelector('.auth-page')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      page()
+        .querySelector('.auth-page')
+        ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       expect(dialog().hasAttribute('open')).toBe(true);
       expect(navigateByUrl).not.toHaveBeenCalled();
     });

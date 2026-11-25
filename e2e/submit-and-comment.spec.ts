@@ -9,7 +9,10 @@ test.describe('submitting stories and questions', () => {
     await page.getByRole('link', { name: 'New', exact: true }).click();
     const card = page.locator('article.story', { hasText: 'My e2e story' });
     await expect(card).toBeVisible();
-    await expect(card.getByRole('link', { name: /My e2e story/ })).toHaveAttribute('href', 'https://example.com/mine');
+    await expect(card.getByRole('link', { name: /My e2e story/ })).toHaveAttribute(
+      'href',
+      'https://example.com/mine',
+    );
   });
 
   test('a question with no link shows up in Ask, and opens its own page', async ({ page }) => {
@@ -34,7 +37,9 @@ test.describe('submitting stories and questions', () => {
     await expect(storyTitles(page).last()).toContainText('Older Hacker News story');
   });
 
-  test('the Submit button is never off: pressing it says what is wrong and goes to the first field to fix', async ({ page }) => {
+  test('the Submit button is never off: pressing it says what is wrong and goes to the first field to fix', async ({
+    page,
+  }) => {
     await createUserAndLogIn(page, uniqueName('jack'));
     await page.getByRole('link', { name: 'Submit', exact: true }).click();
     const dialog = page.getByRole('dialog', { name: 'Submit a story' });
@@ -53,7 +58,9 @@ test.describe('submitting stories and questions', () => {
 
     await dialog.getByLabel('Link').fill('example.com');
     await dialog.getByLabel('Link').blur();
-    await expect(dialog.getByText('Enter a full web address that starts with http:// or https://')).toBeVisible();
+    await expect(
+      dialog.getByText('Enter a full web address that starts with http:// or https://'),
+    ).toBeVisible();
     await send.click();
     await expect(dialog.getByLabel('Link')).toBeFocused();
 
@@ -73,12 +80,18 @@ test.describe('submitting stories and questions', () => {
 });
 
 test.describe('comments', () => {
-  test('a comment on a story submitted here is kept, for everyone, after a reload', async ({ page, browser }) => {
+  test('a comment on a story submitted here is kept, for everyone, after a reload', async ({
+    page,
+    browser,
+  }) => {
     const author = uniqueName('liam');
     await createUserAndLogIn(page, author);
     await submitStory(page, { title: 'Story to discuss', link: 'https://example.com/discuss' });
     await page.getByRole('link', { name: 'New', exact: true }).click();
-    await page.locator('article.story', { hasText: 'Story to discuss' }).getByRole('link', { name: '0 comments' }).click();
+    await page
+      .locator('article.story', { hasText: 'Story to discuss' })
+      .getByRole('link', { name: '0 comments' })
+      .click();
     await expect(page).toHaveURL(/\/item\/\d+$/);
     const storyUrl = page.url();
 
@@ -102,7 +115,10 @@ test.describe('comments', () => {
     await createUserAndLogIn(page, uniqueName('mona'));
     await submitStory(page, { title: 'Counted story', link: 'https://example.com/counted' });
     await page.getByRole('link', { name: 'New', exact: true }).click();
-    await page.locator('article.story', { hasText: 'Counted story' }).getByRole('link', { name: '0 comments' }).click();
+    await page
+      .locator('article.story', { hasText: 'Counted story' })
+      .getByRole('link', { name: '0 comments' })
+      .click();
 
     await page.getByLabel('Add a comment').fill('One');
     await page.getByRole('button', { name: 'Add comment' }).click();
@@ -114,11 +130,15 @@ test.describe('comments', () => {
     await page.getByRole('button', { name: '← Back' }).click();
     await page.getByRole('link', { name: 'New', exact: true }).click();
     await expect(
-      page.locator('article.story', { hasText: 'Counted story' }).getByRole('link', { name: '2 comments' }),
+      page
+        .locator('article.story', { hasText: 'Counted story' })
+        .getByRole('link', { name: '2 comments' }),
     ).toBeVisible();
   });
 
-  test('a comment on a Hacker News story is only kept until the page is reloaded', async ({ page }) => {
+  test('a comment on a Hacker News story is only kept until the page is reloaded', async ({
+    page,
+  }) => {
     await createUserAndLogIn(page, uniqueName('nate'));
     await page.goto('/item/101');
     await page.getByLabel('Add a comment').fill('Gone after reload');
@@ -141,6 +161,8 @@ test.describe('comments', () => {
     expect(count).not.toBeNull();
     expect(prompt).not.toBeNull();
     expect(prompt!.x).toBeGreaterThan(count!.x + count!.width);
-    expect(Math.abs(prompt!.y + prompt!.height / 2 - (count!.y + count!.height / 2))).toBeLessThan(15);
+    expect(Math.abs(prompt!.y + prompt!.height / 2 - (count!.y + count!.height / 2))).toBeLessThan(
+      15,
+    );
   });
 });

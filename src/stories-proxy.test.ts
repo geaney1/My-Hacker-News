@@ -87,14 +87,22 @@ describe('stories proxy', () => {
 
     it('are first only when they are the newest', async () => {
       submitted.stories = [{ id: 2_000_000_002, time: 500 }];
-      expect((await proxy.getStoryPage('new', 1, 20)).stories.map((story) => story.id)).toEqual([2_000_000_002, 1, 2]);
+      expect((await proxy.getStoryPage('new', 1, 20)).stories.map((story) => story.id)).toEqual([
+        2_000_000_002, 1, 2,
+      ]);
     });
 
     it('are placed among the "ask" questions by when they were made, and not in "new"', async () => {
-      expect((await proxy.getStoryPage('ask', 1, 20)).stories.map((story) => story.id)).toEqual([2_000_000_003, 3]);
+      expect((await proxy.getStoryPage('ask', 1, 20)).stories.map((story) => story.id)).toEqual([
+        2_000_000_003, 3,
+      ]);
       submitted.questions = [{ id: 2_000_000_003, time: 10 }];
-      expect((await proxy.getStoryPage('ask', 1, 20)).stories.map((story) => story.id)).toEqual([3, 2_000_000_003]);
-      expect((await proxy.getStoryPage('new', 1, 20)).stories.map((story) => story.id)).not.toContain(2_000_000_003);
+      expect((await proxy.getStoryPage('ask', 1, 20)).stories.map((story) => story.id)).toEqual([
+        3, 2_000_000_003,
+      ]);
+      expect(
+        (await proxy.getStoryPage('new', 1, 20)).stories.map((story) => story.id),
+      ).not.toContain(2_000_000_003);
     });
 
     it('are not in the other lists', async () => {
@@ -107,13 +115,18 @@ describe('stories proxy', () => {
 
     it('are paged along with the Hacker News stories', async () => {
       // The merged list is 1, mine, 2, mine: the second page of three is the last one.
-      expect((await proxy.getStoryPage('new', 2, 3)).stories.map((story) => story.id)).toEqual([2_000_000_001]);
+      expect((await proxy.getStoryPage('new', 2, 3)).stories.map((story) => story.id)).toEqual([
+        2_000_000_001,
+      ]);
     });
 
     it('show how many comments have been written on them in this app', async () => {
       commentCounts.set(2_000_000_001, 2);
       expect((await proxy.getItem(2_000_000_001))?.descendants).toBe(2);
-      expect((await proxy.getStoryPage('new', 1, 20)).stories.find((story) => story.id === 2_000_000_001)?.descendants).toBe(2);
+      expect(
+        (await proxy.getStoryPage('new', 1, 20)).stories.find((story) => story.id === 2_000_000_001)
+          ?.descendants,
+      ).toBe(2);
       expect((await proxy.getItem(2_000_000_002))?.descendants).toBe(0);
     });
 

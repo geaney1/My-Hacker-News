@@ -25,7 +25,9 @@ export class Pagination {
     const current = this.page();
     const last = this.totalPages();
     const visible = new Set([1, last, current - 1, current, current + 1]);
-    const pages = [...visible].filter((page) => page >= 1 && page <= last).sort((earlier, later) => earlier - later);
+    const pages = [...visible]
+      .filter((page) => page >= 1 && page <= last)
+      .sort((earlier, later) => earlier - later);
 
     const items: PaginationItem[] = [];
     pages.forEach((page, index) => {

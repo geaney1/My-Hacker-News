@@ -34,8 +34,10 @@ describe('SubmitStory', () => {
   }
 
   const page = () => fixture.nativeElement as HTMLElement;
-  const field = (id: string) => page().querySelector<HTMLInputElement>(`input#${id}`) as HTMLInputElement;
-  const button = () => page().querySelector<HTMLButtonElement>('button[type="submit"]') as HTMLButtonElement;
+  const field = (id: string) =>
+    page().querySelector<HTMLInputElement>(`input#${id}`) as HTMLInputElement;
+  const button = () =>
+    page().querySelector<HTMLButtonElement>('button[type="submit"]') as HTMLButtonElement;
   // Whether the form is invalid: the button is never turned off, so this is what tells "could be
   // sent" from "could not".
   const formIsInvalid = () => {
@@ -52,7 +54,9 @@ describe('SubmitStory', () => {
   }
 
   async function typeText(value: string) {
-    const box = page().querySelector<HTMLTextAreaElement>('textarea#story-text') as HTMLTextAreaElement;
+    const box = page().querySelector<HTMLTextAreaElement>(
+      'textarea#story-text',
+    ) as HTMLTextAreaElement;
     box.value = value;
     box.dispatchEvent(new Event('input'));
     await settle();
@@ -65,7 +69,9 @@ describe('SubmitStory', () => {
   }
 
   async function submit() {
-    page().querySelector('form')?.dispatchEvent(new Event('submit', { cancelable: true }));
+    page()
+      .querySelector('form')
+      ?.dispatchEvent(new Event('submit', { cancelable: true }));
     await settle();
   }
 
@@ -75,7 +81,8 @@ describe('SubmitStory', () => {
   }
 
   describe('the text box', () => {
-    const textBox = () => page().querySelector<HTMLTextAreaElement>('textarea#story-text') as HTMLTextAreaElement;
+    const textBox = () =>
+      page().querySelector<HTMLTextAreaElement>('textarea#story-text') as HTMLTextAreaElement;
 
     it('is a labelled, multi-line text box that is optional', () => {
       expect(textBox()).not.toBeNull();
@@ -223,15 +230,21 @@ describe('SubmitStory', () => {
       expect(formIsInvalid()).toBe(false);
     });
 
-    it.each(['example.com', 'www.example.com/page', 'ftp://example.com', 'javascript:alert(1)', 'http://', 'not a link'])(
-      'refuses the link %j, and says what is wanted',
-      async (url) => {
-        await fill('A good story', url);
-        await leave('story-url');
-        expect(errorOf('story-url')).toBe('Enter a full web address that starts with http:// or https://');
-        expect(formIsInvalid()).toBe(true);
-      },
-    );
+    it.each([
+      'example.com',
+      'www.example.com/page',
+      'ftp://example.com',
+      'javascript:alert(1)',
+      'http://',
+      'not a link',
+    ])('refuses the link %j, and says what is wanted', async (url) => {
+      await fill('A good story', url);
+      await leave('story-url');
+      expect(errorOf('story-url')).toBe(
+        'Enter a full web address that starts with http:// or https://',
+      );
+      expect(formIsInvalid()).toBe(true);
+    });
 
     it('accepts a link with a query and a fragment', async () => {
       await fill('A good story', 'https://example.com/a?b=c&d=e#f');
@@ -258,7 +271,11 @@ describe('SubmitStory', () => {
 
       const request = http.expectOne('/api/submissions');
       expect(request.request.method).toBe('POST');
-      expect(request.request.body).toEqual({ title: 'Padded', url: 'https://example.com/a?b=c', text: '' });
+      expect(request.request.body).toEqual({
+        title: 'Padded',
+        url: 'https://example.com/a?b=c',
+        text: '',
+      });
       request.flush({ id: '1', submittedAt: 1 }, { status: 201, statusText: 'Created' });
       await settle();
     });
@@ -267,7 +284,9 @@ describe('SubmitStory', () => {
       const openWindow = vi.spyOn(window, 'open').mockReturnValue(null);
       await fill();
       await submit();
-      http.expectOne('/api/submissions').flush({ id: '1', submittedAt: 1 }, { status: 201, statusText: 'Created' });
+      http
+        .expectOne('/api/submissions')
+        .flush({ id: '1', submittedAt: 1 }, { status: 201, statusText: 'Created' });
       await settle();
       expect(openWindow).not.toHaveBeenCalled();
     });
@@ -275,16 +294,22 @@ describe('SubmitStory', () => {
     it('loads the story lists again, so the new story is in them', async () => {
       await fill();
       await submit();
-      http.expectOne('/api/submissions').flush({ id: '1', kind: 'story', submittedAt: 1 }, { status: 201, statusText: 'Created' });
+      http
+        .expectOne('/api/submissions')
+        .flush({ id: '1', kind: 'story', submittedAt: 1 }, { status: 201, statusText: 'Created' });
       await settle();
-      expect(http.match((request) => request.url.startsWith('/api/stories/')).length).toBeGreaterThan(0);
+      expect(
+        http.match((request) => request.url.startsWith('/api/stories/')).length,
+      ).toBeGreaterThan(0);
     });
 
     it('then closes the dialog, back to the list the user last had open', async () => {
       TestBed.inject(StoriesStore).selectList('show');
       await fill();
       await submit();
-      http.expectOne('/api/submissions').flush({ id: '1', submittedAt: 1 }, { status: 201, statusText: 'Created' });
+      http
+        .expectOne('/api/submissions')
+        .flush({ id: '1', submittedAt: 1 }, { status: 201, statusText: 'Created' });
       await settle();
       expect(navigate).toHaveBeenCalledWith('/show');
     });
@@ -314,7 +339,9 @@ describe('SubmitStory', () => {
 
       await submit();
       expect(page().querySelector('.form-error')).toBeNull();
-      http.expectOne('/api/submissions').flush({ id: '1', submittedAt: 1 }, { status: 201, statusText: 'Created' });
+      http
+        .expectOne('/api/submissions')
+        .flush({ id: '1', submittedAt: 1 }, { status: 201, statusText: 'Created' });
       await settle();
     });
 
@@ -330,7 +357,11 @@ describe('SubmitStory', () => {
       await typeText('My question');
       await submit();
       const request = http.expectOne('/api/submissions');
-      expect(request.request.body).toEqual({ title: 'Ask: anything?', url: '', text: 'My question' });
+      expect(request.request.body).toEqual({
+        title: 'Ask: anything?',
+        url: '',
+        text: 'My question',
+      });
       request.flush({ id: '1', submittedAt: 1 }, { status: 201, statusText: 'Created' });
       await settle();
     });

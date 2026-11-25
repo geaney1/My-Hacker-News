@@ -17,7 +17,8 @@ export class ProfileStore {
 
   private readonly profileResource = resource({
     // No username means nobody is logged in, so there is nothing to load.
-    params: () => (this.isBrowser && this.authStore.login() ? this.authStore.username() : undefined),
+    params: () =>
+      this.isBrowser && this.authStore.login() ? this.authStore.username() : undefined,
     loader: () => this.profileApi.getProfile(),
   });
 

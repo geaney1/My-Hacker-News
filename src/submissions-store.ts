@@ -123,10 +123,18 @@ function validateSubmission(title: unknown, url: unknown = '', text: unknown = '
 }
 
 /** Saves a story for `username`. */
-export async function addSubmission(username: string, title: unknown, url?: unknown, text?: unknown) {
+export async function addSubmission(
+  username: string,
+  title: unknown,
+  url?: unknown,
+  text?: unknown,
+) {
   const fields = validateSubmission(title, url, text);
   const submissions = await loadSubmissions();
-  if (submissions.filter((submission) => submission.username === username).length >= maxSubmissionsPerUser) {
+  if (
+    submissions.filter((submission) => submission.username === username).length >=
+    maxSubmissionsPerUser
+  ) {
     throw new TooManySubmissionsError();
   }
   const submission: Submission = {
@@ -134,7 +142,10 @@ export async function addSubmission(username: string, title: unknown, url?: unkn
     // From a counter, not the length of the list, so an id is never used twice.
     itemId: await nextId(
       'submission',
-      submissions.reduce((highest, existing) => Math.max(highest, existing.itemId), localItemIdBase),
+      submissions.reduce(
+        (highest, existing) => Math.max(highest, existing.itemId),
+        localItemIdBase,
+      ),
     ),
     username,
     ...fields,
@@ -154,7 +165,10 @@ export async function submittedStories(kind: SubmissionKind) {
   return submissions
     .filter((submission) => submission.kind === kind)
     .sort((first, second) => second.submittedAt - first.submittedAt)
-    .map((submission) => ({ id: submission.itemId, time: Math.floor(submission.submittedAt / 1000) }));
+    .map((submission) => ({
+      id: submission.itemId,
+      time: Math.floor(submission.submittedAt / 1000),
+    }));
 }
 
 /** The item ids of everything `username` submitted, newest first. */

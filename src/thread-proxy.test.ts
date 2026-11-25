@@ -132,7 +132,10 @@ describe('thread proxy', () => {
   });
 
   it('survives a comment that fails to load', async () => {
-    serve([{ id: 1, type: 'story', kids: [2, 3] }, { id: 3, type: 'comment' }]);
+    serve([
+      { id: 1, type: 'story', kids: [2, 3] },
+      { id: 3, type: 'comment' },
+    ]);
     const original = getItem.getMockImplementation() as (id: number) => Promise<HnItem | null>;
     getItem.mockImplementation(async (id: number) => {
       if (id === 2) {
@@ -160,7 +163,11 @@ describe('thread proxy', () => {
     const replies = Array.from({ length: 100 }, (_, index) => index + 1000);
     serve([
       { id: 1, type: 'story', kids: topLevel },
-      ...topLevel.map((id, index) => ({ id, type: 'comment' as const, kids: index === 0 ? replies : undefined })),
+      ...topLevel.map((id, index) => ({
+        id,
+        type: 'comment' as const,
+        kids: index === 0 ? replies : undefined,
+      })),
       ...replies.map((id) => ({ id, type: 'comment' as const })),
     ]);
 
@@ -171,7 +178,7 @@ describe('thread proxy', () => {
     expect(thread?.truncated).toBe(true);
   });
 
-  it('loads a poll\'s options in the poll\'s order and skips dead ones', async () => {
+  it("loads a poll's options in the poll's order and skips dead ones", async () => {
     serve([
       { id: 1, type: 'poll', parts: [12, 10, 11, 13] },
       { id: 10, type: 'pollopt', poll: 1, score: 5 },

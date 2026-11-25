@@ -1,5 +1,13 @@
 import { Location, NgTemplateOutlet } from '@angular/common';
-import { Component, computed, effect, inject, input, numberAttribute, resource } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  numberAttribute,
+  resource,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HnApi } from '../../../core/api/hn-api';
 import { AuthStore } from '../../../core/auth/auth.store';

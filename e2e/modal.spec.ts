@@ -12,7 +12,9 @@ test.describe('the page behind an open dialog is blurred', () => {
     await expect(dialog).toBeVisible();
 
     expect(await backdropFilter(dialog)).toBe('blur(8px)');
-    const dim = await dialog.evaluate((element) => getComputedStyle(element, '::backdrop').backgroundColor);
+    const dim = await dialog.evaluate(
+      (element) => getComputedStyle(element, '::backdrop').backgroundColor,
+    );
     expect(dim).not.toBe('rgba(0, 0, 0, 0)');
   });
 
@@ -42,7 +44,9 @@ test.describe('the page behind an open dialog is blurred', () => {
       await expect(page.locator('article.story').first()).toBeVisible();
       await page.getByRole('button', { name: 'Menu' }).click();
 
-      const filter = await page.locator('.menu-backdrop').evaluate((element) => getComputedStyle(element).backdropFilter);
+      const filter = await page
+        .locator('.menu-backdrop')
+        .evaluate((element) => getComputedStyle(element).backdropFilter);
       expect(filter).toBe('blur(4px)');
     });
   });

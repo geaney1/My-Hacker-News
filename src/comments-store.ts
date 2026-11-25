@@ -59,8 +59,7 @@ export async function getLocalComments(itemId: number, viewer?: string) {
   return (await loadComments())
     .filter((comment) => comment.itemId === itemId)
     .filter(
-      (comment) =>
-        (comment.visibleAt ?? comment.submittedAt) <= now || comment.username === viewer,
+      (comment) => (comment.visibleAt ?? comment.submittedAt) <= now || comment.username === viewer,
     )
     .sort((first, second) => second.submittedAt - first.submittedAt)
     .map(toComment);

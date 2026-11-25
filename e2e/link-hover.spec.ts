@@ -9,11 +9,15 @@ async function hovered(page: Page, link: Locator) {
   await link.hover();
   await page.waitForTimeout(250);
   const during = await width();
-  const thickness = await link.evaluate((element) => getComputedStyle(element).textDecorationThickness);
+  const thickness = await link.evaluate(
+    (element) => getComputedStyle(element).textDecorationThickness,
+  );
   return { before, during, thickness };
 }
 
-test('a link with words beside it does not grow over them when the mouse is on it', async ({ page }) => {
+test('a link with words beside it does not grow over them when the mouse is on it', async ({
+  page,
+}) => {
   await createUserAndLogIn(page, uniqueName('hov'));
 
   await page.goto('/welcome');

@@ -45,7 +45,13 @@ describe('UserPage', () => {
   });
 
   it('shows a user of this app', async () => {
-    await open('Billy', { id: 'Billy', created: 1_700_000_000, karma: 0, submitted: [2_000_000_001], local: true });
+    await open('Billy', {
+      id: 'Billy',
+      created: 1_700_000_000,
+      karma: 0,
+      submitted: [2_000_000_001],
+      local: true,
+    });
     expect(page().querySelector('h2')?.textContent).toBe('Billy');
     expect(text()).toContain('Submissions1');
     expect(page().querySelector('a[href*="ycombinator"]')).toBeNull();
@@ -60,6 +66,8 @@ describe('UserPage', () => {
 
   it('only says no user was found when neither Hacker News nor this app has them', async () => {
     await open('nobody', null);
-    expect(page().querySelector('[role="alert"]')?.textContent).toContain('No user named nobody was found.');
+    expect(page().querySelector('[role="alert"]')?.textContent).toContain(
+      'No user named nobody was found.',
+    );
   });
 });

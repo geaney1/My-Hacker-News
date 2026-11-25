@@ -81,16 +81,30 @@ export async function getStoryPage(
   // stories under "new" and questions under "ask".
   const hackerNewsIds = await getStoryIds(list as HnStoryList);
   const submitted =
-    list === 'new' ? await submittedStories('story') : list === 'ask' ? await submittedStories('question') : [];
-  const ids = await mergeByTime(hackerNewsIds, submitted, list === 'new' ? 'newest-first' : 'ranked', timeOfItem);
+    list === 'new'
+      ? await submittedStories('story')
+      : list === 'ask'
+        ? await submittedStories('question')
+        : [];
+  const ids = await mergeByTime(
+    hackerNewsIds,
+    submitted,
+    list === 'new' ? 'newest-first' : 'ranked',
+    timeOfItem,
+  );
   const start = (page - 1) * pageSize;
   const results = await Promise.allSettled(ids.slice(start, start + pageSize).map(getItem));
 
   // A story that failed to load is left out instead of failing the whole page.
   const stories = results
-    .filter((result): result is PromiseFulfilledResult<HnItem | null> => result.status === 'fulfilled')
+    .filter(
+      (result): result is PromiseFulfilledResult<HnItem | null> => result.status === 'fulfilled',
+    )
     .map((result) => result.value)
-    .filter((item): item is HnItem => item !== null && !item.deleted && (!item.dead || !!options.showDead));
+    .filter(
+      (item): item is HnItem =>
+        item !== null && !item.deleted && (!item.dead || !!options.showDead),
+    );
 
   return { total: ids.length, stories } satisfies StoryPage;
 }

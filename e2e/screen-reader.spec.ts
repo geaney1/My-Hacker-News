@@ -2,10 +2,13 @@ import { expect, test } from '@playwright/test';
 import { createUserAndLogIn, uniqueName } from './helpers';
 
 /** The live region that says the page has changed. */
-const announcer = (page: import('@playwright/test').Page) => page.locator('div.visually-hidden[role="status"]');
+const announcer = (page: import('@playwright/test').Page) =>
+  page.locator('div.visually-hidden[role="status"]');
 
 test.describe('keyboard and screen reader support', () => {
-  test('the first Tab goes to a "Skip to main content" link, which moves the focus to the page', async ({ page }) => {
+  test('the first Tab goes to a "Skip to main content" link, which moves the focus to the page', async ({
+    page,
+  }) => {
     await page.goto('/top');
     await expect(page.locator('article.story').first()).toBeVisible();
 
@@ -33,7 +36,9 @@ test.describe('keyboard and screen reader support', () => {
     expect(box!.y + box!.height).toBeLessThanOrEqual(0);
   });
 
-  test('a new page is announced by its title after each navigation, but not the first load', async ({ page }) => {
+  test('a new page is announced by its title after each navigation, but not the first load', async ({
+    page,
+  }) => {
     await page.goto('/top');
     await expect(page.locator('article.story').first()).toBeVisible();
     await page.waitForTimeout(400);
@@ -73,10 +78,14 @@ test.describe('keyboard and screen reader support', () => {
     const username = uniqueName('first');
     await createUserAndLogIn(page, username);
     await page.getByRole('link', { name: `Profile for ${username}` }).click();
-    await expect(page.getByRole('dialog', { name: 'Profile' }).getByRole('textbox', { name: 'About You' })).toBeFocused();
+    await expect(
+      page.getByRole('dialog', { name: 'Profile' }).getByRole('textbox', { name: 'About You' }),
+    ).toBeFocused();
   });
 
-  test('a field that is wrong says so, and a field that has to be filled in says that too', async ({ page }) => {
+  test('a field that is wrong says so, and a field that has to be filled in says that too', async ({
+    page,
+  }) => {
     await page.goto('/create-user');
     const username = page.getByLabel('Username');
     await expect(username).toHaveAttribute('aria-required', 'true');
@@ -91,7 +100,9 @@ test.describe('keyboard and screen reader support', () => {
     await expect(username).not.toHaveAttribute('aria-invalid', 'true');
   });
 
-  test('the avatar link is named for the profile, and its letter is not read out as well', async ({ page }) => {
+  test('the avatar link is named for the profile, and its letter is not read out as well', async ({
+    page,
+  }) => {
     const username = uniqueName('ava');
     await createUserAndLogIn(page, username);
     const avatar = page.getByRole('link', { name: `Profile for ${username}` });
@@ -108,11 +119,15 @@ test.describe('keyboard and screen reader support', () => {
     await expect(status).toHaveText('Page 2 of 3');
   });
 
-  test('the theme button is named for what it does, with the short name showing', async ({ page }) => {
+  test('the theme button is named for what it does, with the short name showing', async ({
+    page,
+  }) => {
     const username = uniqueName('thm');
     await createUserAndLogIn(page, username);
     await page.getByRole('link', { name: `Profile for ${username}` }).click();
-    const button = page.getByRole('dialog', { name: 'Profile' }).getByRole('button', { name: 'Switch to Dark theme' });
+    const button = page
+      .getByRole('dialog', { name: 'Profile' })
+      .getByRole('button', { name: 'Switch to Dark theme' });
     await expect(button).toBeVisible();
     // The "Switch to " is for screen readers only (clipped away); what is seen is just "Dark theme".
     await expect(button.locator('.visually-hidden')).toHaveText('Switch to');

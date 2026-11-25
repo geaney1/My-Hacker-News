@@ -24,15 +24,20 @@
   @if (store.error()) {
     <app-banner kind="error">
       Could not load stories.
-      <button bannerAction type="button" class="button button-outline" (click)="store.reload()">Try again</button>
+      <button bannerAction type="button" class="button button-outline" (click)="store.reload()">
+        Try again
+      </button>
     </app-banner>
   } @else if (store.isLoading()) {
     <p role="status">Loading stories…</p>
   } @else {
     @if (store.changedStoryCount(); as changed) {
       <app-banner class="updates-notice" kind="info">
-        {{ changed }} {{ changed === 1 ? 'story has' : 'stories have' }} been updated on Hacker News.
-        <button bannerAction type="button" class="button button-outline" (click)="store.reload()">Refresh</button>
+        {{ changed }} {{ changed === 1 ? 'story has' : 'stories have' }} been updated on Hacker
+        News.
+        <button bannerAction type="button" class="button button-outline" (click)="store.reload()">
+          Refresh
+        </button>
       </app-banner>
     }
     <ul class="story-list">

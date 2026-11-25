@@ -32,7 +32,10 @@ export async function createUserAndLogIn(page: Page, username: string) {
 }
 
 /** Opens the Submit dialog from the side menu and sends a story or question. */
-export async function submitStory(page: Page, fields: { title: string; link?: string; text?: string }) {
+export async function submitStory(
+  page: Page,
+  fields: { title: string; link?: string; text?: string },
+) {
   await page.getByRole('link', { name: 'Submit', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Submit a story' });
   await expect(dialog).toBeVisible();
@@ -54,17 +57,28 @@ export const storyTitles = (page: Page) => page.locator('article.story h3');
 export async function saveProfile(
   page: Page,
   username: string,
-  settings: { showDead?: 'yes' | 'no'; noProcrast?: 'yes' | 'no'; maxVisit?: number; minAway?: number; delay?: number },
+  settings: {
+    showDead?: 'yes' | 'no';
+    noProcrast?: 'yes' | 'no';
+    maxVisit?: number;
+    minAway?: number;
+    delay?: number;
+  },
 ) {
   await page.getByRole('link', { name: `Profile for ${username}` }).click();
   const dialog = page.getByRole('dialog', { name: 'Profile' });
   await expect(dialog).toBeVisible();
   await dialog.getByLabel('Email', { exact: true }).fill(`${username}@example.com`);
-  if (settings.showDead) await dialog.getByLabel('Show Dead', { exact: true }).selectOption(settings.showDead);
-  if (settings.noProcrast) await dialog.getByLabel('No Procrast', { exact: true }).selectOption(settings.noProcrast);
-  if (settings.maxVisit !== undefined) await dialog.getByLabel('Max Visit', { exact: true }).fill(String(settings.maxVisit));
-  if (settings.minAway !== undefined) await dialog.getByLabel('Min Away', { exact: true }).fill(String(settings.minAway));
-  if (settings.delay !== undefined) await dialog.getByLabel('Delay', { exact: true }).fill(String(settings.delay));
+  if (settings.showDead)
+    await dialog.getByLabel('Show Dead', { exact: true }).selectOption(settings.showDead);
+  if (settings.noProcrast)
+    await dialog.getByLabel('No Procrast', { exact: true }).selectOption(settings.noProcrast);
+  if (settings.maxVisit !== undefined)
+    await dialog.getByLabel('Max Visit', { exact: true }).fill(String(settings.maxVisit));
+  if (settings.minAway !== undefined)
+    await dialog.getByLabel('Min Away', { exact: true }).fill(String(settings.minAway));
+  if (settings.delay !== undefined)
+    await dialog.getByLabel('Delay', { exact: true }).fill(String(settings.delay));
   await dialog.getByRole('button', { name: 'Update' }).click();
   await expect(dialog).toBeHidden();
 }

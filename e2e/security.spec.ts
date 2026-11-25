@@ -14,7 +14,9 @@ async function recordViolations(page: Page) {
 }
 
 test.describe('security headers and the content security policy', () => {
-  test('every page is sent with the headers, and a nonce of its own each time', async ({ request }) => {
+  test('every page is sent with the headers, and a nonce of its own each time', async ({
+    request,
+  }) => {
     const first = await request.get('/top');
     const second = await request.get('/top');
 
@@ -25,12 +27,13 @@ test.describe('security headers and the content security policy', () => {
     expect(first.headers()['x-content-type-options']).toBe('nosniff');
     expect(first.headers()['x-powered-by']).toBeUndefined();
 
-    const nonceOf = (headers: Record<string, string>) => /'nonce-([^']+)'/.exec(headers['content-security-policy'])?.[1];
+    const nonceOf = (headers: Record<string, string>) =>
+      /'nonce-([^']+)'/.exec(headers['content-security-policy'])?.[1];
     expect(nonceOf(first.headers())).toBeTruthy();
     expect(nonceOf(first.headers())).not.toBe(nonceOf(second.headers()));
   });
 
-  test('every inline script and style in a page has that request\'s nonce', async ({ request }) => {
+  test("every inline script and style in a page has that request's nonce", async ({ request }) => {
     const response = await request.get('/top');
     const nonce = /'nonce-([^']+)'/.exec(response.headers()['content-security-policy'])?.[1];
     const html = await response.text();

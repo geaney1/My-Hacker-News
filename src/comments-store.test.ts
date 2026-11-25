@@ -33,7 +33,14 @@ describe('comments store', () => {
     await comments.addLocalComment('Anna', storyId, '  Nice one  ');
 
     expect(await comments.getLocalComments(storyId)).toEqual([
-      expect.objectContaining({ type: 'comment', by: 'Anna', time: 5, text: 'Nice one', parent: storyId, replies: [] }),
+      expect.objectContaining({
+        type: 'comment',
+        by: 'Anna',
+        time: 5,
+        text: 'Nice one',
+        parent: storyId,
+        replies: [],
+      }),
     ]);
   });
 
@@ -54,8 +61,13 @@ describe('comments store', () => {
     vi.setSystemTime(3_000);
     await comments.addLocalComment('Ben', storyId, 'Second');
 
-    expect((await comments.getLocalComments(storyId)).map((comment) => comment.text)).toEqual(['Second', 'First']);
-    expect((await comments.getLocalComments(other)).map((comment) => comment.text)).toEqual(['Elsewhere']);
+    expect((await comments.getLocalComments(storyId)).map((comment) => comment.text)).toEqual([
+      'Second',
+      'First',
+    ]);
+    expect((await comments.getLocalComments(other)).map((comment) => comment.text)).toEqual([
+      'Elsewhere',
+    ]);
   });
 
   it('escapes what was typed, so it cannot add HTML to the page', async () => {
@@ -68,20 +80,30 @@ describe('comments store', () => {
     await comments.addLocalComment('Anna', storyId, 'Still here');
     vi.resetModules();
     const again = await import('./comments-store');
-    expect((await again.getLocalComments(storyId)).map((comment) => comment.text)).toEqual(['Still here']);
+    expect((await again.getLocalComments(storyId)).map((comment) => comment.text)).toEqual([
+      'Still here',
+    ]);
   });
 
   it.each([undefined, '', '   ', 5, null])('refuses the comment %j', async (text) => {
-    await expect(comments.addLocalComment('Anna', storyId, text)).rejects.toThrow(/Write a comment/);
+    await expect(comments.addLocalComment('Anna', storyId, text)).rejects.toThrow(
+      /Write a comment/,
+    );
   });
 
   it('refuses a comment of more than 2000 characters, and accepts exactly 2000', async () => {
-    await expect(comments.addLocalComment('Anna', storyId, 'x'.repeat(2001))).rejects.toThrow(/at most 2000/);
-    await expect(comments.addLocalComment('Anna', storyId, 'x'.repeat(2000))).resolves.toBeDefined();
+    await expect(comments.addLocalComment('Anna', storyId, 'x'.repeat(2001))).rejects.toThrow(
+      /at most 2000/,
+    );
+    await expect(
+      comments.addLocalComment('Anna', storyId, 'x'.repeat(2000)),
+    ).resolves.toBeDefined();
   });
 
   it('only allows comments on stories submitted in this app', async () => {
-    await expect(comments.addLocalComment('Anna', 8863, 'Hi')).rejects.toBeInstanceOf(comments.NoSuchStoryError);
+    await expect(comments.addLocalComment('Anna', 8863, 'Hi')).rejects.toBeInstanceOf(
+      comments.NoSuchStoryError,
+    );
     await expect(comments.addLocalComment('Anna', storyId + 50, 'Hi')).rejects.toBeInstanceOf(
       comments.NoSuchStoryError,
     );
@@ -96,12 +118,14 @@ describe('comments store', () => {
   });
 
   describe('Delay', () => {
-    it('hides a comment from everyone but its author until the author\'s delay has passed', async () => {
+    it("hides a comment from everyone but its author until the author's delay has passed", async () => {
       vi.useFakeTimers();
       vi.setSystemTime(10_000);
       await comments.addLocalComment('Anna', storyId, 'Slow one', 60);
 
-      expect((await comments.getLocalComments(storyId, 'Anna')).map((comment) => comment.text)).toEqual(['Slow one']);
+      expect(
+        (await comments.getLocalComments(storyId, 'Anna')).map((comment) => comment.text),
+      ).toEqual(['Slow one']);
       expect(await comments.getLocalComments(storyId, 'Ben')).toEqual([]);
       expect(await comments.getLocalComments(storyId)).toEqual([]);
       expect(await comments.countLocalComments(storyId)).toBe(0);
@@ -110,7 +134,9 @@ describe('comments store', () => {
       expect(await comments.getLocalComments(storyId, 'Ben')).toEqual([]);
 
       vi.setSystemTime(10_000 + 60_000);
-      expect((await comments.getLocalComments(storyId, 'Ben')).map((comment) => comment.text)).toEqual(['Slow one']);
+      expect(
+        (await comments.getLocalComments(storyId, 'Ben')).map((comment) => comment.text),
+      ).toEqual(['Slow one']);
       expect(await comments.countLocalComments(storyId)).toBe(1);
     });
 
@@ -122,7 +148,9 @@ describe('comments store', () => {
     it('only delays the comments of the author who has a delay', async () => {
       await comments.addLocalComment('Anna', storyId, 'Delayed', 600);
       await comments.addLocalComment('Ben', storyId, 'Immediate', 0);
-      expect((await comments.getLocalComments(storyId, 'Cara')).map((comment) => comment.text)).toEqual(['Immediate']);
+      expect(
+        (await comments.getLocalComments(storyId, 'Cara')).map((comment) => comment.text),
+      ).toEqual(['Immediate']);
     });
   });
 

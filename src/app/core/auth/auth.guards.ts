@@ -9,7 +9,10 @@ import { AuthStore } from './auth.store';
 function requireLogin(wantedUrl: string) {
   const authStore = inject(AuthStore);
   const router = inject(Router);
-  return authStore.login() || router.createUrlTree(['/log-in'], { queryParams: { returnUrl: wantedUrl } });
+  return (
+    authStore.login() ||
+    router.createUrlTree(['/log-in'], { queryParams: { returnUrl: wantedUrl } })
+  );
 }
 
 export const loggedInGuard: CanActivateFn = (_route, state) => requireLogin(state.url);

@@ -46,7 +46,12 @@ function yesNo(value: unknown, name: string) {
 }
 
 function wholeNumber(value: unknown, name: string, minimum: number) {
-  if (typeof value !== 'number' || !Number.isInteger(value) || value < minimum || value > maxNumber) {
+  if (
+    typeof value !== 'number' ||
+    !Number.isInteger(value) ||
+    value < minimum ||
+    value > maxNumber
+  ) {
     throw new BadRequestError(`${name} must be a whole number from ${minimum} to ${maxNumber}`);
   }
   return value;
@@ -58,7 +63,11 @@ function validateProfile(fields: Record<string, unknown>) {
   if (typeof about !== 'string' || about.length > maxAboutLength) {
     throw new BadRequestError(`About can be at most ${maxAboutLength} characters`);
   }
-  if (typeof email !== 'string' || email.trim().length > maxEmailLength || !emailPattern.test(email.trim())) {
+  if (
+    typeof email !== 'string' ||
+    email.trim().length > maxEmailLength ||
+    !emailPattern.test(email.trim())
+  ) {
     throw new BadRequestError('Enter a valid email address');
   }
   return {

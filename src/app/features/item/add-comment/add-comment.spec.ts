@@ -24,7 +24,9 @@ describe('AddComment', () => {
   afterEach(() => {
     // Saving a comment also loads the story lists again: that is checked on its own below.
     // Logging in also loads the user's profile in the background: not what these tests are about.
-    http.match((request) => request.url.startsWith('/api/stories/') || request.url === '/api/profile');
+    http.match(
+      (request) => request.url.startsWith('/api/stories/') || request.url === '/api/profile',
+    );
     http.verify();
   });
 
@@ -49,7 +51,8 @@ describe('AddComment', () => {
   }
 
   const page = () => fixture.nativeElement as HTMLElement;
-  const box = () => page().querySelector<HTMLTextAreaElement>('textarea#new-comment') as HTMLTextAreaElement;
+  const box = () =>
+    page().querySelector<HTMLTextAreaElement>('textarea#new-comment') as HTMLTextAreaElement;
   const error = () => page().querySelector('#new-comment-error')?.textContent?.trim();
 
   async function write(text: string, send = true) {
@@ -57,7 +60,9 @@ describe('AddComment', () => {
     box().dispatchEvent(new Event('input'));
     await settle();
     if (send) {
-      page().querySelector('form')?.dispatchEvent(new Event('submit', { cancelable: true }));
+      page()
+        .querySelector('form')
+        ?.dispatchEvent(new Event('submit', { cancelable: true }));
       await settle();
     }
   }
@@ -91,8 +96,10 @@ describe('AddComment', () => {
     describe('on a story submitted in this app', () => {
       beforeEach(() => open(localStoryId));
 
-      it('says the comment is saved on the app\'s server', () => {
-        expect(page().querySelector('#new-comment-hint')?.textContent).toContain('saved on this app');
+      it("says the comment is saved on the app's server", () => {
+        expect(page().querySelector('#new-comment-hint')?.textContent).toContain(
+          'saved on this app',
+        );
       });
 
       it('saves the comment on the server, empties the box, and says it is saved', async () => {
@@ -109,31 +116,45 @@ describe('AddComment', () => {
 
       it('loads the story lists again, so the comment count in them is current', async () => {
         await write('Nicely done');
-        http.expectOne(`/api/items/${localStoryId}/comments`).flush({}, { status: 201, statusText: 'Created' });
+        http
+          .expectOne(`/api/items/${localStoryId}/comments`)
+          .flush({}, { status: 201, statusText: 'Created' });
         await settle();
-        expect(http.match((request) => request.url.startsWith('/api/stories/')).length).toBeGreaterThan(0);
+        expect(
+          http.match((request) => request.url.startsWith('/api/stories/')).length,
+        ).toBeGreaterThan(0);
       });
 
       it('keeps the text, and says why, when it could not be saved', async () => {
         await write('Nicely done');
-        http.expectOne(`/api/items/${localStoryId}/comments`).flush({}, { status: 500, statusText: 'Error' });
+        http
+          .expectOne(`/api/items/${localStoryId}/comments`)
+          .flush({}, { status: 500, statusText: 'Error' });
         await settle();
 
         expect(saved).not.toHaveBeenCalled();
         expect(box().value).toBe('Nicely done');
-        expect(page().querySelector('app-banner [role="alert"]')?.textContent).toContain('Something went wrong');
+        expect(page().querySelector('app-banner [role="alert"]')?.textContent).toContain(
+          'Something went wrong',
+        );
       });
 
       it('clears an earlier failure message when the user tries again', async () => {
         await write('Nicely done');
-        http.expectOne(`/api/items/${localStoryId}/comments`).flush({}, { status: 500, statusText: 'Error' });
+        http
+          .expectOne(`/api/items/${localStoryId}/comments`)
+          .flush({}, { status: 500, statusText: 'Error' });
         await settle();
         expect(page().querySelector('app-banner [role="alert"]')).not.toBeNull();
 
-        page().querySelector('form')?.dispatchEvent(new Event('submit', { cancelable: true }));
+        page()
+          .querySelector('form')
+          ?.dispatchEvent(new Event('submit', { cancelable: true }));
         await settle();
         expect(page().querySelector('app-banner [role="alert"]')).toBeNull();
-        http.expectOne(`/api/items/${localStoryId}/comments`).flush({}, { status: 201, statusText: 'Created' });
+        http
+          .expectOne(`/api/items/${localStoryId}/comments`)
+          .flush({}, { status: 201, statusText: 'Created' });
         await settle();
       });
     });
@@ -152,7 +173,9 @@ describe('AddComment', () => {
 
         expect(http.match((request) => request.url.endsWith('/comments'))).toHaveLength(0);
         const kept = TestBed.inject(NewCommentsStore).forItem(hackerNewsStoryId);
-        expect(kept.map((comment) => [comment.by, comment.text])).toEqual([['Anna', 'Just for me']]);
+        expect(kept.map((comment) => [comment.by, comment.text])).toEqual([
+          ['Anna', 'Just for me'],
+        ]);
         expect(box().value).toBe('');
         expect(saved).not.toHaveBeenCalled();
       });

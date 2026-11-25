@@ -42,19 +42,33 @@ describe('SideMenu', () => {
     fixture.detectChanges();
   }
 
-  const tabs = () => Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('a.tab'));
-  const tab = (label: string) => tabs().find((link) => link.textContent?.trim() === label) as HTMLAnchorElement;
-  const highlighted = () => tabs().filter((link) => link.classList.contains('active')).map((link) => link.textContent?.trim());
+  const tabs = () =>
+    Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('a.tab'));
+  const tab = (label: string) =>
+    tabs().find((link) => link.textContent?.trim() === label) as HTMLAnchorElement;
+  const highlighted = () =>
+    tabs()
+      .filter((link) => link.classList.contains('active'))
+      .map((link) => link.textContent?.trim());
 
   it('lists the story lists, without Submit or Welcome while logged out', async () => {
     await goTo('/top');
-    expect(tabs().map((link) => link.textContent?.trim())).toEqual(['Top', 'New', 'Best', 'Ask', 'Show', 'Jobs']);
+    expect(tabs().map((link) => link.textContent?.trim())).toEqual([
+      'Top',
+      'New',
+      'Best',
+      'Ask',
+      'Show',
+      'Jobs',
+    ]);
   });
 
   describe('when logged in', () => {
     beforeEach(async () => {
       const login = TestBed.inject(AuthStore).logIn('Suin', 'correct-horse');
-      TestBed.inject(HttpTestingController).expectOne('/api/auth/login').flush({ username: 'Suin' });
+      TestBed.inject(HttpTestingController)
+        .expectOne('/api/auth/login')
+        .flush({ username: 'Suin' });
       await login;
       await goTo('/top');
     });
@@ -63,7 +77,14 @@ describe('SideMenu', () => {
 
     it('adds Submit and Welcome after the story lists', () => {
       expect(tabs().map((link) => link.textContent?.trim())).toEqual([
-        'Top', 'New', 'Best', 'Ask', 'Show', 'Jobs', 'Submit', 'Welcome',
+        'Top',
+        'New',
+        'Best',
+        'Ask',
+        'Show',
+        'Jobs',
+        'Submit',
+        'Welcome',
       ]);
     });
 
@@ -151,14 +172,17 @@ describe('SideMenu', () => {
       expect(highlighted()).toEqual(['Show']);
     });
 
-    it.each(['/log-in', '/create-user', '/user-profile'])('keeps the list highlighted on %s, which opens over it', async (url) => {
-      await goTo('/job');
-      stories.selectList('job');
-      await goTo(url);
+    it.each(['/log-in', '/create-user', '/user-profile'])(
+      'keeps the list highlighted on %s, which opens over it',
+      async (url) => {
+        await goTo('/job');
+        stories.selectList('job');
+        await goTo(url);
 
-      expect(highlighted()).toEqual(['Jobs']);
-      expect(tab('Jobs').hasAttribute('aria-current')).toBe(false);
-    });
+        expect(highlighted()).toEqual(['Jobs']);
+        expect(tab('Jobs').hasAttribute('aria-current')).toBe(false);
+      },
+    );
 
     it('falls back to Top when the page was opened directly', async () => {
       await goTo('/user/pg');

@@ -38,7 +38,11 @@ describe('submissions routes', () => {
 
   beforeEach(() => resetRateLimits());
 
-  async function post(body?: unknown, withCookie: string | null = cookie, contentType = 'application/json') {
+  async function post(
+    body?: unknown,
+    withCookie: string | null = cookie,
+    contentType = 'application/json',
+  ) {
     const response = await fetch(baseUrl, {
       method: 'POST',
       headers: { 'content-type': contentType, ...(withCookie ? { cookie: withCookie } : {}) },
@@ -48,7 +52,10 @@ describe('submissions routes', () => {
   }
 
   const saved = () =>
-    JSON.parse(readFileSync(join(directory, 'submissions.json'), 'utf8')) as Record<string, unknown>[];
+    JSON.parse(readFileSync(join(directory, 'submissions.json'), 'utf8')) as Record<
+      string,
+      unknown
+    >[];
 
   it('saves a story for the logged-in user, trimmed, and answers 201 with its id', async () => {
     const result = await post({ title: '  A good story  ', url: '  https://example.com/post  ' });
@@ -70,7 +77,9 @@ describe('submissions routes', () => {
 
   it('answers 401 without a session, or with one that does not exist', async () => {
     expect((await post({ title: 'x', url: 'https://example.com' }, null)).status).toBe(401);
-    expect((await post({ title: 'x', url: 'https://example.com' }, 'hn_session=nope')).status).toBe(401);
+    expect((await post({ title: 'x', url: 'https://example.com' }, 'hn_session=nope')).status).toBe(
+      401,
+    );
   });
 
   it('answers 415 when the body is not JSON', async () => {
@@ -120,13 +129,20 @@ describe('submissions routes', () => {
     const result = await post({ title: 'Ask: anything?', text: 'My question' });
     expect(result.status).toBe(201);
     expect(result.body?.['kind']).toBe('question');
-    expect(saved().at(-1)).toMatchObject({ kind: 'question', title: 'Ask: anything?', url: '', text: 'My question' });
+    expect(saved().at(-1)).toMatchObject({
+      kind: 'question',
+      title: 'Ask: anything?',
+      url: '',
+      text: 'My question',
+    });
     expect((await post({ title: 'Ask: again', url: '', text: 'Blank link' })).status).toBe(201);
   });
 
   it('answers 400 for text that is not text or is too long', async () => {
     expect((await post({ title: 'x', url: 'https://example.com', text: 5 })).status).toBe(400);
-    expect((await post({ title: 'x', url: 'https://example.com', text: 'x'.repeat(2001) })).status).toBe(400);
+    expect(
+      (await post({ title: 'x', url: 'https://example.com', text: 'x'.repeat(2001) })).status,
+    ).toBe(400);
   });
 
   it('accepts a title of exactly 80 characters', async () => {

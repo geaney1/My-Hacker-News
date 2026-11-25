@@ -21,7 +21,9 @@ async function openProfile(page: import('@playwright/test').Page) {
 }
 
 test.describe('the "i" beside each profile setting explains what it is for', () => {
-  test('every setting has an info button, which shows and hides its explanation', async ({ page }) => {
+  test('every setting has an info button, which shows and hides its explanation', async ({
+    page,
+  }) => {
     const dialog = await openProfile(page);
 
     for (const field of fields) {
@@ -41,7 +43,9 @@ test.describe('the "i" beside each profile setting explains what it is for', () 
     }
   });
 
-  test("the button is big enough to press, and the explanation is the field's description even when closed", async ({ page }) => {
+  test("the button is big enough to press, and the explanation is the field's description even when closed", async ({
+    page,
+  }) => {
     const dialog = await openProfile(page);
 
     for (const field of fields) {
@@ -69,7 +73,9 @@ test.describe('the "i" beside each profile setting explains what it is for', () 
     await expect(dialog).toBeHidden();
   });
 
-  test('the names of other settings in an explanation stand out, and read as plain words', async ({ page }) => {
+  test('the names of other settings in an explanation stand out, and read as plain words', async ({
+    page,
+  }) => {
     const dialog = await openProfile(page);
 
     await dialog.getByRole('button', { name: 'About Min Away' }).click();
@@ -79,7 +85,12 @@ test.describe('the "i" beside each profile setting explains what it is for', () 
     const style = await names.first().evaluate((element) => {
       const own = getComputedStyle(element);
       const around = getComputedStyle(element.parentElement as HTMLElement);
-      return { weight: own.fontWeight, colour: own.color, aroundWeight: around.fontWeight, aroundColour: around.color };
+      return {
+        weight: own.fontWeight,
+        colour: own.color,
+        aroundWeight: around.fontWeight,
+        aroundColour: around.color,
+      };
     });
     expect(Number(style.weight)).toBeGreaterThanOrEqual(700);
     expect(Number(style.aroundWeight)).toBeLessThan(600);
@@ -87,7 +98,9 @@ test.describe('the "i" beside each profile setting explains what it is for', () 
 
     // A screen reader hears the whole sentence, with no asterisks.
     const description = dialog.getByRole('spinbutton', { name: 'Min Away', exact: true });
-    await expect(description).toHaveAccessibleDescription(/once Max Visit is reached.*Only used when No Procrast is yes/);
+    await expect(description).toHaveAccessibleDescription(
+      /once Max Visit is reached.*Only used when No Procrast is yes/,
+    );
     await expect(description).not.toHaveAccessibleDescription(/\*/);
   });
 
@@ -101,7 +114,9 @@ test.describe('the "i" beside each profile setting explains what it is for', () 
     await expect(dialog.getByText(/so other people see them later/)).toBeHidden();
   });
 
-  test('only one explanation shows at a time, and a click anywhere else hides it', async ({ page }) => {
+  test('only one explanation shows at a time, and a click anywhere else hides it', async ({
+    page,
+  }) => {
     const dialog = await openProfile(page);
     const delay = dialog.getByText(/so other people see them later/);
     const showDead = dialog.getByText(/Dead stories and comments/);
@@ -113,7 +128,10 @@ test.describe('the "i" beside each profile setting explains what it is for', () 
     await dialog.getByRole('button', { name: 'About Show Dead' }).click();
     await expect(showDead).toBeVisible();
     await expect(delay).toBeHidden();
-    await expect(dialog.getByRole('button', { name: 'About Delay' })).toHaveAttribute('aria-expanded', 'false');
+    await expect(dialog.getByRole('button', { name: 'About Delay' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
 
     // Clicking inside the explanation keeps it; clicking elsewhere in the dialog hides it.
     await showDead.click();
@@ -122,7 +140,9 @@ test.describe('the "i" beside each profile setting explains what it is for', () 
     await expect(showDead).toBeHidden();
   });
 
-  test('an open explanation is not still open when the dialog is opened again', async ({ page }) => {
+  test('an open explanation is not still open when the dialog is opened again', async ({
+    page,
+  }) => {
     const dialog = await openProfile(page);
     await dialog.getByRole('button', { name: 'About Delay' }).click();
     await expect(dialog.getByText(/so other people see them later/)).toBeVisible();
@@ -131,7 +151,10 @@ test.describe('the "i" beside each profile setting explains what it is for', () 
 
     await page.getByRole('link', { name: /^Profile for / }).click();
     const reopened = page.getByRole('dialog', { name: 'Profile' });
-    await expect(reopened.getByRole('button', { name: 'About Delay' })).toHaveAttribute('aria-expanded', 'false');
+    await expect(reopened.getByRole('button', { name: 'About Delay' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
   });
 
   test.describe('on a phone', () => {
@@ -145,7 +168,9 @@ test.describe('the "i" beside each profile setting explains what it is for', () 
       const box = await dialog.boundingBox();
       expect(text!.x).toBeGreaterThanOrEqual(box!.x);
       expect(text!.x + text!.width).toBeLessThanOrEqual(box!.x + box!.width);
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
       expect(overflow).toBeLessThanOrEqual(0);
     });
   });

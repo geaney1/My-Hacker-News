@@ -1,5 +1,14 @@
 import { isPlatformBrowser } from '@angular/common';
-import { computed, DOCUMENT, effect, inject, PLATFORM_ID, Service, signal, untracked } from '@angular/core';
+import {
+  computed,
+  DOCUMENT,
+  effect,
+  inject,
+  PLATFORM_ID,
+  Service,
+  signal,
+  untracked,
+} from '@angular/core';
 import { AuthStore } from '../auth/auth.store';
 import { ProfileStore } from './profile.store';
 
@@ -91,8 +100,13 @@ export class VisitLimitStore {
 
   private read(username: string): Visit {
     try {
-      const stored = JSON.parse(this.storage?.getItem(this.key(username)) ?? 'null') as Visit | null;
-      if (stored && [stored.visitStart, stored.lastSeen, stored.lockedUntil].every(Number.isFinite)) {
+      const stored = JSON.parse(
+        this.storage?.getItem(this.key(username)) ?? 'null',
+      ) as Visit | null;
+      if (
+        stored &&
+        [stored.visitStart, stored.lastSeen, stored.lockedUntil].every(Number.isFinite)
+      ) {
         return stored;
       }
     } catch {

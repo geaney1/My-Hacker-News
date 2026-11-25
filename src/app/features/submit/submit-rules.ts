@@ -11,7 +11,9 @@ export const maxUrlLength = 2000;
 export function isWebAddress(value: string) {
   try {
     const address = new URL(value.trim());
-    return (address.protocol === 'http:' || address.protocol === 'https:') && address.hostname !== '';
+    return (
+      (address.protocol === 'http:' || address.protocol === 'https:') && address.hostname !== ''
+    );
   } catch {
     return false;
   }

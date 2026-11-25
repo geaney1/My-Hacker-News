@@ -29,7 +29,9 @@ test.describe('accounts', () => {
     await page.getByLabel('Password', { exact: true }).fill('not-the-password');
     await page.getByRole('button', { name: 'Log in', exact: true }).click();
 
-    await expect(page.getByRole('alert').filter({ hasText: 'Incorrect username or password' })).toBeVisible();
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'Incorrect username or password' }),
+    ).toBeVisible();
     await expect(page.getByRole('button', { name: 'Log Out' })).toBeHidden();
   });
 
@@ -45,7 +47,9 @@ test.describe('accounts', () => {
     await expect(page.getByText('That username is already taken')).toBeVisible();
   });
 
-  test('a page that needs a login sends a visitor to log in, and then back to it', async ({ page }) => {
+  test('a page that needs a login sends a visitor to log in, and then back to it', async ({
+    page,
+  }) => {
     const username = uniqueName('eve');
     await createUser(page, username);
     await page.goto('/submit');
@@ -56,7 +60,9 @@ test.describe('accounts', () => {
     await expect(page.getByRole('dialog', { name: 'Submit a story' })).toBeVisible();
   });
 
-  test('the log-in dialog opens over the stories, and closing it goes back to them', async ({ page }) => {
+  test('the log-in dialog opens over the stories, and closing it goes back to them', async ({
+    page,
+  }) => {
     await page.goto('/top');
     await page.getByRole('link', { name: 'Log In' }).click();
 
@@ -78,7 +84,10 @@ test.describe('accounts', () => {
     await expect(page).toHaveURL(/\/user-profile/);
 
     // The profile dialog is open over the page: close it, then log out.
-    await page.getByRole('dialog', { name: 'Profile' }).getByRole('link', { name: 'Close' }).click();
+    await page
+      .getByRole('dialog', { name: 'Profile' })
+      .getByRole('link', { name: 'Close' })
+      .click();
     await page.getByRole('button', { name: 'Log Out' }).click();
     await page.goto('/log-in');
     await page.getByLabel('Username').fill(username);

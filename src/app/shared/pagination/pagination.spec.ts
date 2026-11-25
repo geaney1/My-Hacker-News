@@ -14,12 +14,18 @@ describe('Pagination', () => {
   }
 
   const element = () => fixture.nativeElement as HTMLElement;
-  const pageButtons = () => Array.from(element().querySelectorAll<HTMLButtonElement>('button.page'));
+  const pageButtons = () =>
+    Array.from(element().querySelectorAll<HTMLButtonElement>('button.page'));
   const arrow = (label: string) =>
-    element().querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`) as HTMLButtonElement;
-  const goInput = () => element().querySelector<HTMLInputElement>('#go-to-page') as HTMLInputElement;
+    element().querySelector<HTMLButtonElement>(
+      `button[aria-label="${label}"]`,
+    ) as HTMLButtonElement;
+  const goInput = () =>
+    element().querySelector<HTMLInputElement>('#go-to-page') as HTMLInputElement;
   const goButton = () =>
-    element().querySelector<HTMLButtonElement>('form.go-to button[type="submit"]') as HTMLButtonElement;
+    element().querySelector<HTMLButtonElement>(
+      'form.go-to button[type="submit"]',
+    ) as HTMLButtonElement;
   const goError = () => element().querySelector('.go-to-error')?.textContent?.trim();
 
   /** The page list as the user reads it, e.g. "1 … 3 4 5 … 25". */
@@ -35,7 +41,9 @@ describe('Pagination', () => {
   }
 
   async function submitGoTo() {
-    element().querySelector('form.go-to')?.dispatchEvent(new Event('submit', { cancelable: true }));
+    element()
+      .querySelector('form.go-to')
+      ?.dispatchEvent(new Event('submit', { cancelable: true }));
     await fixture.whenStable();
   }
 
@@ -80,7 +88,9 @@ describe('Pagination', () => {
 
     it('marks the current page for assistive technology', async () => {
       await render(4, 25);
-      const current = pageButtons().filter((button) => button.getAttribute('aria-current') === 'page');
+      const current = pageButtons().filter(
+        (button) => button.getAttribute('aria-current') === 'page',
+      );
       expect(current.map((button) => button.textContent?.trim())).toEqual(['4']);
       expect(pageButtons()[0].getAttribute('aria-label')).toBe('Page 1');
     });

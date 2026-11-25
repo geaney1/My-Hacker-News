@@ -33,9 +33,18 @@
       <div class="setting">
         <div class="label-row">
           <label for="about">About You</label>
-          <app-info-tip label="About You" text="Tell people a little about yourself. This is shown on your public profile page." tipId="about-info" />
+          <app-info-tip
+            label="About You"
+            text="Tell people a little about yourself. This is shown on your public profile page."
+            tipId="about-info"
+          />
         </div>
-        <textarea id="about" rows="4" aria-describedby="about-info" [formField]="userProfileForm.about"></textarea>
+        <textarea
+          id="about"
+          rows="4"
+          aria-describedby="about-info"
+          [formField]="userProfileForm.about"
+        ></textarea>
       </div>
 
       <app-form-text-field
@@ -54,9 +63,17 @@
         <div class="setting">
           <div class="label-row">
             <label for="showdead">Show Dead</label>
-            <app-info-tip label="Show Dead" text="Dead stories and comments are ones Hacker News has hidden, for example because they were flagged. Choose yes to see them too." tipId="showdead-info" />
+            <app-info-tip
+              label="Show Dead"
+              text="Dead stories and comments are ones Hacker News has hidden, for example because they were flagged. Choose yes to see them too."
+              tipId="showdead-info"
+            />
           </div>
-          <select id="showdead" aria-describedby="showdead-info" [formField]="userProfileForm.showdead">
+          <select
+            id="showdead"
+            aria-describedby="showdead-info"
+            [formField]="userProfileForm.showdead"
+          >
             @for (option of yesNoOptions; track option) {
               <option [value]="option">{{ option }}</option>
             }
@@ -66,9 +83,17 @@
         <div class="setting">
           <div class="label-row">
             <label for="noprocrast">No Procrast</label>
-            <app-info-tip label="No Procrast" text="Helps you spend less time here. Choose yes and, once a visit lasts **Max Visit** minutes, you are locked out for **Min Away** minutes." tipId="noprocrast-info" />
+            <app-info-tip
+              label="No Procrast"
+              text="Helps you spend less time here. Choose yes and, once a visit lasts **Max Visit** minutes, you are locked out for **Min Away** minutes."
+              tipId="noprocrast-info"
+            />
           </div>
-          <select id="noprocrast" aria-describedby="noprocrast-info" [formField]="userProfileForm.noprocrast">
+          <select
+            id="noprocrast"
+            aria-describedby="noprocrast-info"
+            [formField]="userProfileForm.noprocrast"
+          >
             @for (option of yesNoOptions; track option) {
               <option [value]="option">{{ option }}</option>
             }
@@ -106,15 +131,12 @@
     }
 
     <div class="actions">
-      <button
-        type="submit"
-        class="button button-solid"
-        [disabled]="profileStore.isLoading()"
-      >
+      <button type="submit" class="button button-solid" [disabled]="profileStore.isLoading()">
         Update
       </button>
       <button type="button" class="button button-outline" (click)="themeStore.toggle()">
-        <span class="visually-hidden">Switch to </span>{{ themeStore.isDark() ? 'Light theme' : 'Dark theme' }}
+        <span class="visually-hidden">Switch to </span
+        >{{ themeStore.isDark() ? 'Light theme' : 'Dark theme' }}
       </button>
       <a class="button button-outline" routerLink="/change-password">Change password</a>
     </div>

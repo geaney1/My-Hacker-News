@@ -5,14 +5,20 @@ import { saveProfile, createUserAndLogIn, submitStory, uniqueName } from './help
 // would: change the setting, press Update, and look at the app.
 
 test.describe('Show Dead', () => {
-  test('hides dead stories and comments until it is turned on, then marks them [dead]', async ({ page }) => {
+  test('hides dead stories and comments until it is turned on, then marks them [dead]', async ({
+    page,
+  }) => {
     const username = uniqueName('dead');
     await createUserAndLogIn(page, username);
 
     // Off by default: the dead story and the dead comment are left out.
     await page.getByRole('link', { name: 'New', exact: true }).click();
-    await expect(page.locator('article.story', { hasText: 'Fresh Hacker News story' })).toBeVisible();
-    await expect(page.locator('article.story', { hasText: 'A dead Hacker News story' })).toHaveCount(0);
+    await expect(
+      page.locator('article.story', { hasText: 'Fresh Hacker News story' }),
+    ).toBeVisible();
+    await expect(
+      page.locator('article.story', { hasText: 'A dead Hacker News story' }),
+    ).toHaveCount(0);
     await page.goto('/item/101');
     await expect(page.getByText('A comment from Hacker News')).toBeVisible();
     await expect(page.getByText('A dead comment')).toHaveCount(0);
@@ -23,7 +29,9 @@ test.describe('Show Dead', () => {
     const deadStory = page.locator('article.story', { hasText: 'A dead Hacker News story' });
     await expect(deadStory).toBeVisible();
     await expect(deadStory.locator('.dead')).toHaveText('[dead]');
-    await expect(page.locator('article.story', { hasText: 'Fresh Hacker News story' }).locator('.dead')).toHaveCount(0);
+    await expect(
+      page.locator('article.story', { hasText: 'Fresh Hacker News story' }).locator('.dead'),
+    ).toHaveCount(0);
 
     await page.goto('/item/101');
     const deadComment = page.locator('app-story-comment', { hasText: 'A dead comment' });
@@ -33,31 +41,50 @@ test.describe('Show Dead', () => {
     // Off again: gone again.
     await page.goto('/new');
     await saveProfile(page, username, { showDead: 'no' });
-    await expect(page.locator('article.story', { hasText: 'A dead Hacker News story' })).toHaveCount(0);
+    await expect(
+      page.locator('article.story', { hasText: 'A dead Hacker News story' }),
+    ).toHaveCount(0);
   });
 
-  test('is per person: someone who has not turned it on still does not see dead things', async ({ page, browser }) => {
+  test('is per person: someone who has not turned it on still does not see dead things', async ({
+    page,
+    browser,
+  }) => {
     const username = uniqueName('dead');
     await createUserAndLogIn(page, username);
     await saveProfile(page, username, { showDead: 'yes' });
 
     const other = await (await browser.newContext()).newPage();
     await other.goto('/new');
-    await expect(other.locator('article.story', { hasText: 'Fresh Hacker News story' })).toBeVisible();
-    await expect(other.locator('article.story', { hasText: 'A dead Hacker News story' })).toHaveCount(0);
+    await expect(
+      other.locator('article.story', { hasText: 'Fresh Hacker News story' }),
+    ).toBeVisible();
+    await expect(
+      other.locator('article.story', { hasText: 'A dead Hacker News story' }),
+    ).toHaveCount(0);
     await other.context().close();
   });
 });
 
 test.describe('No Procrast, Max Visit and Min Away', () => {
   /** Makes it look as if the visit began `minutes` minutes ago, in this browser. */
-  const startedMinutesAgo = (page: import('@playwright/test').Page, username: string, minutes: number) =>
+  const startedMinutesAgo = (
+    page: import('@playwright/test').Page,
+    username: string,
+    minutes: number,
+  ) =>
     page.evaluate(
-      ([key, started]) => localStorage.setItem(key, JSON.stringify({ visitStart: started, lastSeen: Date.now(), lockedUntil: 0 })),
+      ([key, started]) =>
+        localStorage.setItem(
+          key,
+          JSON.stringify({ visitStart: started, lastSeen: Date.now(), lockedUntil: 0 }),
+        ),
       [`hacker-news.visit.${username.toLowerCase()}`, Date.now() - minutes * 60_000] as const,
     );
 
-  test('shuts the user out once a visit has lasted Max Visit minutes, for Min Away minutes', async ({ page }) => {
+  test('shuts the user out once a visit has lasted Max Visit minutes, for Min Away minutes', async ({
+    page,
+  }) => {
     const username = uniqueName('proc');
     await createUserAndLogIn(page, username);
     await saveProfile(page, username, { noProcrast: 'yes', maxVisit: 1, minAway: 10 });
@@ -77,7 +104,9 @@ test.describe('No Procrast, Max Visit and Min Away', () => {
     await expect(page.locator('article.story')).toHaveCount(0);
   });
 
-  test('stays shut across a reload, and the profile can still be opened to turn it off', async ({ page }) => {
+  test('stays shut across a reload, and the profile can still be opened to turn it off', async ({
+    page,
+  }) => {
     const username = uniqueName('proc');
     await createUserAndLogIn(page, username);
     await saveProfile(page, username, { noProcrast: 'yes', maxVisit: 1, minAway: 10 });
@@ -119,7 +148,15 @@ test.describe('No Procrast, Max Visit and Min Away', () => {
 
     // The lock ended a minute ago.
     await page.evaluate(
-      (key) => localStorage.setItem(key, JSON.stringify({ visitStart: 0, lastSeen: Date.now() - 11 * 60_000, lockedUntil: Date.now() - 60_000 })),
+      (key) =>
+        localStorage.setItem(
+          key,
+          JSON.stringify({
+            visitStart: 0,
+            lastSeen: Date.now() - 11 * 60_000,
+            lockedUntil: Date.now() - 60_000,
+          }),
+        ),
       `hacker-news.visit.${username.toLowerCase()}`,
     );
     await page.reload();
@@ -129,13 +166,19 @@ test.describe('No Procrast, Max Visit and Min Away', () => {
 });
 
 test.describe('Delay', () => {
-  test('holds back new comments from other people for that many seconds, but not from the writer', async ({ page, browser }) => {
+  test('holds back new comments from other people for that many seconds, but not from the writer', async ({
+    page,
+    browser,
+  }) => {
     const author = uniqueName('late');
     const title = `Story for delay ${uniqueName('t')}`;
     await createUserAndLogIn(page, author);
     await submitStory(page, { title, link: 'https://example.com/delay' });
     await page.getByRole('link', { name: 'New', exact: true }).click();
-    await page.locator('article.story', { hasText: title }).getByRole('link', { name: '0 comments' }).click();
+    await page
+      .locator('article.story', { hasText: title })
+      .getByRole('link', { name: '0 comments' })
+      .click();
     await expect(page).toHaveURL(/\/item\/\d+$/);
     const storyUrl = page.url();
 
@@ -170,12 +213,17 @@ test.describe('Delay', () => {
 });
 
 test.describe('About You and Email', () => {
-  test('About is shown on the public profile page, and the email never is', async ({ page, browser }) => {
+  test('About is shown on the public profile page, and the email never is', async ({
+    page,
+    browser,
+  }) => {
     const username = uniqueName('abt');
     await createUserAndLogIn(page, username);
     await page.getByRole('link', { name: `Profile for ${username}` }).click();
     const dialog = page.getByRole('dialog', { name: 'Profile' });
-    await dialog.getByRole('textbox', { name: 'About You', exact: true }).fill('I like testing the profile');
+    await dialog
+      .getByRole('textbox', { name: 'About You', exact: true })
+      .fill('I like testing the profile');
     await dialog.getByLabel('Email', { exact: true }).fill('secret-address@example.com');
     await dialog.getByRole('button', { name: 'Update' }).click();
     await expect(dialog).toBeHidden();

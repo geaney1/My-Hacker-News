@@ -24,22 +24,30 @@ describe('mergeByTime', () => {
 
     it('puts a story among the ones of the same age, not on top', async () => {
       const { timeOf } = timesOf(times);
-      expect(await mergeByTime(ids, [{ id: 900, time: 85 }], 'newest-first', timeOf)).toEqual([1, 2, 900, 3, 4, 5]);
+      expect(await mergeByTime(ids, [{ id: 900, time: 85 }], 'newest-first', timeOf)).toEqual([
+        1, 2, 900, 3, 4, 5,
+      ]);
     });
 
     it('puts a story newer than everything first', async () => {
       const { timeOf } = timesOf(times);
-      expect(await mergeByTime(ids, [{ id: 900, time: 500 }], 'newest-first', timeOf)).toEqual([900, 1, 2, 3, 4, 5]);
+      expect(await mergeByTime(ids, [{ id: 900, time: 500 }], 'newest-first', timeOf)).toEqual([
+        900, 1, 2, 3, 4, 5,
+      ]);
     });
 
     it('puts a story older than everything last', async () => {
       const { timeOf } = timesOf(times);
-      expect(await mergeByTime(ids, [{ id: 900, time: 1 }], 'newest-first', timeOf)).toEqual([1, 2, 3, 4, 5, 900]);
+      expect(await mergeByTime(ids, [{ id: 900, time: 1 }], 'newest-first', timeOf)).toEqual([
+        1, 2, 3, 4, 5, 900,
+      ]);
     });
 
     it('puts a story first of those made at the same moment', async () => {
       const { timeOf } = timesOf(times);
-      expect(await mergeByTime(ids, [{ id: 900, time: 80 }], 'newest-first', timeOf)).toEqual([1, 2, 900, 3, 4, 5]);
+      expect(await mergeByTime(ids, [{ id: 900, time: 80 }], 'newest-first', timeOf)).toEqual([
+        1, 2, 900, 3, 4, 5,
+      ]);
     });
 
     it('spreads several stories out by their times, keeping their own order', async () => {
@@ -50,7 +58,9 @@ describe('mergeByTime', () => {
         { id: 903, time: 84 },
         { id: 904, time: 10 },
       ];
-      expect(await mergeByTime(ids, local, 'newest-first', timeOf)).toEqual([1, 901, 2, 902, 903, 3, 4, 5, 904]);
+      expect(await mergeByTime(ids, local, 'newest-first', timeOf)).toEqual([
+        1, 901, 2, 902, 903, 3, 4, 5, 904,
+      ]);
     });
 
     it('does not depend on the order the stories are given in', async () => {
@@ -61,12 +71,24 @@ describe('mergeByTime', () => {
         { id: 903, time: 84 },
         { id: 902, time: 85 },
       ];
-      expect(await mergeByTime(ids, local, 'newest-first', timeOf)).toEqual([1, 901, 2, 902, 903, 3, 4, 5, 904]);
+      expect(await mergeByTime(ids, local, 'newest-first', timeOf)).toEqual([
+        1, 901, 2, 902, 903, 3, 4, 5, 904,
+      ]);
     });
 
     it('works with an empty Hacker News list', async () => {
       const { timeOf } = timesOf({});
-      expect(await mergeByTime([], [{ id: 900, time: 1 }, { id: 901, time: 2 }], 'newest-first', timeOf)).toEqual([901, 900]);
+      expect(
+        await mergeByTime(
+          [],
+          [
+            { id: 900, time: 1 },
+            { id: 901, time: 2 },
+          ],
+          'newest-first',
+          timeOf,
+        ),
+      ).toEqual([901, 900]);
     });
 
     it('does not change the list it was given', async () => {
@@ -88,7 +110,9 @@ describe('mergeByTime', () => {
 
     it('steps past a story with no time, such as a deleted one, to judge the position', async () => {
       const { timeOf } = timesOf({ 1: 100, 2: undefined, 3: 80, 4: 70, 5: 60 });
-      expect(await mergeByTime(ids, [{ id: 900, time: 75 }], 'newest-first', timeOf)).toEqual([1, 2, 3, 900, 4, 5]);
+      expect(await mergeByTime(ids, [{ id: 900, time: 75 }], 'newest-first', timeOf)).toEqual([
+        1, 2, 3, 900, 4, 5,
+      ]);
     });
   });
 
@@ -99,23 +123,34 @@ describe('mergeByTime', () => {
 
     it('puts a question before the first story that is older than it', async () => {
       const { timeOf } = timesOf(times);
-      expect(await mergeByTime(ids, [{ id: 900, time: 60 }], 'ranked', timeOf)).toEqual([900, 1, 2, 3, 4]);
-      expect(await mergeByTime(ids, [{ id: 900, time: 40 }], 'ranked', timeOf)).toEqual([1, 2, 900, 3, 4]);
+      expect(await mergeByTime(ids, [{ id: 900, time: 60 }], 'ranked', timeOf)).toEqual([
+        900, 1, 2, 3, 4,
+      ]);
+      expect(await mergeByTime(ids, [{ id: 900, time: 40 }], 'ranked', timeOf)).toEqual([
+        1, 2, 900, 3, 4,
+      ]);
     });
 
     it('puts a question older than everything last', async () => {
       const { timeOf } = timesOf(times);
-      expect(await mergeByTime(ids, [{ id: 900, time: 5 }], 'ranked', timeOf)).toEqual([1, 2, 3, 4, 900]);
+      expect(await mergeByTime(ids, [{ id: 900, time: 5 }], 'ranked', timeOf)).toEqual([
+        1, 2, 3, 4, 900,
+      ]);
     });
 
     it('puts a question newer than everything first', async () => {
       const { timeOf } = timesOf(times);
-      expect(await mergeByTime(ids, [{ id: 900, time: 500 }], 'ranked', timeOf)).toEqual([900, 1, 2, 3, 4]);
+      expect(await mergeByTime(ids, [{ id: 900, time: 500 }], 'ranked', timeOf)).toEqual([
+        900, 1, 2, 3, 4,
+      ]);
     });
 
     it('keeps questions submitted here in their own order, newest first', async () => {
       const { timeOf } = timesOf(times);
-      const local = [{ id: 901, time: 15 }, { id: 902, time: 45 }];
+      const local = [
+        { id: 901, time: 15 },
+        { id: 902, time: 45 },
+      ];
       expect(await mergeByTime(ids, local, 'ranked', timeOf)).toEqual([1, 2, 902, 3, 4, 901]);
     });
   });

@@ -22,7 +22,11 @@ test.describe('closing a dialog does not make it jump', () => {
 
   test('pressing the Close icon leaves the card as it was, and closes it', async ({ page }) => {
     const icon = (await page.getByRole('link', { name: 'Close' }).boundingBox())!;
-    const { before, during, errors } = await cardWhilePressing(page, icon.x + icon.width / 2, icon.y + icon.height / 2);
+    const { before, during, errors } = await cardWhilePressing(
+      page,
+      icon.x + icon.width / 2,
+      icon.y + icon.height / 2,
+    );
     expect(during.height).toBe(before.height);
     expect(during.y).toBe(before.y);
     expect(errors).toBe(0);
@@ -41,7 +45,9 @@ test.describe('closing a dialog does not make it jump', () => {
     await expect(page.getByRole('dialog')).toBeHidden();
   });
 
-  test('leaving an empty field for another part of the form still says what is wanted', async ({ page }) => {
+  test('leaving an empty field for another part of the form still says what is wanted', async ({
+    page,
+  }) => {
     await page.getByLabel('Link').click();
     await expect(page.getByText('A title is required')).toBeVisible();
   });

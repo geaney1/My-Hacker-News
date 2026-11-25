@@ -20,7 +20,9 @@ describe('ProfileStore', () => {
   let store: ProfileStore;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
     http = TestBed.inject(HttpTestingController);
     store = TestBed.inject(ProfileStore);
   });

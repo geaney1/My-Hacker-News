@@ -25,7 +25,8 @@ describe('addCspNonce', () => {
   const nonce = 'abc123';
 
   it('puts the nonce on inline scripts and styles', () => {
-    const html = '<head><style ng-app-id="ng">a{}</style></head><body><script type="text/javascript" id="x">1</script></body>';
+    const html =
+      '<head><style ng-app-id="ng">a{}</style></head><body><script type="text/javascript" id="x">1</script></body>';
     expect(addCspNonce(html, nonce)).toBe(
       '<head><style nonce="abc123" ng-app-id="ng">a{}</style></head><body><script nonce="abc123" type="text/javascript" id="x">1</script></body>',
     );
@@ -38,7 +39,9 @@ describe('addCspNonce', () => {
   });
 
   it('puts the nonce on the Angular root, for the styles Angular adds later', () => {
-    expect(addCspNonce('<app-root></app-root>', nonce)).toBe('<app-root ngCspNonce="abc123"></app-root>');
+    expect(addCspNonce('<app-root></app-root>', nonce)).toBe(
+      '<app-root ngCspNonce="abc123"></app-root>',
+    );
   });
 
   it('leaves a tag that has a nonce, and the root that has one, alone', () => {
@@ -47,7 +50,8 @@ describe('addCspNonce', () => {
   });
 
   it('does not touch other tags, nor words that only start like them', () => {
-    const html = '<scripted></scripted><styled></styled><app-root-other></app-root-other><p>script style</p>';
+    const html =
+      '<scripted></scripted><styled></styled><app-root-other></app-root-other><p>script style</p>';
     expect(addCspNonce(html, nonce)).toBe(html);
   });
 
@@ -62,7 +66,11 @@ describe('withCspNonce', () => {
   it('adds the nonce to an HTML response, keeping its status and headers but not its length', async () => {
     const response = new Response('<app-root></app-root>', {
       status: 404,
-      headers: { 'content-type': 'text/html; charset=utf-8', 'content-length': '21', 'x-keep': 'yes' },
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+        'content-length': '21',
+        'x-keep': 'yes',
+      },
     });
     const result = await withCspNonce(response, 'n1');
     expect(await result.text()).toBe('<app-root ngCspNonce="n1"></app-root>');
@@ -72,7 +80,9 @@ describe('withCspNonce', () => {
   });
 
   it('passes anything that is not HTML on as it is', async () => {
-    const response = new Response('{"a":"<script>"}', { headers: { 'content-type': 'application/json' } });
+    const response = new Response('{"a":"<script>"}', {
+      headers: { 'content-type': 'application/json' },
+    });
     expect(await withCspNonce(response, 'n1')).toBe(response);
   });
 
@@ -114,7 +124,7 @@ describe('securityHeaders', () => {
     return { response, directives, nonce: ((await response.json()) as { nonce: string }).nonce };
   };
 
-  it('only lets the page run its own scripts and the ones with this request\'s nonce', async () => {
+  it("only lets the page run its own scripts and the ones with this request's nonce", async () => {
     const { directives, nonce } = await policyOf();
     expect(directives['script-src']).toEqual(["'self'", `'nonce-${nonce}'`]);
     expect(directives['script-src']).not.toContain("'unsafe-inline'");

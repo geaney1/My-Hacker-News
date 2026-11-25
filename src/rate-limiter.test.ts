@@ -17,7 +17,13 @@ describe('createRateLimiter', () => {
 
   it('allows attempts up to the limit, then refuses', () => {
     const limiter = createRateLimiter({ maxAttempts: 3, windowMilliseconds: 60_000 });
-    expect([1, 2, 3, 4, 5].map(() => limiter.isLimited('a'))).toEqual([false, false, false, true, true]);
+    expect([1, 2, 3, 4, 5].map(() => limiter.isLimited('a'))).toEqual([
+      false,
+      false,
+      false,
+      true,
+      true,
+    ]);
   });
 
   it('counts each key on its own', () => {

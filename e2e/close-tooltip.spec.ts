@@ -1,12 +1,15 @@
 import { expect, test } from '@playwright/test';
 
-test('the close icon of a dialog shows a "Close" tooltip on hover and on keyboard focus', async ({ page }) => {
+test('the close icon of a dialog shows a "Close" tooltip on hover and on keyboard focus', async ({
+  page,
+}) => {
   await page.goto('/create-user');
   const close = page.getByRole('link', { name: 'Close' });
-  const tooltip = () => close.evaluate((element) => {
-    const style = getComputedStyle(element, '::after');
-    return { text: style.content, opacity: style.opacity };
-  });
+  const tooltip = () =>
+    close.evaluate((element) => {
+      const style = getComputedStyle(element, '::after');
+      return { text: style.content, opacity: style.opacity };
+    });
 
   await expect.poll(async () => (await tooltip()).opacity).toBe('0');
   expect((await tooltip()).text).toBe('"Close"');

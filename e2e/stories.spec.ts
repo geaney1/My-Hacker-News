@@ -2,7 +2,9 @@ import { expect, test } from '@playwright/test';
 import { storyTitles } from './helpers';
 
 test.describe('reading the story lists', () => {
-  test('the top list shows the stories, and a title opens the article in a new tab', async ({ page }) => {
+  test('the top list shows the stories, and a title opens the article in a new tab', async ({
+    page,
+  }) => {
     await page.goto('/top');
     await expect(storyTitles(page)).toHaveText([/Fake top story/, /Second fake top story/]);
 
@@ -11,7 +13,9 @@ test.describe('reading the story lists', () => {
     await expect(link).toHaveAttribute('target', '_blank');
   });
 
-  test('choosing another list in the side menu shows its stories, and marks it as the current one', async ({ page }) => {
+  test('choosing another list in the side menu shows its stories, and marks it as the current one', async ({
+    page,
+  }) => {
     await page.goto('/top');
     await page.getByRole('link', { name: 'New', exact: true }).click();
 
@@ -19,10 +23,15 @@ test.describe('reading the story lists', () => {
     // Stories submitted in the app are placed among these by time, so only the ends are certain.
     await expect(storyTitles(page).first()).toContainText('Fresh Hacker News story');
     await expect(storyTitles(page).last()).toContainText('Older Hacker News story');
-    await expect(page.getByRole('link', { name: 'New', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByRole('link', { name: 'New', exact: true })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
   });
 
-  test('the comments link opens the story\'s page in this app, with its comments', async ({ page }) => {
+  test("the comments link opens the story's page in this app, with its comments", async ({
+    page,
+  }) => {
     await page.goto('/top');
     await page.getByRole('link', { name: /1 comments/ }).click();
 
@@ -40,7 +49,9 @@ test.describe('reading the story lists', () => {
     await expect(page.getByText('What do you think?')).toBeVisible();
   });
 
-  test('an author links to their page, which shows what Hacker News has on them', async ({ page }) => {
+  test('an author links to their page, which shows what Hacker News has on them', async ({
+    page,
+  }) => {
     await page.goto('/top');
     await page.getByRole('link', { name: 'hnauthor' }).first().click();
 

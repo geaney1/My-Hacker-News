@@ -4,7 +4,9 @@ import { createUserAndLogIn, uniqueName } from './helpers';
 /** The card's edges, the columns the paragraphs sit in, and any sideways scrolling. */
 async function measure(page: Page) {
   return page.getByRole('article').evaluate((article) => {
-    const paragraphs = Array.from(article.querySelectorAll('p')).flatMap((paragraph) => Array.from(paragraph.getClientRects()));
+    const paragraphs = Array.from(article.querySelectorAll('p')).flatMap((paragraph) =>
+      Array.from(paragraph.getClientRects()),
+    );
     const card = article.getBoundingClientRect();
     return {
       columns: new Set(paragraphs.map((box) => Math.round(box.left))).size,
@@ -24,7 +26,10 @@ for (const theme of ['light', 'dark'] as const) {
     { width: 320, height: 640 },
   ]) {
     test(`the welcome page suits a ${width} px wide screen, ${theme} theme`, async ({ page }) => {
-      await page.addInitScript((chosen) => localStorage.setItem('hacker-news.theme', chosen), theme);
+      await page.addInitScript(
+        (chosen) => localStorage.setItem('hacker-news.theme', chosen),
+        theme,
+      );
       await page.setViewportSize({ width, height });
       await createUserAndLogIn(page, uniqueName('wlay'));
       await page.goto('/top');

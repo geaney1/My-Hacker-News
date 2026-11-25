@@ -14,7 +14,11 @@ describe('Dashboard', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       // The same router features as the real app, so route parameters reach the pages' inputs.
-      providers: [provideRouter(routes, withComponentInputBinding()), provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideRouter(routes, withComponentInputBinding()),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     });
     router = TestBed.inject(Router);
     fixture = TestBed.createComponent(App);
@@ -32,9 +36,13 @@ describe('Dashboard', () => {
 
   const page = () => fixture.nativeElement as HTMLElement;
   const highlighted = () =>
-    Array.from(page().querySelectorAll('app-side-menu a.tab.active')).map((link) => link.textContent?.trim());
+    Array.from(page().querySelectorAll('app-side-menu a.tab.active')).map((link) =>
+      link.textContent?.trim(),
+    );
   const tabs = () =>
-    Array.from(page().querySelectorAll('app-side-menu a.tab')).map((link) => link.textContent?.trim());
+    Array.from(page().querySelectorAll('app-side-menu a.tab')).map((link) =>
+      link.textContent?.trim(),
+    );
 
   describe.each(['/log-in', '/create-user'])('on %s', (url) => {
     beforeEach(() => goTo(url));
@@ -65,7 +73,9 @@ describe('Dashboard', () => {
 
     it('shows the stories behind the dialog', () => {
       expect(page().querySelector('app-stories-page')).not.toBeNull();
-      expect(page().querySelector('app-stories-page .filters, app-stories-page .toolbar')).not.toBeNull();
+      expect(
+        page().querySelector('app-stories-page .filters, app-stories-page .toolbar'),
+      ).not.toBeNull();
     });
   });
 
@@ -96,7 +106,13 @@ describe('Dashboard', () => {
       await login;
       await goTo('/top');
       http.expectOne('/api/profile').flush({
-        about: '', email: 'anna@example.com', showdead: 'no', noprocrast: 'yes', maxvisit: 20, minaway: 180, delay: 0,
+        about: '',
+        email: 'anna@example.com',
+        showdead: 'no',
+        noprocrast: 'yes',
+        maxvisit: 20,
+        minaway: 180,
+        delay: 0,
       });
       await new Promise((resolve) => setTimeout(resolve));
       TestBed.tick();
@@ -133,7 +149,9 @@ describe('Dashboard', () => {
   describe('the Submit dialog', () => {
     async function logIn() {
       const login = TestBed.inject(AuthStore).logIn('Suin', 'correct-horse');
-      TestBed.inject(HttpTestingController).expectOne('/api/auth/login').flush({ username: 'Suin' });
+      TestBed.inject(HttpTestingController)
+        .expectOne('/api/auth/login')
+        .flush({ username: 'Suin' });
       await login;
     }
 

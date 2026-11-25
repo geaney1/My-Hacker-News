@@ -1,12 +1,23 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, TestRequest, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  TestRequest,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { HnItem } from '../../models/hn-item';
 import { StoriesStore } from './stories.store';
 
 /** Builds a story with the given id, using sensible defaults for everything else. */
 function story(id: number, overrides: Partial<HnItem> = {}): HnItem {
-  return { id, type: 'story', title: `Story ${id}`, by: `author${id}`, score: id * 10, ...overrides };
+  return {
+    id,
+    type: 'story',
+    title: `Story ${id}`,
+    by: `author${id}`,
+    score: id * 10,
+    ...overrides,
+  };
 }
 
 describe('StoriesStore', () => {
@@ -20,8 +31,7 @@ describe('StoriesStore', () => {
     TestBed.tick();
   }
 
-  const storyRequests = () =>
-    http.match((request) => request.url.startsWith('/api/stories/'));
+  const storyRequests = () => http.match((request) => request.url.startsWith('/api/stories/'));
 
   const pageOf = (request: TestRequest) => Number(request.request.params.get('page'));
 
@@ -39,7 +49,9 @@ describe('StoriesStore', () => {
       for (const request of storyRequests()) {
         const list = request.request.url.split('/').pop();
         // A copy, as a real response is parsed afresh each time.
-        request.flush(structuredClone(pages[`${list}:${pageOf(request)}`] ?? { total: 0, stories: [] }));
+        request.flush(
+          structuredClone(pages[`${list}:${pageOf(request)}`] ?? { total: 0, stories: [] }),
+        );
       }
       for (const request of http.match('/api/updates')) {
         request.flush({ items: changedIds, profiles: [] });
@@ -278,9 +290,9 @@ describe('StoriesStore', () => {
 
       vi.advanceTimersByTime(60_000);
       await settle();
-      http.match('/api/updates').forEach((request) =>
-        request.flush('down', { status: 500, statusText: 'Server Error' }),
-      );
+      http
+        .match('/api/updates')
+        .forEach((request) => request.flush('down', { status: 500, statusText: 'Server Error' }));
       await settle();
 
       expect(store.changedStoryCount()).toBe(0);

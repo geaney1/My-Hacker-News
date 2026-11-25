@@ -5,7 +5,11 @@ import { saveProfile, createUser, createUserAndLogIn, uniqueName } from './helpe
 async function getLockedOut(page: Page, username: string) {
   await saveProfile(page, username, { noProcrast: 'yes', maxVisit: 1, minAway: 10 });
   await page.evaluate(
-    ([key, started]) => localStorage.setItem(key, JSON.stringify({ visitStart: started, lastSeen: Date.now(), lockedUntil: 0 })),
+    ([key, started]) =>
+      localStorage.setItem(
+        key,
+        JSON.stringify({ visitStart: started, lastSeen: Date.now(), lockedUntil: 0 }),
+      ),
     [`hacker-news.visit.${username.toLowerCase()}`, Date.now() - 120_000] as const,
   );
   await page.reload();
@@ -24,7 +28,9 @@ async function measureBanner(page: Page, selector: string) {
       return 0.2126 * redLevel + 0.7152 * greenLevel + 0.0722 * blueLevel;
     };
     const ratio = (first: number[], second: number[]) => {
-      const [lighter, darker] = [luminance(first), luminance(second)].sort((left, right) => right - left);
+      const [lighter, darker] = [luminance(first), luminance(second)].sort(
+        (left, right) => right - left,
+      );
       return (lighter + 0.05) / (darker + 0.05);
     };
 
@@ -52,10 +58,15 @@ async function measureBanner(page: Page, selector: string) {
 for (const theme of ['light', 'dark'] as const) {
   test.describe(`banners, ${theme} theme`, () => {
     test.beforeEach(async ({ page }) => {
-      await page.addInitScript((chosen) => localStorage.setItem('hacker-news.theme', chosen), theme);
+      await page.addInitScript(
+        (chosen) => localStorage.setItem('hacker-news.theme', chosen),
+        theme,
+      );
     });
 
-    test('the break banner stands out from the page, and its words and icon can be read', async ({ page }) => {
+    test('the break banner stands out from the page, and its words and icon can be read', async ({
+      page,
+    }) => {
       const username = uniqueName('ban');
       await createUserAndLogIn(page, username);
       await getLockedOut(page, username);
@@ -73,7 +84,9 @@ for (const theme of ['light', 'dark'] as const) {
       expect(measured.fillOnPage).toBeGreaterThanOrEqual(1.15);
     });
 
-    test('is a banner, not a card: it has a heading, an icon and a button, and is announced', async ({ page }) => {
+    test('is a banner, not a card: it has a heading, an icon and a button, and is announced', async ({
+      page,
+    }) => {
       const username = uniqueName('ban');
       await createUserAndLogIn(page, username);
       await getLockedOut(page, username);
@@ -81,7 +94,9 @@ for (const theme of ['light', 'dark'] as const) {
       const banner = page.locator('app-banner.visit-limit');
       await expect(banner.getByRole('heading', { name: 'Time for a break' })).toBeVisible();
       await expect(banner.locator('svg.icon')).toBeVisible();
-      await expect(banner.getByRole('link', { name: 'Change your profile settings' })).toBeVisible();
+      await expect(
+        banner.getByRole('link', { name: 'Change your profile settings' }),
+      ).toBeVisible();
       await expect(banner.locator('[role="status"]')).toHaveCount(1);
     });
 
@@ -123,4 +138,3 @@ test.describe('the other notices are banners too', () => {
     await expect(page.getByRole('button', { name: '← Back' })).toBeVisible();
   });
 });
-

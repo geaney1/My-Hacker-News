@@ -50,7 +50,10 @@ export class SubmitStory {
     validate(schemaPath.url, ({ value }) =>
       value().trim() === '' || isWebAddress(value())
         ? undefined
-        : { kind: 'invalidUrl', message: 'Enter a full web address that starts with http:// or https://' },
+        : {
+            kind: 'invalidUrl',
+            message: 'Enter a full web address that starts with http:// or https://',
+          },
     );
     maxLength(schemaPath.url, maxUrlLength, {
       message: `A link can be at most ${maxUrlLength} characters`,

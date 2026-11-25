@@ -84,11 +84,14 @@ describe('profile routes', () => {
 
   it('keeps the profile on disk', async () => {
     await call('PUT', billy, valid);
-    const file = JSON.parse(readFileSync(join(directory, 'profiles.json'), 'utf8')) as Record<string, unknown>;
+    const file = JSON.parse(readFileSync(join(directory, 'profiles.json'), 'utf8')) as Record<
+      string,
+      unknown
+    >;
     expect(file['billy']).toEqual(valid);
   });
 
-  it('keeps each user\'s profile separate, and always saves to the session\'s user', async () => {
+  it("keeps each user's profile separate, and always saves to the session's user", async () => {
     await call('PUT', billy, { ...valid, email: 'billy@example.com' });
     await call('PUT', anna, { ...valid, email: 'anna@example.com', username: 'Billy' });
 
@@ -97,7 +100,11 @@ describe('profile routes', () => {
   });
 
   it('trims the email, and keeps only the known fields', async () => {
-    const result = await call('PUT', billy, { ...valid, email: '  trimmed@example.com  ', extra: 'x' });
+    const result = await call('PUT', billy, {
+      ...valid,
+      email: '  trimmed@example.com  ',
+      extra: 'x',
+    });
     expect(result.body?.['email']).toBe('trimmed@example.com');
     expect(result.body).not.toHaveProperty('extra');
   });
@@ -109,7 +116,9 @@ describe('profile routes', () => {
   });
 
   it('answers 415 when the body is not JSON', async () => {
-    expect((await call('PUT', billy, 'email=x', 'application/x-www-form-urlencoded')).status).toBe(415);
+    expect((await call('PUT', billy, 'email=x', 'application/x-www-form-urlencoded')).status).toBe(
+      415,
+    );
   });
 
   it.each([

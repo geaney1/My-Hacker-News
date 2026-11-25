@@ -99,7 +99,10 @@ export class HnApi {
   ) {
     return new Promise<StoryPage>((resolve, reject) => {
       const subscription = this.http
-        .get<StoryPage>(`/api/stories/${list}`, { params: { page, pageSize }, headers: this.serverHeaders() })
+        .get<StoryPage>(`/api/stories/${list}`, {
+          params: { page, pageSize },
+          headers: this.serverHeaders(),
+        })
         .subscribe({ next: resolve, error: reject });
 
       abortSignal?.addEventListener(

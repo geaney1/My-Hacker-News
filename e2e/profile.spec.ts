@@ -2,7 +2,9 @@ import { expect, test } from '@playwright/test';
 import { createUserAndLogIn, submitStory, uniqueName } from './helpers';
 
 test.describe('the profile', () => {
-  test('each label is above its control, and there is no box around a setting', async ({ page }) => {
+  test('each label is above its control, and there is no box around a setting', async ({
+    page,
+  }) => {
     const username = uniqueName('row');
     await createUserAndLogIn(page, username);
     await page.getByRole('link', { name: `Profile for ${username}` }).click();
@@ -40,11 +42,12 @@ test.describe('the profile', () => {
     expect(password!.x).toBeGreaterThan(theme!.x + theme!.width);
 
     // No card around a setting: nothing has a border or a background of its own.
-    const boxed = await dialog.locator('.setting').evaluateAll((rows) =>
-      rows.filter((row) => {
-        const style = getComputedStyle(row);
-        return style.borderTopWidth !== '0px' || style.backgroundColor !== 'rgba(0, 0, 0, 0)';
-      }).length,
+    const boxed = await dialog.locator('.setting').evaluateAll(
+      (rows) =>
+        rows.filter((row) => {
+          const style = getComputedStyle(row);
+          return style.borderTopWidth !== '0px' || style.backgroundColor !== 'rgba(0, 0, 0, 0)';
+        }).length,
     );
     expect(boxed).toBe(0);
   });
@@ -81,7 +84,9 @@ test.describe('the profile', () => {
     }
   });
 
-  test('opens as a dialog from the avatar, over the stories, and closes with the X', async ({ page }) => {
+  test('opens as a dialog from the avatar, over the stories, and closes with the X', async ({
+    page,
+  }) => {
     const username = uniqueName('olga');
     await createUserAndLogIn(page, username);
     await page.getByRole('link', { name: `Profile for ${username}` }).click();
@@ -94,7 +99,9 @@ test.describe('the profile', () => {
     await expect(page).toHaveURL(/\/top$/);
   });
 
-  test('saves the settings, closes on Update, and has them again when it is reopened', async ({ page }) => {
+  test('saves the settings, closes on Update, and has them again when it is reopened', async ({
+    page,
+  }) => {
     const username = uniqueName('paul');
     await createUserAndLogIn(page, username);
     await page.getByRole('link', { name: `Profile for ${username}` }).click();
@@ -115,7 +122,9 @@ test.describe('the profile', () => {
     await page.getByRole('link', { name: `Profile for ${username}` }).click();
     const reopened = page.getByRole('dialog', { name: 'Profile' });
     await expect(reopened.getByLabel('Email', { exact: true })).toHaveValue('paul@example.com');
-    await expect(reopened.getByRole('textbox', { name: 'About You' })).toHaveValue('I write the e2e tests');
+    await expect(reopened.getByRole('textbox', { name: 'About You' })).toHaveValue(
+      'I write the e2e tests',
+    );
     await expect(reopened.getByLabel('Show Dead', { exact: true })).toHaveValue('yes');
     await expect(reopened.getByLabel('Max Visit', { exact: true })).toHaveValue('45');
   });
@@ -135,7 +144,7 @@ test.describe('the profile', () => {
     await expect(dialog.getByLabel('Email', { exact: true })).toBeFocused();
   });
 
-  test('the About box is shown on the user\'s page, and the email never is', async ({ page }) => {
+  test("the About box is shown on the user's page, and the email never is", async ({ page }) => {
     const username = uniqueName('rosa');
     await createUserAndLogIn(page, username);
     await page.getByRole('link', { name: `Profile for ${username}` }).click();
@@ -151,13 +160,18 @@ test.describe('the profile', () => {
     await expect(page.locator('body')).not.toContainText('rosa-private@example.com');
   });
 
-  test('a user of this app has a page, found through the stories they submitted', async ({ page }) => {
+  test('a user of this app has a page, found through the stories they submitted', async ({
+    page,
+  }) => {
     const username = uniqueName('sam');
     await createUserAndLogIn(page, username);
-    await submitStory(page, { title: 'Sam\'s story', link: 'https://example.com/sam' });
+    await submitStory(page, { title: "Sam's story", link: 'https://example.com/sam' });
 
     await page.getByRole('link', { name: 'New', exact: true }).click();
-    await page.locator('article.story', { hasText: 'Sam\'s story' }).getByRole('link', { name: username }).click();
+    await page
+      .locator('article.story', { hasText: "Sam's story" })
+      .getByRole('link', { name: username })
+      .click();
     await expect(page).toHaveURL(new RegExp(`/user/${username}$`));
     await expect(page.getByRole('heading', { name: username })).toBeVisible();
     await expect(page.getByText('Submissions')).toBeVisible();

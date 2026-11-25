@@ -1,5 +1,13 @@
 ﻿import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { inject, makeStateKey, PLATFORM_ID, REQUEST, Service, signal, TransferState } from '@angular/core';
+import {
+  inject,
+  makeStateKey,
+  PLATFORM_ID,
+  REQUEST,
+  Service,
+  signal,
+  TransferState,
+} from '@angular/core';
 import { isPlatformServer } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { AuthFailure } from '../../models/auth-failure';
@@ -33,8 +41,7 @@ export class AuthStore {
    */
   async initialize() {
     const fromServer = this.transferState.get(sessionStateKey, undefined);
-    const username =
-      fromServer !== undefined ? fromServer : await this.fetchSessionUsername();
+    const username = fromServer !== undefined ? fromServer : await this.fetchSessionUsername();
 
     if (this.isServer) {
       this.transferState.set(sessionStateKey, username);

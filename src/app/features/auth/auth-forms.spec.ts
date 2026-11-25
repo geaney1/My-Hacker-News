@@ -35,7 +35,8 @@ describe('auth forms', () => {
   }
 
   const page = () => fixture.nativeElement as HTMLElement;
-  const field = (id: string) => page().querySelector<HTMLInputElement>(`input#${id}`) as HTMLInputElement;
+  const field = (id: string) =>
+    page().querySelector<HTMLInputElement>(`input#${id}`) as HTMLInputElement;
   // Whether the form (whichever the page has) is invalid: the button is never turned off, so this is
   // what tells "could be sent" from "could not".
   const formIsInvalid = () => {
@@ -66,14 +67,18 @@ describe('auth forms', () => {
   }
 
   async function submit() {
-    page().querySelector('form')?.dispatchEvent(new Event('submit', { cancelable: true }));
+    page()
+      .querySelector('form')
+      ?.dispatchEvent(new Event('submit', { cancelable: true }));
     await settle();
   }
 
   afterEach(() => {
     // The story list loads in the background of these pages. It is not what is being tested.
     // Logging in also loads the user's profile in the background: not what these tests are about.
-    http.match((request) => request.url.startsWith('/api/stories/') || request.url === '/api/profile');
+    http.match(
+      (request) => request.url.startsWith('/api/stories/') || request.url === '/api/profile',
+    );
     http.verify();
   });
 
@@ -134,7 +139,9 @@ describe('auth forms', () => {
       await settle();
 
       expect(formError()).toBe('Incorrect username or password');
-      expect(page().querySelector('.form-error [role="alert"]')?.getAttribute('role')).toBe('alert');
+      expect(page().querySelector('.form-error [role="alert"]')?.getAttribute('role')).toBe(
+        'alert',
+      );
       expect(TestBed.inject(AuthStore).login()).toBe(false);
       expect(navigate).not.toHaveBeenCalled();
     });
@@ -194,7 +201,9 @@ describe('auth forms', () => {
     it('has a plain create-user link when there is no return address', async () => {
       open(LogIn);
       await settle();
-      expect(page().querySelector('a[href^="/create-user"]')?.getAttribute('href')).toBe('/create-user');
+      expect(page().querySelector('a[href^="/create-user"]')?.getAttribute('href')).toBe(
+        '/create-user',
+      );
     });
   });
 
@@ -227,7 +236,9 @@ describe('auth forms', () => {
       request.flush({ username: 'Anna' }, { status: 201, statusText: 'Created' });
       await settle();
 
-      expect(navigateTo).toHaveBeenCalledWith(['/log-in'], { queryParams: { returnUrl: undefined } });
+      expect(navigateTo).toHaveBeenCalledWith(['/log-in'], {
+        queryParams: { returnUrl: undefined },
+      });
       // Creating a user does not log the user in.
       expect(TestBed.inject(AuthStore).login()).toBe(false);
     });
@@ -237,10 +248,14 @@ describe('auth forms', () => {
       await settle();
       await fill('Anna', 'correct-horse');
       await submit();
-      http.expectOne('/api/auth/register').flush({ username: 'Anna' }, { status: 201, statusText: 'Created' });
+      http
+        .expectOne('/api/auth/register')
+        .flush({ username: 'Anna' }, { status: 201, statusText: 'Created' });
       await settle();
 
-      expect(navigateTo).toHaveBeenCalledWith(['/log-in'], { queryParams: { returnUrl: '/user-profile' } });
+      expect(navigateTo).toHaveBeenCalledWith(['/log-in'], {
+        queryParams: { returnUrl: '/user-profile' },
+      });
     });
 
     it('says when the username is taken, and stays on the page', async () => {
@@ -255,7 +270,9 @@ describe('auth forms', () => {
 
     it('makes clear this is not a Hacker News account, and links to where a real Hacker News account is made', () => {
       expect(page().textContent).toContain('It is not a Hacker News account');
-      const link = page().querySelector<HTMLAnchorElement>('a[href="https://news.ycombinator.com/login"]');
+      const link = page().querySelector<HTMLAnchorElement>(
+        'a[href="https://news.ycombinator.com/login"]',
+      );
       expect(link).not.toBeNull();
       expect(link?.rel).toContain('noopener');
     });
@@ -277,7 +294,9 @@ describe('auth forms', () => {
       await fill('correct-horse', 'correct-horse');
       await blur('new-password');
 
-      expect(fieldError('new-password')).toBe('New password must be different from the current password');
+      expect(fieldError('new-password')).toBe(
+        'New password must be different from the current password',
+      );
       expect(formIsInvalid()).toBe(true);
     });
 
@@ -307,7 +326,9 @@ describe('auth forms', () => {
     it('says when the current password is wrong, and stays on the page', async () => {
       await fill('wrong-wrong-1', 'brand-new-pass');
       await submit();
-      http.expectOne('/api/auth/change-password').flush({}, { status: 403, statusText: 'Forbidden' });
+      http
+        .expectOne('/api/auth/change-password')
+        .flush({}, { status: 403, statusText: 'Forbidden' });
       await settle();
 
       expect(formError()).toBe('The current password is incorrect');
@@ -317,7 +338,9 @@ describe('auth forms', () => {
     it('tells the user when their session has ended', async () => {
       await fill('correct-horse', 'brand-new-pass');
       await submit();
-      http.expectOne('/api/auth/change-password').flush({}, { status: 401, statusText: 'Unauthorized' });
+      http
+        .expectOne('/api/auth/change-password')
+        .flush({}, { status: 401, statusText: 'Unauthorized' });
       await settle();
 
       expect(formError()).toBe('Your session has ended. Log in again to continue.');

@@ -111,7 +111,7 @@ describe('sessions store', () => {
       await expect(store.deleteSession('unknown')).resolves.toBeUndefined();
     });
 
-    it('deleteSessionsOf ends every session of one user and no one else\'s', async () => {
+    it("deleteSessionsOf ends every session of one user and no one else's", async () => {
       const annaOne = await store.createSession('Anna');
       const annaTwo = await store.createSession('Anna');
       const ben = await store.createSession('Ben');
@@ -185,7 +185,7 @@ describe('sessions store', () => {
       expect(await store.findSession(ids[10])).not.toBeNull();
     });
 
-    it('does not count one user\'s sessions against another', async () => {
+    it("does not count one user's sessions against another", async () => {
       for (let index = 0; index < 10; index++) {
         await store.createSession('Anna');
       }
@@ -195,7 +195,9 @@ describe('sessions store', () => {
   });
 
   it('handles many sessions being created at the same time', async () => {
-    const ids = await Promise.all(Array.from({ length: 20 }, (_, index) => store.createSession(`User${index}`)));
+    const ids = await Promise.all(
+      Array.from({ length: 20 }, (_, index) => store.createSession(`User${index}`)),
+    );
     for (const id of ids) {
       expect(await store.findSession(id)).not.toBeNull();
     }

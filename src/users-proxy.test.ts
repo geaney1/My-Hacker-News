@@ -9,7 +9,10 @@ const local = vi.hoisted(() => ({
   about: new Map<string, string>(),
 }));
 vi.mock('./profiles-store', () => ({
-  getProfile: async (username: string) => ({ about: local.about.get(username.toLowerCase()) ?? '', email: 'private@example.com' }),
+  getProfile: async (username: string) => ({
+    about: local.about.get(username.toLowerCase()) ?? '',
+    email: 'private@example.com',
+  }),
 }));
 vi.mock('./accounts-store', () => ({
   findAccount: async (username: string) => local.accounts.get(username.toLowerCase()) ?? null,
@@ -33,7 +36,9 @@ describe('users proxy', () => {
 
     hnUsers = { pg: { id: 'pg', created: 1160418111, karma: 157316 } };
     fetchMock = vi.fn(async (url: string) => {
-      const name = url.replace('https://hacker-news.firebaseio.com/v0/user/', '').replace('.json', '');
+      const name = url
+        .replace('https://hacker-news.firebaseio.com/v0/user/', '')
+        .replace('.json', '');
       return Response.json(hnUsers[name] ?? null);
     });
     vi.stubGlobal('fetch', fetchMock);
@@ -105,9 +110,12 @@ describe('users proxy', () => {
     expect(fetchMock).toHaveBeenCalledOnce();
   });
 
-  it.each(['a', 'has space', 'x'.repeat(16), '../etc'])('rejects the invalid username %j', async (name) => {
-    await expect(proxy.getUser(name)).rejects.toThrow(/Invalid username/);
-  });
+  it.each(['a', 'has space', 'x'.repeat(16), '../etc'])(
+    'rejects the invalid username %j',
+    async (name) => {
+      await expect(proxy.getUser(name)).rejects.toThrow(/Invalid username/);
+    },
+  );
 
   it('never exposes anything secret about an account', async () => {
     local.accounts.set('billy', { username: 'Billy', createdAt: 1 });

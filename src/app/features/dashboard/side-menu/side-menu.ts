@@ -11,7 +11,15 @@ type StoryListOption = { value: HnStoryList; label: string };
  * Pages opened from a story list (or over one, like the log-in and submit dialogs): the list the
  * user came from stays selected while on them.
  */
-const pagesOpenedFromAList = ['item', 'user', 'log-in', 'create-user', 'submit', 'user-profile', 'change-password'];
+const pagesOpenedFromAList = [
+  'item',
+  'user',
+  'log-in',
+  'create-user',
+  'submit',
+  'user-profile',
+  'change-password',
+];
 
 @Component({
   selector: 'app-side-menu',
@@ -51,7 +59,6 @@ export class SideMenu {
 
   /** `true` while the user is logged in: Submit and Welcome are only shown then. */
   protected readonly login = this.authStore.login;
-
 
   private readonly currentUrl = injectCurrentUrl();
 

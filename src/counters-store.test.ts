@@ -51,7 +51,9 @@ describe('counters store', () => {
   it('keeps counting after a restart', async () => {
     await nextId('thing', 0);
     await nextId('thing', 0);
-    expect(JSON.parse(readFileSync(join(directory, 'counters.json'), 'utf8'))).toEqual({ thing: 2 });
+    expect(JSON.parse(readFileSync(join(directory, 'counters.json'), 'utf8'))).toEqual({
+      thing: 2,
+    });
 
     vi.resetModules();
     const again = (await import('./counters-store')).nextId;

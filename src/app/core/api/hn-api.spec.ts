@@ -36,7 +36,13 @@ describe('HnApi', () => {
       await first;
 
       TestBed.inject(ProfileStore).remember({
-        about: '', email: 'a@b.co', showdead: 'yes', noprocrast: 'no', maxvisit: 20, minaway: 180, delay: 0,
+        about: '',
+        email: 'a@b.co',
+        showdead: 'yes',
+        noprocrast: 'no',
+        maxvisit: 20,
+        minaway: 180,
+        delay: 0,
       });
       const again = api.getStoryPage('top', 1, 20);
       http.expectOne((request) => request.url === '/api/stories/top').flush(page);
@@ -55,7 +61,9 @@ describe('HnApi', () => {
   describe('getThread', () => {
     it('returns the thread, or null when the item does not exist', async () => {
       const found = api.getThread(1);
-      http.expectOne('/api/items/1/thread').flush({ item: { id: 1 }, comments: [], pollOptions: [], truncated: false });
+      http
+        .expectOne('/api/items/1/thread')
+        .flush({ item: { id: 1 }, comments: [], pollOptions: [], truncated: false });
       expect(await found).toMatchObject({ item: { id: 1 } });
 
       const missing = api.getThread(2);

@@ -107,12 +107,23 @@ describe('submissions store as items', () => {
     writeFileSync(
       join(directory, 'submissions.json'),
       JSON.stringify([
-        { id: 'a', itemId: store.localItemIdBase + 7, kind: 'story', username: 'Old', title: 'Old', url: 'https://example.com', text: '', submittedAt: 1 },
+        {
+          id: 'a',
+          itemId: store.localItemIdBase + 7,
+          kind: 'story',
+          username: 'Old',
+          title: 'Old',
+          url: 'https://example.com',
+          text: '',
+          submittedAt: 1,
+        },
       ]),
     );
     vi.resetModules();
     const restarted = await import('./submissions-store');
-    expect((await restarted.addSubmission('Suin', 'New', 'https://example.com')).itemId).toBe(store.localItemIdBase + 8);
+    expect((await restarted.addSubmission('Suin', 'New', 'https://example.com')).itemId).toBe(
+      store.localItemIdBase + 8,
+    );
   });
 
   it('answers null for ids that are not submissions, including real Hacker News ids', async () => {
@@ -126,11 +137,31 @@ describe('submissions store as items', () => {
     writeFileSync(
       join(directory, 'submissions.json'),
       JSON.stringify([
-        { id: 'a', kind: 'story', username: 'Old', title: 'Old one', url: 'https://example.com', text: '', submittedAt: 1000 },
-        { id: 'b', kind: 'question', username: 'Old', title: 'Old ask', url: '', text: 'Hi', submittedAt: 2000 },
+        {
+          id: 'a',
+          kind: 'story',
+          username: 'Old',
+          title: 'Old one',
+          url: 'https://example.com',
+          text: '',
+          submittedAt: 1000,
+        },
+        {
+          id: 'b',
+          kind: 'question',
+          username: 'Old',
+          title: 'Old ask',
+          url: '',
+          text: 'Hi',
+          submittedAt: 2000,
+        },
       ]),
     );
-    expect(await store.submittedStories('story')).toEqual([{ id: store.localItemIdBase + 1, time: 1 }]);
-    expect(await store.submittedStories('question')).toEqual([{ id: store.localItemIdBase + 2, time: 2 }]);
+    expect(await store.submittedStories('story')).toEqual([
+      { id: store.localItemIdBase + 1, time: 1 },
+    ]);
+    expect(await store.submittedStories('question')).toEqual([
+      { id: store.localItemIdBase + 2, time: 2 },
+    ]);
   });
 });

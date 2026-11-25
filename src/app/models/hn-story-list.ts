@@ -6,11 +6,4 @@
 export type HnStoryList = 'top' | 'new' | 'best' | 'ask' | 'show' | 'job';
 
 /** Every story list, used to validate the list in the URL. */
-export const hnStoryLists: readonly HnStoryList[] = [
-  'top',
-  'new',
-  'best',
-  'ask',
-  'show',
-  'job',
-];
+export const hnStoryLists: readonly HnStoryList[] = ['top', 'new', 'best', 'ask', 'show', 'job'];

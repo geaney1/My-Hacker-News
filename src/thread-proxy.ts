@@ -44,7 +44,10 @@ async function loadReplies(ids: number[] | undefined, state: LoadState) {
 async function loadPollOptions(partIds: number[] | undefined, showDead: boolean) {
   const results = await Promise.allSettled((partIds ?? []).map(getItem));
   return results.flatMap((result) =>
-    result.status === 'fulfilled' && result.value && !result.value.deleted && (!result.value.dead || showDead)
+    result.status === 'fulfilled' &&
+    result.value &&
+    !result.value.deleted &&
+    (!result.value.dead || showDead)
       ? [result.value]
       : [],
   );

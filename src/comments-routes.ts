@@ -40,7 +40,9 @@ commentsRouter.post('/:id/comments', async (request, response) => {
     if (error instanceof BadRequestError) {
       response.status(400).json({ message: error.message });
     } else if (error instanceof NoSuchStoryError) {
-      response.status(404).json({ message: 'Comments can only be written on stories submitted in this app' });
+      response
+        .status(404)
+        .json({ message: 'Comments can only be written on stories submitted in this app' });
     } else if (error instanceof TooManyCommentsError) {
       response.status(403).json({ message: 'You have written as many comments as are allowed' });
     } else {

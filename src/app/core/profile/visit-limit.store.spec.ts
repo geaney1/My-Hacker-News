@@ -26,7 +26,9 @@ describe('VisitLimitStore', () => {
     localStorage.clear();
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-01-01T09:00:00Z'));
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
     http = TestBed.inject(HttpTestingController);
   });
 
@@ -115,13 +117,15 @@ describe('VisitLimitStore', () => {
     expect(limit.locked()).toBe(true);
 
     TestBed.resetTestingModule();
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
     http = TestBed.inject(HttpTestingController);
     await start(profile());
     expect(limit.locked()).toBe(true);
   });
 
-  it('keeps the limit of one user apart from another\'s', async () => {
+  it("keeps the limit of one user apart from another's", async () => {
     await start(profile());
     await wait(20);
     expect(limit.locked()).toBe(true);
@@ -135,7 +139,9 @@ describe('VisitLimitStore', () => {
     await wait(20);
     expect(limit.locked()).toBe(true);
 
-    TestBed.inject((await import('./profile.store')).ProfileStore).remember(profile({ noprocrast: 'no' }));
+    TestBed.inject((await import('./profile.store')).ProfileStore).remember(
+      profile({ noprocrast: 'no' }),
+    );
     TestBed.tick();
     expect(limit.locked()).toBe(false);
     expect(localStorage.getItem('hacker-news.visit.billy')).toBeNull();
