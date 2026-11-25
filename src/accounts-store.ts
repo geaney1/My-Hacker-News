@@ -2,6 +2,7 @@ import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import { createSerialQueue, readJsonFile, writeJsonFile } from './data-files';
 import { BadRequestError } from './hn-fetch';
+import type { AccountFile } from './models/account-file';
 
 const scryptAsync = promisify(scrypt);
 
@@ -18,18 +19,6 @@ export class UsernameTakenError extends Error {}
 
 /** The current password given when changing a password was not the account's password. */
 export class WrongPasswordError extends Error {}
-
-type Account = {
-  /** The username as the user typed it when they created the account. */
-  username: string;
-  salt: string;
-  hash: string;
-  /** When the account was made, in Unix milliseconds. Accounts made before this was kept have none. */
-  createdAt?: number;
-};
-
-/** Accounts by lower-case username, so `Anna` and `anna` are the same person. */
-type AccountFile = Record<string, Account>;
 
 const enqueue = createSerialQueue();
 

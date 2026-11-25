@@ -2,7 +2,8 @@ import type { HnUser } from './app/models/hn-user';
 import { findAccount } from './accounts-store';
 import { getProfile } from './profiles-store';
 import { submittedItemIdsBy, toItemHtml } from './submissions-store';
-import { BadRequestError, type CacheEntry, evictStale, fetchJson, isFresh } from './hn-fetch';
+import { BadRequestError, evictStale, fetchJson, isFresh } from './hn-fetch';
+import type { CacheEntry } from './models/cache-entry';
 
 const maxCachedUsers = 1000;
 

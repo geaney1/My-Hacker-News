@@ -1,17 +1,11 @@
 import type { HnItem } from './app/models/hn-item';
 import { hnStoryLists, type HnStoryList } from './app/models/hn-story-list';
 import type { StoryPage } from './app/models/story-page';
-import {
-  BadRequestError,
-  type CacheEntry,
-  evictStale,
-  fetchJson,
-  isFresh,
-  parseCount,
-} from './hn-fetch';
+import { BadRequestError, evictStale, fetchJson, isFresh, parseCount } from './hn-fetch';
 import { countLocalComments } from './comments-store';
 import { mergeByTime } from './list-merge';
 import { getSubmittedItem, submittedStories } from './submissions-store';
+import type { CacheEntry } from './models/cache-entry';
 
 const maxPageSize = 100;
 const maxCachedItems = 2000;

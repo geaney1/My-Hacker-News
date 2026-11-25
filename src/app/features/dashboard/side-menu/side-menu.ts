@@ -2,10 +2,9 @@ import { Component, computed, ElementRef, inject, input, output } from '@angular
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { firstSegmentOf, injectCurrentUrl } from '../../../core/navigation/current-url';
-import { HnStoryList, hnStoryLists } from '../../../models/hn-story-list';
+import { hnStoryLists } from '../../../models/hn-story-list';
 import { StoriesStore } from '../../stories/stories.store';
-
-type StoryListOption = { value: HnStoryList; label: string };
+import { StoryListOption } from '../../../models/story-list-option';
 
 /**
  * Pages opened from a story list (or over one, like the log-in and submit dialogs): the list the

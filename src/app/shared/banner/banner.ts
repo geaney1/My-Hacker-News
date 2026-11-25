@@ -1,7 +1,5 @@
 import { Component, computed, input } from '@angular/core';
-
-/** What a banner is telling the user. */
-export type BannerKind = 'warning' | 'error' | 'info';
+import { BannerKind } from '../../models/banner-kind';
 
 let nextBannerId = 0;
 

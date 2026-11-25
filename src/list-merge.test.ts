@@ -1,4 +1,5 @@
-import { mergeByTime, type TimeOf } from './list-merge';
+import { mergeByTime } from './list-merge';
+import type { TimeOf } from './models/time-of';
 
 /** Hacker News stories 1..n with the given times; a missing time means "not known". */
 function timesOf(times: Record<number, number | undefined>) {

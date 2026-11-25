@@ -4,6 +4,8 @@ import { localItemIdBase } from './app/models/local-item-ids';
 import { BadRequestError } from './hn-fetch';
 import { nextId } from './counters-store';
 import { createJsonStore } from './json-store';
+import type { SubmissionKind } from './models/submission-kind';
+import type { Submission } from './models/submission';
 
 export const maxTitleLength = 80;
 export const maxUrlLength = 2000;
@@ -13,21 +15,6 @@ export { localItemIdBase };
 
 /** The most stories one user can have saved, so nobody can fill the disk. */
 const maxSubmissionsPerUser = 200;
-
-/** Without a link a submission is a question for discussion; with one it is a story. */
-type SubmissionKind = 'story' | 'question';
-
-type Submission = {
-  id: string;
-  /** The id the story has in the lists and at /item/<id>. */
-  itemId: number;
-  kind: SubmissionKind;
-  username: string;
-  title: string;
-  url: string;
-  text: string;
-  submittedAt: number;
-};
 
 /** Thrown when a user has saved as many stories as they are allowed. */
 export class TooManySubmissionsError extends Error {}

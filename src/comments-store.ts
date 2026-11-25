@@ -4,26 +4,12 @@ import { nextId } from './counters-store';
 import { createJsonStore } from './json-store';
 import { BadRequestError } from './hn-fetch';
 import { getSubmittedItem, toItemHtml } from './submissions-store';
+import type { StoredComment } from './models/stored-comment';
 
 const maxCommentLength = 2000;
 
 /** The most comments one user can have written, so nobody can fill the disk. */
 const maxCommentsPerUser = 500;
-
-type StoredComment = {
-  id: number;
-  /** The story (or question) submitted in this app that the comment is on. */
-  itemId: number;
-  username: string;
-  /** What the user typed. It is turned into safe HTML only when shown. */
-  text: string;
-  submittedAt: number;
-  /**
-   * When other people can see it: the time it was written plus the author's Delay. The author
-   * always sees it. Comments saved before Delay was used have none, and are visible.
-   */
-  visibleAt?: number;
-};
 
 /** Thrown when the story does not exist in this app, so it cannot have comments written here. */
 export class NoSuchStoryError extends Error {}

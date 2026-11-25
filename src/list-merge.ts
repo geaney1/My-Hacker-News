@@ -1,14 +1,6 @@
-/** A story submitted in this app, as far as placing it in a list goes. */
-type LocalEntry = { id: number; time: number };
-
-/** Finds when a Hacker News story was made, in Unix seconds, or `undefined` if that is not known. */
-export type TimeOf = (id: number) => Promise<number | undefined>;
-
-/**
- * How the Hacker News list is ordered. "newest-first" is strictly by time (New). "ranked" is by
- * Hacker News's own ranking, which only roughly follows time (Ask).
- */
-type ListOrder = 'newest-first' | 'ranked';
+import type { LocalEntry } from './models/local-entry';
+import type { TimeOf } from './models/time-of';
+import type { ListOrder } from './models/list-order';
 
 /** How far to look past a story that has no time (a deleted one) for one that does. */
 const probeLimit = 5;

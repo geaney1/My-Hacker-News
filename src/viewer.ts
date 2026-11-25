@@ -2,16 +2,7 @@ import type { Request } from 'express';
 import { sessionIdOf } from './current-user';
 import { getProfile } from './profiles-store';
 import { findSession } from './sessions-store';
-
-/** Who is asking, and the parts of their profile that change what the server sends or saves. */
-export type Viewer = {
-  /** The logged-in user, or `undefined` for a visitor. */
-  username?: string;
-  /** Show Dead: dead stories and comments are included. */
-  showDead: boolean;
-  /** Delay: how many seconds the user's own comments stay hidden from others. */
-  delaySeconds: number;
-};
+import type { Viewer } from './models/viewer';
 
 export const anonymousViewer: Viewer = { showDead: false, delaySeconds: 0 };
 

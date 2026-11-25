@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { createJsonStore } from './json-store';
+import type { SessionFile } from './models/session-file';
 
 /** The browser's cookie holds only a random session ID. Everything else stays on the server. */
 export const sessionCookieName = 'hn_session';
@@ -9,18 +10,6 @@ export const sessionLifetimeMilliseconds = 14 * 24 * 60 * 60 * 1000;
 
 /** The most sessions one user can have at once (for example on different devices). */
 const maxSessionsPerUser = 10;
-
-type StoredSession = {
-  username: string;
-  createdAt: number;
-  expiresAt: number;
-};
-
-/**
- * Sessions by the SHA-256 hash of their ID. The ID itself is never stored, so someone who reads
- * the file cannot use it to log in as anybody.
- */
-type SessionFile = Record<string, StoredSession>;
 
 const hashId = (id: string) => createHash('sha256').update(id).digest('hex');
 

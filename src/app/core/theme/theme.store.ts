@@ -1,7 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { computed, DOCUMENT, effect, inject, PLATFORM_ID, Service, signal } from '@angular/core';
-
-type Theme = 'light' | 'dark';
+import { Theme } from '../../models/theme';
 
 const storageKey = 'hacker-news.theme';
 

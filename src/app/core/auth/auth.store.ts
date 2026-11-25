@@ -11,11 +11,10 @@ import {
 import { isPlatformServer } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { AuthFailure } from '../../models/auth-failure';
+import { SessionResponse } from '../../models/session-response';
 
 /** Carries the session's username from the server-rendered page to the browser. */
 const sessionStateKey = makeStateKey<string>('session-username');
-
-type SessionResponse = { username: string };
 
 /**
  * Holds the logged-in state. Accounts and sessions live on the server: creating a user stores a

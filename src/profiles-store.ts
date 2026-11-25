@@ -1,19 +1,11 @@
 import { createJsonStore } from './json-store';
 import { BadRequestError } from './hn-fetch';
+import type { Profile } from './models/profile';
+import type { ProfileFile } from './models/profile-file';
 
 const maxAboutLength = 2000;
 const maxEmailLength = 254;
 const maxNumber = 100_000;
-
-export type Profile = {
-  about: string;
-  email: string;
-  showdead: 'yes' | 'no';
-  noprocrast: 'yes' | 'no';
-  maxvisit: number;
-  minaway: number;
-  delay: number;
-};
 
 /** What a user who has never saved their profile has. The same as the form's starting values. */
 const defaultProfile: Profile = {
@@ -25,9 +17,6 @@ const defaultProfile: Profile = {
   minaway: 180,
   delay: 0,
 };
-
-/** Profiles by lower-case username, so `Anna` and `anna` are the same person. */
-type ProfileFile = Record<string, Profile>;
 
 const profilesStore = createJsonStore<ProfileFile>({ file: 'profiles.json', empty: () => ({}) });
 

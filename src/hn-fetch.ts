@@ -1,10 +1,10 @@
+import type { CacheEntry } from './models/cache-entry';
+
 /** Where Hacker News's API is. Set `HN_API_URL` to use another one, such as the fake one in the end-to-end tests. */
 const baseUrl = process.env['HN_API_URL'] ?? 'https://hacker-news.firebaseio.com/v0';
 
 /** How long a response from Hacker News is reused by default, so users share the requests. */
 const defaultCacheMilliseconds = 60 * 1000;
-
-export type CacheEntry<Value> = { value: Value; fetchedAt: number };
 
 /** Thrown when a request from the browser is invalid. The server answers it with a 400. */
 export class BadRequestError extends Error {}

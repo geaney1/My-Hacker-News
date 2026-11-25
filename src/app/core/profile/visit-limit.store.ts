@@ -11,20 +11,12 @@ import {
 } from '@angular/core';
 import { AuthStore } from '../auth/auth.store';
 import { ProfileStore } from './profile.store';
+import { Visit } from '../../models/visit';
 
 /** How often the time spent is checked while the app is open. */
 const checkMilliseconds = 15 * 1000;
 
 const minute = 60 * 1000;
-
-type Visit = {
-  /** When the current visit started, or 0 when there is none. */
-  visitStart: number;
-  /** The last time the app was open. */
-  lastSeen: number;
-  /** The user is shut out until then, or 0. */
-  lockedUntil: number;
-};
 
 /**
  * No Procrast: with it on, the user is shut out for Min Away minutes once a visit has lasted Max

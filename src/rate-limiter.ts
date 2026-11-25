@@ -1,8 +1,4 @@
-type RateLimiterOptions = {
-  /** How many attempts are allowed in each window. */
-  maxAttempts: number;
-  windowMilliseconds: number;
-};
+import type { RateLimiterOptions } from './models/rate-limiter-options';
 
 /** The most keys remembered at once. When it is passed, finished windows are forgotten. */
 const maxKeys = 5000;

@@ -2,12 +2,12 @@ import type { HnComment } from './app/models/hn-comment';
 import type { ItemThread } from './app/models/item-thread';
 import { getLocalComments } from './comments-store';
 import { getItem } from './stories-proxy';
-import { anonymousViewer, type Viewer } from './viewer';
+import { anonymousViewer } from './viewer';
+import type { LoadState } from './models/load-state';
+import type { Viewer } from './models/viewer';
 
 /** The most comments loaded for one thread, so a huge discussion cannot flood the server. */
 const maxComments = 200;
-
-type LoadState = { remaining: number; truncated: boolean; showDead: boolean };
 
 /** Loads the replies for `ids`, and theirs in turn, until the comment budget is used up. */
 async function loadReplies(ids: number[] | undefined, state: LoadState) {

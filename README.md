@@ -69,7 +69,8 @@ src/
                  submit, auth, change-password, welcome
     shared/      Small components and styles used by several features: banner, auth-card,
                  form-text-field, form-text-area, info-tip, pagination
-    models/      Types only, one per file
+    models/      Types of the app (also used by the server), one per file
+  models/                                           Types used only by the server, one per file
 e2e/             End-to-end tests (Playwright) and a fake Hacker News
 data/            The JSON files the server saves (not committed)
 ```
@@ -79,7 +80,7 @@ The structure follows a few rules, each for a reason:
 - **Feature folders (`features/`).** Everything for one part of the app (component, template, styles, tests, and its own store) sits together, so a change to one feature touches one folder. Routes load features lazily, so a visitor only downloads the part they open.
 - **`core/` for what the whole app needs once.** Stores that exist once per app (who is logged in, the saved profile, the theme, the No Procrast timer) and the API classes that talk to the server live here, away from any one screen. Components never call `HttpClient` themselves: they ask a store or an API class. This keeps requests in one place, and makes them easy to fake in tests.
 - **`shared/` for reuse.** A component used by more than one feature (the banner, the dialog card, the form field, the info tip, the paging bar) lives here once, so the look and the accessibility behaviour are the same everywhere and are fixed in one place.
-- **`models/`: types in their own files.** One type per file, so they are easy to find and can be shared between the app and its tests.
+- **`models/`: types in their own files.** One type per file, so they are easy to find and can be shared. Types the app uses are in `src/app/models/`, and types only the server uses are in `src/models/`. A test's own helper types stay in the test.
 - **One theme file.** All colours, spacing and shapes are tokens in `src/styles.scss`. The dark theme is a second set of the same tokens, so a component never needs to know which theme is on, and the look can be changed in one place.
 - **Server code is split by job, not in one big file.** `*-routes.ts` handles the requests, `*-store.ts` keeps the data, `*-proxy.ts` talks to Hacker News, and small helpers (`rate-limiter.ts`, `json-store.ts`, `security.ts`, `cookies.ts`) do one thing each. Most of these files have a test of the same name beside them; a few small ones are tested through the files that use them, and `server.ts` only by the end-to-end tests. The split keeps each piece small enough to understand and test alone.
 - **Tests sit beside the code they test** (`*.spec.ts` for the app, `*.test.ts` for the server). The end-to-end tests are separate because they run the whole built app in a real browser.

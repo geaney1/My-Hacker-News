@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Banner, BannerKind } from './banner';
+import { Banner } from './banner';
+import { BannerKind } from '../../models/banner-kind';
 
 @Component({
   imports: [Banner],

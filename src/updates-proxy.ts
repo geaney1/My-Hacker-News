@@ -1,5 +1,6 @@
 import type { HnUpdates } from './app/models/hn-updates';
-import { type CacheEntry, fetchJson, isFresh } from './hn-fetch';
+import { fetchJson, isFresh } from './hn-fetch';
+import type { CacheEntry } from './models/cache-entry';
 
 /** Changes are listed for the last few minutes only, so this is kept for a short time. */
 const updatesCacheMilliseconds = 15 * 1000;
