@@ -5,6 +5,8 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
+import { AuthStore } from '../../core/auth/auth.store';
 import { HnItem } from '../../models/hn-item';
 import { StoriesStore } from './stories.store';
 
@@ -19,6 +21,9 @@ function story(id: number, overrides: Partial<HnItem> = {}): HnItem {
     ...overrides,
   };
 }
+
+@Component({ template: '' })
+class Blank {}
 
 describe('StoriesStore', () => {
   let store: StoriesStore;
@@ -240,6 +245,61 @@ describe('StoriesStore', () => {
       store.minScore.set(1000);
       expect(store.stories()).toEqual([]);
       expect(store.totalStories()).toBe(3);
+    });
+  });
+
+  describe('logging in and out', () => {
+    async function logIn(username: string) {
+      const done = TestBed.inject(AuthStore).logIn(username, 'long-enough-password');
+      http.expectOne('/api/auth/login').flush({ username });
+      await done;
+      await settle();
+    }
+
+    async function logOut() {
+      const done = TestBed.inject(AuthStore).logOut();
+      http.expectOne('/api/auth/logout').flush({});
+      await done;
+      await settle();
+    }
+
+    const savedMinScore = () =>
+      JSON.parse(localStorage.getItem('hacker-news.stories.preferences') ?? '{}').minScore;
+
+    it('empties the search term and the minimum score on logging in', async () => {
+      store.searchTerm.set('angular');
+      store.minScore.set(40);
+      await settle();
+
+      await logIn('anna');
+
+      expect(store.searchTerm()).toBe('');
+      expect(store.minScore()).toBe(0);
+    });
+
+    it('empties them again on logging out', async () => {
+      await logIn('anna');
+      store.searchTerm.set('angular');
+      store.minScore.set(40);
+      await settle();
+
+      await logOut();
+
+      expect(store.searchTerm()).toBe('');
+      expect(store.minScore()).toBe(0);
+    });
+
+    it('resets the saved minimum score too, so a reload does not bring it back', async () => {
+      // Creating the store again after a render is a reload: the saved score is read back.
+      localStorage.setItem('hacker-news.stories.preferences', JSON.stringify({ minScore: 40 }));
+      createStore();
+      TestBed.createComponent(Blank).detectChanges();
+      await settle();
+      expect(store.minScore()).toBe(40);
+
+      await logIn('anna');
+
+      expect(savedMinScore()).toBe(0);
     });
   });
 

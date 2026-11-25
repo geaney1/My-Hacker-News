@@ -14,7 +14,8 @@ export class Pagination {
   readonly page = input.required<number>();
   readonly totalPages = input.required<number>();
   /**
-   * Clears the "go to page" box whenever this value changes, e.g. when another list is chosen.
+   * Clears the "go to page" box whenever this value changes, e.g. when another list is chosen or
+   * somebody logs in or out.
    * The box is also cleared whenever the page changes.
    */
   readonly resetKey = input<unknown>();
@@ -58,7 +59,7 @@ export class Pagination {
   });
 
   constructor() {
-    // Start with an empty box after any change of page or list.
+    // Start with an empty box after any change of page or reset key.
     effect(() => {
       this.page();
       this.resetKey();

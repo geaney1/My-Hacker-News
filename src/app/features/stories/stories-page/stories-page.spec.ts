@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { AuthStore } from '../../../core/auth/auth.store';
 import { HnItem } from '../../../models/hn-item';
 import { StoriesPage } from './stories-page';
 
@@ -157,6 +158,28 @@ describe('StoriesPage', () => {
       expect(meta).toContain('by author1');
       expect(meta).toMatch(/ago|just now/);
     });
+  });
+
+  it('empties the search, minimum score and "Go to page" boxes on logging in', async () => {
+    await open(Array.from({ length: 45 }, (_, index) => story(index + 1)));
+    const box = (id: string) => page().querySelector<HTMLInputElement>(`#${id}`)!;
+    const type = (id: string, value: string) => {
+      box(id).value = value;
+      box(id).dispatchEvent(new Event('input'));
+    };
+    type('search', 'Story');
+    type('min-score', '5');
+    type('go-to-page', '2');
+    await settle();
+
+    const done = TestBed.inject(AuthStore).logIn('anna', 'long-enough-password');
+    http.expectOne('/api/auth/login').flush({ username: 'anna' });
+    await done;
+    await settle();
+
+    expect(box('search').value).toBe('');
+    expect(box('min-score').value).toBe('0');
+    expect(box('go-to-page').value).toBe('');
   });
 
   it('says so when there are no stories to show', async () => {

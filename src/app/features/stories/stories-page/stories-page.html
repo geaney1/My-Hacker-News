@@ -84,7 +84,7 @@
     class="pagination"
     [page]="store.page()"
     [totalPages]="store.totalPages()"
-    [resetKey]="store.selectedList()"
+    [resetKey]="paginationResetKey()"
     (pageChange)="store.goToPage($event)"
   />
 </section>

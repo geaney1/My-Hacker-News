@@ -14,6 +14,7 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HnApi } from '../../core/api/hn-api';
+import { AuthStore } from '../../core/auth/auth.store';
 import { ProfileStore } from '../../core/profile/profile.store';
 import { HnStoryList } from '../../models/hn-story-list';
 import { StoryPage } from '../../models/story-page';
@@ -27,11 +28,20 @@ const updatesPollMilliseconds = 60 * 1000;
 export class StoriesStore {
   private readonly api = inject(HnApi);
   private readonly profileStore = inject(ProfileStore);
+  private readonly authStore = inject(AuthStore);
 
   // Writable state
   readonly selectedList = signal<HnStoryList>('top');
-  readonly searchTerm = signal('');
-  readonly minScore = signal(0);
+
+  /** The filters start empty again whenever somebody logs in or out. */
+  readonly searchTerm = linkedSignal({
+    source: () => this.authStore.username(),
+    computation: () => '',
+  });
+  readonly minScore = linkedSignal({
+    source: () => this.authStore.username(),
+    computation: () => 0,
+  });
   readonly pageSize = signal(20);
 
   /** Starts on page 1 again whenever the list or page size changes. */
