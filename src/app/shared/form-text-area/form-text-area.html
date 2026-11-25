@@ -1,0 +1,15 @@
+<div class="field">
+  <label [for]="fieldId()">{{ label() }}</label>
+  <textarea
+    [id]="fieldId()"
+    [rows]="rows()"
+    [attr.aria-describedby]="describedBy()"
+    [formField]="field()"
+  ></textarea>
+  @if (hint()) {
+    <p class="hint" [id]="hintId()">{{ hint() }}</p>
+  }
+  @if (errorMessage()) {
+    <p class="error" [id]="errorId()" role="alert">{{ errorMessage() }}</p>
+  }
+</div>

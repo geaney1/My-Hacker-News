@@ -13,9 +13,7 @@ Users can browse stories, posts, comments, or lists without logging in.
 
 Require login only for actions that modify data, such as:
 
-- Upvoting
 - Commenting
 - Submitting stories
-- Saving favourites/bookmarks
 - Editing user profiles
 - Viewing personalised content

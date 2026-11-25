@@ -20,6 +20,14 @@ describe('StoryComment', () => {
 
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideRouter([])] }));
 
+  it('marks a dead comment as [dead], and a live one not at all', async () => {
+    await show(comment(1, { dead: true }));
+    expect(page().querySelector('.dead')?.textContent).toBe('[dead]');
+
+    await show(comment(2));
+    expect(page().querySelector('.dead')).toBeNull();
+  });
+
   it('shows the author as a link to their profile, and the comment text', async () => {
     await show(comment(1, { by: 'anna', text: 'Hello there' }));
 
@@ -75,9 +83,46 @@ describe('StoryComment', () => {
     expect(page().querySelector('ul.replies')).toBeNull();
   });
 
-  it('can be folded away, as it is a details element that starts open', async () => {
-    await show(comment(1));
-    const details = page().querySelector('details') as HTMLDetailsElement;
-    expect(details.open).toBe(true);
+  describe('folding', () => {
+    const toggle = () => page().querySelector<HTMLButtonElement>('button.toggle') as HTMLButtonElement;
+    const withReply = () => comment(1, { by: 'anna', replies: [comment(2, { by: 'ben', text: 'A reply' })] });
+
+    it('starts open, with a button that says what it does', async () => {
+      await show(withReply());
+      expect(toggle().getAttribute('aria-expanded')).toBe('true');
+      expect(toggle().getAttribute('aria-label')).toBe('Collapse comment by anna');
+      expect(page().querySelector('.text')).not.toBeNull();
+    });
+
+    it('hides the text and the replies when the button is pressed, and shows them again', async () => {
+      await show(withReply());
+      toggle().click();
+      await fixture.whenStable();
+      expect(toggle().getAttribute('aria-expanded')).toBe('false');
+      expect(toggle().getAttribute('aria-label')).toBe('Expand comment by anna');
+      expect(page().textContent).not.toContain('A reply');
+      expect(page().querySelector('.text')).toBeNull();
+      // The author and time stay, so the user can see what was folded.
+      expect(page().querySelector('a.author')?.textContent?.trim()).toBe('anna');
+
+      toggle().click();
+      await fixture.whenStable();
+      expect(page().textContent).toContain('A reply');
+    });
+
+    it('folds a reply on its own, not the comment above it', async () => {
+      await show(withReply());
+      const replyToggle = page().querySelectorAll<HTMLButtonElement>('button.toggle')[1];
+      replyToggle.click();
+      await fixture.whenStable();
+      expect(page().textContent).toContain('Comment 1');
+      expect(page().textContent).not.toContain('A reply');
+    });
+
+    it('keeps the author link outside the button, so a control does not hold another one', async () => {
+      await show(withReply());
+      expect(toggle().querySelector('a')).toBeNull();
+      expect(page().querySelector('details, summary')).toBeNull();
+    });
   });
 });

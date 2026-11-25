@@ -16,7 +16,7 @@
 - don't use inline HTML templates or CSS in Angular components. Always use external files.
 
 
-- Use domain stores, Resource Signals, computed signals, linked signals, OnPush change detection and feature-based architecture.
+- Use domain stores, Resource Signals, computed signals, linked signals, OnPush change detection (the default in Angular 22, so it is not set in the decorator) and feature-based architecture.
 
 -Folder Structure
 core/, features/stories/, stores/, services/, shared/, models/. Keep domain stores close to features.

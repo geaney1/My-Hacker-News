@@ -1,17 +1,32 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
-import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { inject, PLATFORM_ID, REQUEST, Service } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { ProfileStore } from '../profile/profile.store';
+import { ItemThread } from '../../models/item-thread';
 import { HnStoryList } from '../../models/hn-story-list';
 import { StoryPage } from '../../models/story-page';
 import { HnUpdates } from '../../models/hn-updates';
 import { HnUser } from '../../models/hn-user';
-import { ItemThread } from '../../models/item-thread';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class HnApi {
   private readonly http = inject(HttpClient);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly profileStore = inject(ProfileStore);
+  private readonly request = inject(REQUEST, { optional: true });
+
+  /**
+   * When a page is rendered on the server, the browser's cookie has to be passed on by hand to the
+   * calls that depend on who is looking (the stories and a story's comments: Show Dead, and a
+   * comment still held back by its writer's Delay). Without it the server-rendered page would be
+   * made for a visitor, and a logged-in user would not see their own settings on a page they open
+   * directly. The cookie only goes to this app's own server.
+   */
+  private serverHeaders(): Record<string, string> {
+    const cookie = this.request?.headers.get('cookie');
+    return cookie ? { cookie } : {};
+  }
 
   /** Pages already loaded in this browser. Not used on the server, which is shared by all users. */
   private readonly storyPageCache = new Map<string, StoryPage>();
@@ -71,7 +86,8 @@ export class HnApi {
   }
 
   private storyPageKey(list: HnStoryList, page: number, pageSize: number) {
-    return `${list}:${page}:${pageSize}`;
+    // Show Dead changes which stories a page has, so pages are kept apart by it.
+    return `${list}:${page}:${pageSize}:${this.profileStore.showDead()}`;
   }
 
   /** Promise-based request that stops the HTTP call when `abortSignal` is aborted. */
@@ -83,7 +99,7 @@ export class HnApi {
   ) {
     return new Promise<StoryPage>((resolve, reject) => {
       const subscription = this.http
-        .get<StoryPage>(`/api/stories/${list}`, { params: { page, pageSize } })
+        .get<StoryPage>(`/api/stories/${list}`, { params: { page, pageSize }, headers: this.serverHeaders() })
         .subscribe({ next: resolve, error: reject });
 
       abortSignal?.addEventListener(
@@ -104,7 +120,7 @@ export class HnApi {
 
   /** An item with its comment tree. Resolves to `null` when the item does not exist. */
   getThread(id: number) {
-    return this.getOrNull<ItemThread>(`/api/items/${id}/thread`);
+    return this.getOrNull<ItemThread>(`/api/items/${id}/thread`, this.serverHeaders());
   }
 
   /** Resolves to `null` when the user does not exist or has no public activity. */
@@ -113,9 +129,9 @@ export class HnApi {
   }
 
   /** The server answers 404 for something that does not exist: that is `null`, not an error. */
-  private async getOrNull<Value>(url: string) {
+  private async getOrNull<Value>(url: string, headers: Record<string, string> = {}) {
     try {
-      return await firstValueFrom(this.http.get<Value>(url));
+      return await firstValueFrom(this.http.get<Value>(url, { headers }));
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 404) {
         return null;

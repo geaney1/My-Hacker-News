@@ -1,10 +1,17 @@
 <div class="field">
-  <label [for]="fieldId()">{{ label() }}</label>
+  <div class="label-row">
+    <label [for]="fieldId()">{{ label() }}</label>
+    @if (info(); as explanation) {
+      <app-info-tip [label]="label()" [text]="explanation" [tipId]="infoId()" />
+    }
+  </div>
   <input
     [id]="fieldId()"
     [type]="type()"
     [attr.autocomplete]="autocomplete()"
     [attr.aria-describedby]="describedBy()"
+    [attr.aria-invalid]="errorMessage() ? 'true' : null"
+    [attr.aria-required]="isRequired() ? 'true' : null"
     [formField]="field()"
   />
   @if (hint()) {

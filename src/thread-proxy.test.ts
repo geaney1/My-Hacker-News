@@ -2,6 +2,18 @@ import type { HnItem } from './app/models/hn-item';
 
 vi.mock('./stories-proxy', () => ({ getItem: vi.fn() }));
 
+// Comments written in this app, by story id. The real store is tested on its own.
+const local = vi.hoisted(() => ({
+  comments: new Map<number, unknown[]>(),
+  askedFor: [] as { id: number; viewer?: string }[],
+}));
+vi.mock('./comments-store', () => ({
+  getLocalComments: async (id: number, viewer?: string) => {
+    local.askedFor.push({ id, viewer });
+    return local.comments.get(id) ?? [];
+  },
+}));
+
 describe('thread proxy', () => {
   let getThread: typeof import('./thread-proxy').getThread;
   let getItem: ReturnType<typeof vi.fn>;
@@ -13,6 +25,8 @@ describe('thread proxy', () => {
   }
 
   beforeEach(async () => {
+    local.comments.clear();
+    local.askedFor = [];
     ({ getThread } = await import('./thread-proxy'));
     getItem = (await import('./stories-proxy')).getItem as unknown as ReturnType<typeof vi.fn>;
     getItem.mockReset();
@@ -31,6 +45,60 @@ describe('thread proxy', () => {
       pollOptions: [],
       truncated: false,
     });
+  });
+
+  it('puts the comments written in this app first, and counts them, on a story submitted here', async () => {
+    const story = { id: 2_000_000_001, type: 'story' as const, title: 'Mine', descendants: 0 };
+    serve([story]);
+    local.comments.set(story.id, [
+      { id: 3_000_000_002, type: 'comment', by: 'Ben', text: 'Second', replies: [] },
+      { id: 3_000_000_001, type: 'comment', by: 'Anna', text: 'First', replies: [] },
+    ]);
+
+    const thread = await getThread(story.id);
+    expect(thread?.item.descendants).toBe(2);
+    expect(thread?.comments.map((comment) => comment.text)).toEqual(['Second', 'First']);
+  });
+
+  it('leaves the story alone when it has no comments written in this app', async () => {
+    serve([{ id: 2_000_000_001, type: 'story', title: 'Mine', descendants: 0 }]);
+    expect((await getThread(2_000_000_001))?.comments).toEqual([]);
+  });
+
+  describe('Show Dead', () => {
+    const story = { id: 1, type: 'story' as const, kids: [10, 11, 12], parts: [20, 21] };
+    const items = [
+      story,
+      { id: 10, type: 'comment' as const, text: 'Alive' },
+      { id: 11, type: 'comment' as const, text: 'Dead', dead: true },
+      { id: 12, type: 'comment' as const, text: 'Deleted', deleted: true },
+      { id: 20, type: 'pollopt' as const, text: 'Option' },
+      { id: 21, type: 'pollopt' as const, text: 'Dead option', dead: true },
+    ];
+
+    it('leaves dead and deleted comments and options out by default', async () => {
+      serve(items);
+      const thread = await getThread(1);
+      expect(thread?.comments.map((comment) => comment.text)).toEqual(['Alive']);
+      expect(thread?.pollOptions.map((option) => option.text)).toEqual(['Option']);
+    });
+
+    it('includes dead ones, but never deleted ones, when the viewer has Show Dead', async () => {
+      serve(items);
+      const thread = await getThread(1, { showDead: true, delaySeconds: 0 });
+      expect(thread?.comments.map((comment) => comment.text)).toEqual(['Alive', 'Dead']);
+      expect(thread?.pollOptions.map((option) => option.text)).toEqual(['Option', 'Dead option']);
+    });
+  });
+
+  it('asks for the comments of this app as the viewer, so their Delay can hide them from others', async () => {
+    serve([{ id: 2_000_000_001, type: 'story', title: 'Mine' }]);
+    await getThread(2_000_000_001, { username: 'Anna', showDead: false, delaySeconds: 60 });
+    await getThread(2_000_000_001);
+    expect(local.askedFor).toEqual([
+      { id: 2_000_000_001, viewer: 'Anna' },
+      { id: 2_000_000_001, viewer: undefined },
+    ]);
   });
 
   it('nests replies under their comments and keeps the ranked order of kids', async () => {

@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { apply, form, required, submit, validate } from '@angular/forms/signals';
+import { Component, inject, signal } from '@angular/core';
+import { apply, form, required, validate } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { AuthStore } from '../../core/auth/auth.store';
 import { authFailureMessage } from '../../shared/auth-failure-message';
@@ -7,13 +7,14 @@ import { AuthCard } from '../../shared/auth-card/auth-card';
 import { FormTextField } from '../../shared/form-text-field/form-text-field';
 import { ChangePasswordModel } from '../../models/change-password-model';
 import { passwordSchema } from '../auth/password.schema';
+import { Banner } from '../../shared/banner/banner';
+import { submitOrFocusProblem } from '../../shared/submit-form';
 
 @Component({
   selector: 'app-change-password',
-  imports: [AuthCard, FormTextField],
+  imports: [Banner, AuthCard, FormTextField],
   templateUrl: './change-password.html',
   styleUrl: '../../shared/auth-form.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChangePassword {
   private readonly authStore = inject(AuthStore);
@@ -58,7 +59,7 @@ export class ChangePassword {
   protected async onSubmit(event: Event) {
     event.preventDefault();
     this.formError.set(undefined);
-    await submit(this.changePasswordForm, async () => {
+    await submitOrFocusProblem(this.changePasswordForm, async () => {
       const { currentPassword, newPassword } = this.changePasswordModel();
       const failure = await this.authStore.changePassword(currentPassword, newPassword);
       if (failure) {

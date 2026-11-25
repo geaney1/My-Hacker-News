@@ -1,12 +1,20 @@
-<button type="button" class="button back" (click)="goBack()">← Back</button>
+<!--
+  The Back button. It is shown to the left of "Add comment" when the story has a comment box, and
+  on its own below everything else (loading, an error, a job post, a missing story).
+-->
+<ng-template #backButton>
+  <button type="button" class="button button-outline" (click)="goBack()">← Back</button>
+</ng-template>
 
 @if (thread.isLoading()) {
   <p role="status">Loading story…</p>
+  <ng-container [ngTemplateOutlet]="backButton" />
 } @else if (thread.error()) {
-  <p class="error" role="alert">
+  <app-banner kind="error">
     Could not load this story.
-    <button type="button" class="button" (click)="thread.reload()">Try again</button>
-  </p>
+    <button bannerAction type="button" class="button button-outline" (click)="thread.reload()">Try again</button>
+  </app-banner>
+  <ng-container [ngTemplateOutlet]="backButton" />
 } @else if (thread.value(); as loaded) {
   <article class="story">
     <h2>
@@ -22,14 +30,7 @@
         <a [routerLink]="['/user', author]">{{ author }}</a>
       }
       ·
-      {{ loaded.item.time | timeAgo }} ·
-      <a
-        [href]="'https://news.ycombinator.com/item?id=' + loaded.item.id"
-        target="_blank"
-        rel="noopener"
-      >
-        View on Hacker News
-      </a>
+      {{ loaded.item.time | timeAgo }}
     </p>
     @if (loaded.item.text) {
       <div class="text hn-text" [innerHTML]="loaded.item.text"></div>
@@ -58,45 +59,19 @@
   <!-- Job posts have no discussion. -->
   @if (loaded.item.type !== 'job') {
   <section class="comments" aria-labelledby="comments-heading">
-    <h3 id="comments-heading">
-      {{ (loaded.item.descendants ?? 0) + newComments().length }} comments
-    </h3>
+    <!-- The comment count, and beside it a prompt to log in when nobody is. -->
+    <div class="comments-header">
+      <h3 id="comments-heading">
+        {{ (loaded.item.descendants ?? 0) + newComments().length }} comments
+      </h3>
+      @if (!login()) {
+        <p class="login-prompt"><a routerLink="/log-in">Log in</a> to add a comment.</p>
+      }
+    </div>
 
-    @if (authStore.login()) {
-      <form class="add-comment" novalidate (submit)="onAddComment($event)">
-        <label class="visually-hidden" for="new-comment">Add a comment</label>
-        <textarea
-          id="new-comment"
-          rows="6"
-          aria-describedby="new-comment-hint new-comment-error"
-          [formField]="newCommentForm.text"
-        ></textarea>
-        <p class="note" id="new-comment-hint">
-          Comments are kept in this browser session only. They are not posted to Hacker News.
-        </p>
-        @if (newCommentForm.text().touched() && newCommentForm.text().errors().length) {
-          <p class="error" id="new-comment-error" role="alert">
-            {{ newCommentForm.text().errors()[0].message }}
-          </p>
-        }
-        <div class="add-comment-actions">
-          <button type="submit" class="button add-comment-button">Add comment</button>
-          <a
-            class="button reply-link"
-            [href]="'https://news.ycombinator.com/item?id=' + loaded.item.id"
-            target="_blank"
-            rel="noopener"
-          >
-            Reply on Hacker News
-            <span class="visually-hidden">(opens in a new tab)</span>
-          </a>
-        </div>
-      </form>
-    } @else {
-      <p class="login-prompt">
-        <a routerLink="/log-in">Log in</a> to add a comment.
-      </p>
-    }
+    <app-add-comment [itemId]="id()" (saved)="thread.reload()">
+      <ng-container [ngTemplateOutlet]="backButton" />
+    </app-add-comment>
 
     @if (newComments().length || loaded.comments.length) {
       <ul class="comment-list">
@@ -108,22 +83,16 @@
         }
       </ul>
       @if (loaded.truncated) {
-        <p class="note">
-          Showing the first comments only.
-          <a
-            [href]="'https://news.ycombinator.com/item?id=' + loaded.item.id"
-            target="_blank"
-            rel="noopener"
-          >
-            Read the rest on Hacker News
-          </a>
-        </p>
+        <p class="note">Showing the first comments only.</p>
       }
     } @else {
       <p class="note">No comments yet.</p>
     }
   </section>
+  } @else {
+    <ng-container [ngTemplateOutlet]="backButton" />
   }
 } @else {
-  <p role="alert">This story could not be found.</p>
+  <app-banner kind="error">This story could not be found.</app-banner>
+  <ng-container [ngTemplateOutlet]="backButton" />
 }

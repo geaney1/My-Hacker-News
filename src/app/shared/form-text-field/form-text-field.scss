@@ -11,13 +11,23 @@
     font-weight: 700;
   }
 
-  input {
+  // The label, with the "i" button beside it. The explanation wraps onto a row of its own.
+  .label-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  input,
+  textarea {
     padding: 0.625rem 0.75rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-control);
     border-radius: var(--radius);
     background: var(--color-surface);
     color: var(--color-text);
     font: inherit;
+    resize: vertical;
 
     &:focus-visible {
       outline: 2px solid var(--color-focus);

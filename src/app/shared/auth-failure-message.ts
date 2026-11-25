@@ -10,7 +10,7 @@ const messages: Record<AuthFailure, string> = {
   unavailable: 'Something went wrong. Please try again.',
 };
 
-/** The text shown to the user for a failed sign-up, log-in or password change. */
+/** The text shown to the user for a failed attempt to create a user, log in or change a password. */
 export function authFailureMessage(failure: AuthFailure) {
   return messages[failure];
 }

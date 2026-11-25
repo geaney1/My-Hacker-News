@@ -1,0 +1,35 @@
+<app-auth-card heading="Submit a story">
+  <form class="auth-form" novalidate (submit)="onSubmit($event)">
+    <app-form-text-field
+      fieldId="story-title"
+      label="Title"
+      autocomplete="off"
+      [hint]="'At most ' + maxTitleLength + ' characters.'"
+      [field]="submitForm.title"
+    />
+
+    <app-form-text-field
+      fieldId="story-url"
+      label="Link"
+      type="url"
+      autocomplete="off"
+      hint="Starting with http:// or https://. Leave blank to submit a question for discussion."
+      [field]="submitForm.url"
+    />
+
+    <app-form-text-area
+      fieldId="story-text"
+      [label]="textLabel()"
+      [hint]="textHint()"
+      [field]="submitForm.text"
+    />
+
+    @if (formError(); as message) {
+      <app-banner class="form-error" kind="error" [compact]="true">{{ message }}</app-banner>
+    }
+
+    <button type="submit" class="button button-solid">
+      {{ isQuestion() ? 'Submit question' : 'Submit story' }}
+    </button>
+  </form>
+</app-auth-card>

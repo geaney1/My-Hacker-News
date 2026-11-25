@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Service, signal } from '@angular/core';
 import { HnComment } from '../../models/hn-comment';
 
 const htmlEscapes: Record<string, string> = {
@@ -20,11 +20,11 @@ function toCommentHtml(text: string) {
 }
 
 /**
- * Comments written in this app. The Hacker News API is read-only and there is no backend yet,
- * so they are only kept in memory for the current session: they are not posted anywhere and
- * disappear when the page is reloaded.
+ * Comments written on a Hacker News story. The Hacker News API is read-only, so they are only
+ * kept in the browser's memory until the page is reloaded: they are not posted to Hacker News or
+ * saved on this app's server.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class NewCommentsStore {
   private readonly commentsByItem = signal<ReadonlyMap<number, readonly HnComment[]>>(new Map());
 

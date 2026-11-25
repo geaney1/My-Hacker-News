@@ -1,0 +1,84 @@
+:host {
+  display: block;
+}
+
+// A banner across the page: a clearly tinted orange with a darker edge, a shadow and an accent rule
+// on top, so it stands out from the page and does not read as a white story card.
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem var(--spacing);
+  padding: var(--spacing) calc(var(--spacing) * 1.25);
+  border: 1px solid var(--color-banner-border);
+  border-top: 4px solid var(--color-accent);
+  border-radius: var(--radius);
+  background: linear-gradient(var(--color-banner-start), var(--color-banner-end));
+  box-shadow: 0 2px 8px rgb(0 0 0 / 14%);
+  color: var(--color-text);
+}
+
+.icon {
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--color-accent);
+}
+
+// The words take the space between the icon and the button. On a narrow screen the button drops
+// under them, and the icon stays beside the words.
+.message {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.heading {
+  margin: 0 0 0.125rem;
+  font-size: 1.125rem;
+}
+
+.text {
+  line-height: 1.45;
+
+  :where(p) {
+    margin: 0;
+  }
+}
+
+.action {
+  flex: none;
+
+  &:empty {
+    display: none;
+  }
+}
+
+// An error is red: a red rule, and a pale red tint.
+:host(.banner-error) .banner {
+  border-color: var(--color-error-border);
+  border-top-color: var(--color-error);
+  background: var(--color-error-soft);
+
+  .icon {
+    color: var(--color-error);
+  }
+}
+
+// An information banner is calmer: the same tint, with a thinner rule.
+:host(.banner-info) .banner {
+  border-top-width: 1px;
+  border-top-color: var(--color-banner-border);
+}
+
+// A smaller banner, for a notice inside a dialog.
+:host(.banner-compact) .banner {
+  gap: 0.5rem 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border-top-width: 3px;
+  font-size: 0.9375rem;
+
+  .icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}

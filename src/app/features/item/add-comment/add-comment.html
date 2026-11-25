@@ -1,0 +1,39 @@
+<!-- What the page puts inside this component, shown in whichever of the two places is used. -->
+<ng-template #projected><ng-content /></ng-template>
+
+@if (login()) {
+  <form class="add-comment" novalidate (submit)="onAddComment($event)">
+    <label class="visually-hidden" for="new-comment">Add a comment</label>
+    <textarea
+      id="new-comment"
+      rows="6"
+      aria-describedby="new-comment-hint new-comment-error"
+      [formField]="newCommentForm.text"
+    ></textarea>
+    <p class="note" id="new-comment-hint">
+      @if (isLocalStory()) {
+        Comments on stories submitted here are saved on this app's server.
+      } @else {
+        Your comment is only shown on this page until you reload it. It is not saved, and it is not
+        posted to Hacker News.
+      }
+    </p>
+    @if (newCommentForm.text().touched() && newCommentForm.text().errors().length) {
+      <p class="error" id="new-comment-error" role="alert">
+        {{ newCommentForm.text().errors()[0].message }}
+      </p>
+    }
+    @if (commentError(); as message) {
+      <app-banner kind="error" [compact]="true">{{ message }}</app-banner>
+    }
+    <div class="add-comment-actions">
+      <ng-container [ngTemplateOutlet]="projected" />
+      <button type="submit" class="button button-solid">Add comment</button>
+    </div>
+  </form>
+} @else {
+  <!-- Nobody is logged in: the page shows the log-in prompt beside the comment count. -->
+  <div class="add-comment-actions">
+    <ng-container [ngTemplateOutlet]="projected" />
+  </div>
+}

@@ -22,28 +22,35 @@
 
 <section class="stories" aria-labelledby="stories-heading" [attr.aria-busy]="store.isLoading()">
   @if (store.error()) {
-    <p class="error" role="alert">
+    <app-banner kind="error">
       Could not load stories.
-      <button type="button" class="button" (click)="store.reload()">Try again</button>
-    </p>
+      <button bannerAction type="button" class="button button-outline" (click)="store.reload()">Try again</button>
+    </app-banner>
   } @else if (store.isLoading()) {
     <p role="status">Loading stories…</p>
   } @else {
     @if (store.changedStoryCount(); as changed) {
-      <p class="updates-notice" role="status">
+      <app-banner class="updates-notice" kind="info">
         {{ changed }} {{ changed === 1 ? 'story has' : 'stories have' }} been updated on Hacker News.
-        <button type="button" class="button" (click)="store.reload()">Refresh</button>
-      </p>
+        <button bannerAction type="button" class="button button-outline" (click)="store.reload()">Refresh</button>
+      </app-banner>
     }
     <ul class="story-list">
       @for (story of store.stories(); track story.id) {
         <li>
-          <article class="story">
+          <article class="story hover-accent">
             <h3 class="story-title">
-              @if (story.url) {
-                <a [href]="story.url" target="_blank" rel="noopener">{{ story.title }}</a>
+              <!-- A story with an article opens the article. One without (such as an Ask HN) opens its page here. -->
+              @if (story.url; as articleUrl) {
+                <a [href]="articleUrl" target="_blank" rel="noopener">
+                  {{ story.title }}
+                  <span class="visually-hidden">(opens in a new tab)</span>
+                </a>
               } @else {
                 <a [routerLink]="['/item', story.id]">{{ story.title }}</a>
+              }
+              @if (story.dead) {
+                <span class="dead">[dead]</span>
               }
             </h3>
             <p class="story-meta">

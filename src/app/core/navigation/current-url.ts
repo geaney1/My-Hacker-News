@@ -18,7 +18,7 @@ export function injectCurrentUrl() {
   );
 }
 
-/** The first part of an address, e.g. `new` for `/new?x=1` or `log-in` for `/log-in`. */
+/** The first part of an address, e.g. `new` for `/new?x=1` or `user` for `/user/pg`. */
 export function firstSegmentOf(url: string) {
   return url.split(/[?#]/)[0].split('/')[1];
 }

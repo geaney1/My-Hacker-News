@@ -1,17 +1,17 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, linkedSignal } from '@angular/core';
+import { Component, effect, inject, input, linkedSignal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { HnStoryList } from '../../../models/hn-story-list';
 import { Pagination } from '../../../shared/pagination/pagination';
 import { TimeAgoPipe } from '../../../shared/time-ago.pipe';
 import { StoriesStore } from '../stories.store';
+import { Banner } from '../../../shared/banner/banner';
 
 @Component({
   selector: 'app-stories-page',
-  imports: [FormField, Pagination, RouterLink, TimeAgoPipe],
+  imports: [Banner, FormField, Pagination, RouterLink, TimeAgoPipe],
   templateUrl: './stories-page.html',
   styleUrl: './stories-page.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StoriesPage {
   protected readonly store = inject(StoriesStore);

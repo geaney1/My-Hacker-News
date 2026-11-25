@@ -1,10 +1,10 @@
 <nav class="pagination" aria-label="Pagination">
-  <p class="status">Page {{ page() }} of {{ totalPages() }}</p>
+  <p class="status" role="status">Page {{ page() }} of {{ totalPages() }}</p>
 
   <div class="controls">
     <button
       type="button"
-      class="button arrow"
+      class="button button-outline arrow"
       aria-label="Previous page"
       [disabled]="page() <= 1"
       (click)="select(page() - 1)"
@@ -37,7 +37,7 @@
 
     <button
       type="button"
-      class="button arrow"
+      class="button button-outline arrow"
       aria-label="Next page"
       [disabled]="page() >= totalPages()"
       (click)="select(page() + 1)"
@@ -48,11 +48,12 @@
     </button>
 
     <form class="go-to" (submit)="onGoToPage($event)">
-      <label for="go-to-page">Go to page</label>
+      <label class="go-to-label" for="go-to-page">Go to page</label>
       <input
         id="go-to-page"
         type="number"
         inputmode="numeric"
+        placeholder="Page"
         [attr.aria-invalid]="goToPageError() ? 'true' : null"
         [attr.aria-describedby]="goToPageError() ? 'go-to-page-error' : null"
         [formField]="goToPageForm.page"

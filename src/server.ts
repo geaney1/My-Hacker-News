@@ -7,12 +7,16 @@ import {
 import express from 'express';
 import { join } from 'node:path';
 import { authRouter } from './auth-routes';
+import { commentsRouter } from './comments-routes';
 import { BadRequestError } from './hn-fetch';
+import { profileRouter } from './profile-routes';
+import { nonceOf, parseTrustProxy, securityHeaders, withCspNonce } from './security';
 import { getStoryPage, parseItemId } from './stories-proxy';
+import { submissionsRouter } from './submissions-routes';
 import { getThread } from './thread-proxy';
+import { viewerOf } from './viewer';
 import { getUpdates } from './updates-proxy';
 import { getUser } from './users-proxy';
-import { getWelcomeContent } from './welcome-proxy';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
@@ -20,21 +24,38 @@ const app = express();
 const angularApp = new AngularNodeAppEngine();
 
 /**
- * Accounts and sessions: sign up, log in, log out and "who am I". Request bodies are small JSON.
+ * `true` when this file is the server itself (`npm run serve:ssr:hacker-news`, a process manager),
+ * and not the dev server or a build step that borrows its request handler. Only the real server
+ * sends the security headers: the dev server needs inline scripts and a websocket they would block.
+ */
+const runsAsServer = isMainModule(import.meta.url) || !!process.env['pm_id'];
+
+// Behind a proxy that ends HTTPS, set TRUST_PROXY (see security.ts) so cookies are marked Secure
+// and the rate limits see each visitor's own address.
+const trustProxy = parseTrustProxy(process.env['TRUST_PROXY']);
+if (trustProxy !== undefined) {
+  app.set('trust proxy', trustProxy);
+}
+app.disable('x-powered-by');
+
+if (runsAsServer) {
+  app.use(...securityHeaders());
+}
+
+/**
+ * Accounts and sessions: create a user, log in, log out and "who am I". Request bodies are small JSON.
  */
 app.use('/api/auth', express.json({ limit: '10kb' }), authRouter);
 
 /**
- * Proxies the Hacker News welcome page, which the browser cannot fetch directly (CORS).
+ * The logged-in user's profile: read it, and save it.
  */
-app.get('/api/welcome', async (_request, response) => {
-  try {
-    response.json(await getWelcomeContent());
-  } catch (error) {
-    console.error('Failed to load the welcome page', error);
-    response.status(502).json({ message: 'Could not load the welcome page' });
-  }
-});
+app.use('/api/profile', express.json({ limit: '10kb' }), profileRouter);
+
+/**
+ * Stories submitted by logged-in users, saved on this server.
+ */
+app.use('/api/submissions', express.json({ limit: '10kb' }), submissionsRouter);
 
 /**
  * Loads a page of a story list in one call, instead of the browser making one request per story.
@@ -42,7 +63,8 @@ app.get('/api/welcome', async (_request, response) => {
 app.get('/api/stories/:list', async (request, response) => {
   try {
     const { page, pageSize } = request.query;
-    response.json(await getStoryPage(request.params.list, page, pageSize));
+    const { showDead } = await viewerOf(request);
+    response.json(await getStoryPage(request.params.list, page, pageSize, { showDead }));
   } catch (error) {
     if (error instanceof BadRequestError) {
       response.status(400).json({ message: error.message });
@@ -66,11 +88,16 @@ app.get('/api/updates', async (_request, response) => {
 });
 
 /**
+ * Writing a comment on a story submitted in this app. Reading comments is the thread route below.
+ */
+app.use('/api/items', express.json({ limit: '10kb' }), commentsRouter);
+
+/**
  * Loads an item together with its comment tree. Answers 404 when the item does not exist.
  */
 app.get('/api/items/:id/thread', async (request, response) => {
   try {
-    const thread = await getThread(parseItemId(request.params.id));
+    const thread = await getThread(parseItemId(request.params.id), await viewerOf(request));
     if (!thread) {
       response.status(404).json({ message: 'Item not found' });
       return;
@@ -124,9 +151,16 @@ app.use(
 app.use((req, res, next) => {
   angularApp
     .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
+    .then(async (response) => {
+      if (!response) {
+        return next();
+      }
+      // The inline scripts and styles of the rendered page get this request's nonce.
+      await writeResponseToNodeResponse(
+        runsAsServer ? await withCspNonce(response, nonceOf(res)) : response,
+        res,
+      );
+    })
     .catch(next);
 });
 
@@ -134,7 +168,7 @@ app.use((req, res, next) => {
  * Start the server if this module is the main entry point, or it is ran via PM2.
  * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
  */
-if (isMainModule(import.meta.url) || process.env['pm_id']) {
+if (runsAsServer) {
   const port = process.env['PORT'] || 4000;
   app.listen(port, (error) => {
     if (error) {

@@ -148,13 +148,13 @@ describe('AuthStore', () => {
     });
   });
 
-  describe('signOut', () => {
+  describe('logOut', () => {
     it('logs out straight away, before the server has answered, and ends the session', async () => {
       const login = store.logIn('Anna', 'correct-horse');
       respondWith('/api/auth/login', 200, { username: 'Anna' });
       await login;
 
-      const done = store.signOut();
+      const done = store.logOut();
       expect(store.login()).toBe(false);
       expect(store.username()).toBe('');
 
@@ -169,7 +169,7 @@ describe('AuthStore', () => {
       respondWith('/api/auth/login', 200, { username: 'Anna' });
       await login;
 
-      const done = store.signOut();
+      const done = store.logOut();
       respondWith('/api/auth/logout', 500);
       await expect(done).resolves.toBeUndefined();
       expect(store.login()).toBe(false);

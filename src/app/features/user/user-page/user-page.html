@@ -9,16 +9,18 @@
   @if (user.isLoading()) {
     <p role="status">Loading profile…</p>
   } @else if (user.error()) {
-    <p class="error" role="alert">
+    <app-banner kind="error">
       Could not load this profile.
-      <button type="button" class="button" (click)="user.reload()">Try again</button>
-    </p>
+      <button bannerAction type="button" class="button button-outline" (click)="user.reload()">Try again</button>
+    </app-banner>
   } @else if (user.value(); as hnUser) {
     <dl class="stats">
-      <div class="stat">
-        <dt>Created</dt>
-        <dd>{{ hnUser.created | timeAgo }}</dd>
-      </div>
+      @if (hnUser.created) {
+        <div class="stat">
+          <dt>Created</dt>
+          <dd>{{ hnUser.created | timeAgo }}</dd>
+        </div>
+      }
       <div class="stat">
         <dt>Karma</dt>
         <dd>{{ hnUser.karma }}</dd>
@@ -35,21 +37,7 @@
         <div class="about hn-text" [innerHTML]="hnUser.about"></div>
       </section>
     }
-
-    <p class="note">
-      @if (isOwnProfile()) {
-        <a routerLink="/user-profile">Edit your settings</a>
-        ·
-      }
-      <a
-        [href]="'https://news.ycombinator.com/user?id=' + hnUser.id"
-        target="_blank"
-        rel="noopener"
-      >
-        View on Hacker News
-      </a>
-    </p>
   } @else {
-    <p role="alert">No Hacker News user named {{ id() }} was found.</p>
+    <app-banner kind="error">No user named {{ id() }} was found.</app-banner>
   }
 </article>

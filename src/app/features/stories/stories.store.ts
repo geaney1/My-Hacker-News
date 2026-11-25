@@ -1,19 +1,7 @@
-import {
-  afterNextRender,
-  DestroyRef,
-  DOCUMENT,
-  computed,
-  effect,
-  inject,
-  Injectable,
-  linkedSignal,
-  PLATFORM_ID,
-  resource,
-  signal,
-  untracked,
-} from '@angular/core';
+import { afterNextRender, computed, DestroyRef, DOCUMENT, effect, inject, linkedSignal, PLATFORM_ID, resource, Service, signal, untracked } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HnApi } from '../../core/api/hn-api';
+import { ProfileStore } from '../../core/profile/profile.store';
 import { HnStoryList } from '../../models/hn-story-list';
 import { StoryPage } from '../../models/story-page';
 
@@ -22,9 +10,10 @@ const storageKey = 'hacker-news.stories.preferences';
 /** How often the app asks Hacker News which items changed. */
 const updatesPollMilliseconds = 60 * 1000;
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class StoriesStore {
   private readonly api = inject(HnApi);
+  private readonly profileStore = inject(ProfileStore);
 
   // Writable state
   readonly selectedList = signal<HnStoryList>('top');
@@ -40,7 +29,13 @@ export class StoriesStore {
 
   // Server data: the current page of the selected list, loaded in a single request
   private readonly pageResource = resource({
-    params: () => ({ list: this.selectedList(), page: this.page(), pageSize: this.pageSize() }),
+    params: () => ({
+      list: this.selectedList(),
+      page: this.page(),
+      pageSize: this.pageSize(),
+      // Loads the page again when Show Dead is turned on or off.
+      showDead: this.profileStore.showDead(),
+    }),
     loader: ({ params, abortSignal }) =>
       this.api.getStoryPage(params.list, params.page, params.pageSize, abortSignal),
   });

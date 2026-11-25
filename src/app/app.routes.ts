@@ -1,5 +1,5 @@
 ﻿import { Routes } from '@angular/router';
-import { loggedInGuard, submitListGuard } from './core/auth/auth.guards';
+import { loggedInGuard } from './core/auth/auth.guards';
 import { storyListMatcher } from './features/stories/story-list.matcher';
 
 export const routes: Routes = [
@@ -20,6 +20,13 @@ export const routes: Routes = [
         title: 'Create a new user',
         loadComponent: () =>
           import('./features/auth/create-user/create-user').then((module) => module.CreateUser),
+      },
+      {
+        path: 'submit',
+        title: 'Submit a story',
+        canActivate: [loggedInGuard],
+        loadComponent: () =>
+          import('./features/submit/submit-story').then((module) => module.SubmitStory),
       },
       {
         path: 'welcome',
@@ -56,10 +63,9 @@ export const routes: Routes = [
           ),
       },
       {
-        // Matches /top, /new, /best, /ask, /show, /job and /submit
+        // Matches /top, /new, /best, /ask, /show and /job
         matcher: storyListMatcher,
         title: 'Hacker News',
-        canActivate: [submitListGuard],
         loadComponent: () =>
           import('./features/stories/stories-page/stories-page').then(
             (module) => module.StoriesPage,

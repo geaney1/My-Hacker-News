@@ -1,0 +1,74 @@
+// The button sits in the label's row; the explanation takes a row of its own under it, so the
+// label row has to be allowed to wrap (flex-wrap in the field that holds it).
+:host {
+  display: contents;
+}
+
+// At least 24 by 24 pixels, as WCAG asks of anything that can be pressed.
+.info-button {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-accent);
+  cursor: pointer;
+  transition: transform 0.15s;
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  &:hover {
+    transform: scale(1.2);
+  }
+
+  &[aria-expanded='true'] {
+    background: var(--color-accent-soft);
+  }
+}
+
+.info-text {
+  flex: 1 1 100%;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-tint-border);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius);
+  background: var(--color-tint);
+  color: var(--color-text);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.4;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+// The name of a setting inside an explanation: bold, in the accent colour, on a pale pill.
+.setting-name {
+  // The pill reaches into the spaces either side, so the words keep their normal spacing.
+  padding: 0.0625rem 0.3125rem;
+  margin-inline: -0.25rem;
+  border-radius: 999px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .info-button {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}

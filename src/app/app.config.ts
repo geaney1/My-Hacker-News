@@ -16,7 +16,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(),
     provideClientHydration(),
-    // Find out who is signed in before the first page is shown, so guards and the header agree.
+    // Find out who is logged in before the first page is shown, so the header and the guards agree.
     provideAppInitializer(() => inject(AuthStore).initialize()),
   ]
 };

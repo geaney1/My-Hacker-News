@@ -3,10 +3,10 @@
 :host {
   display: block;
   padding: 0.625rem var(--spacing);
-  border: 1px solid #f2dccb;
+  border: 1px solid var(--color-tint-border);
   border-top: 3px solid var(--color-accent);
   border-radius: var(--radius);
-  background: linear-gradient(#fffaf6, #fef0e4);
+  background: linear-gradient(var(--color-tint-start), var(--color-tint-end));
   color: var(--color-text);
 }
 
@@ -24,6 +24,7 @@
   font-weight: 600;
 }
 
+
 .controls {
   display: flex;
   flex-wrap: wrap;
@@ -33,13 +34,10 @@
   margin-inline-start: auto;
 }
 
-// Solid white buttons stand out against the tinted bar.
-.button {
+// Solid buttons, in the colour of a card, stand out against the tinted bar. The outlined ones (the arrows) have their
+// own background. Growing on hover, and not reacting while off, comes from the shared button style.
+.button:not(.button-outline) {
   background: var(--color-surface);
-
-  &:hover:not(:disabled) {
-    border-color: var(--color-accent);
-  }
 }
 
 .arrow {
@@ -48,6 +46,11 @@
   width: 2.5rem;
   height: 2.5rem;
   padding: 0;
+
+  @media (max-width: 32rem) {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
 
   svg {
     width: 1.25rem;
@@ -87,16 +90,17 @@
 .go-to-error {
   position: absolute;
   inset-inline-end: 0;
-  bottom: calc(100% + 0.75rem);
+  bottom: calc(100% + 0.5rem);
   z-index: 2;
   margin: 0;
-  padding: 0.375rem 0.625rem;
-  border: 1px solid var(--color-error);
+  // The same look as the "Close" tooltip of a dialog: a small dark label with light words.
+  padding: 0.25rem 0.5rem;
   border-radius: var(--radius);
-  background: var(--color-surface);
-  box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
-  color: var(--color-error);
-  font-weight: 600;
+  background: var(--color-text);
+  color: var(--color-surface);
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.2;
   white-space: nowrap;
 }
 
@@ -107,17 +111,74 @@
   gap: 0.5rem;
   font-size: 0.875rem;
 
+  // The Go button is the same height as the box beside it.
+  .button {
+    box-sizing: border-box;
+    height: 2rem;
+    padding: 0 0.75rem;
+  }
+
+  // The words "Go to page" are for screen readers only, on every screen: the box says "Page" in it.
+  .go-to-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  // Wide enough for the word "Page" in the empty box, with the spinner beside it, and for a few
+  // digits. 5.25rem by 2rem (84 by 32px) in all, border and padding included.
   input {
-    width: 5rem;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--color-border);
+    box-sizing: border-box;
+    width: 5.25rem;
+    height: 2rem;
+    padding: 0 0.375rem;
+    border: 1px solid var(--color-border-control);
     border-radius: var(--radius);
     background: var(--color-surface);
     color: var(--color-text);
     font: inherit;
 
+    // The word in the empty box. Muted, but dark enough to read (WCAG AA).
+    &::placeholder {
+      color: var(--color-text-muted);
+      opacity: 1;
+    }
+
     &[aria-invalid='true'] {
       border-color: var(--color-error);
     }
+  }
+}
+
+// A phone: a smaller bar, all on one line: "Page 1 of 2", the previous and next arrows, and the box
+// to go to a page. The numbered pages between the arrows are left out.
+@media (max-width: 32rem) {
+  :host {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .pagination {
+    gap: 0.375rem 0.5rem;
+  }
+
+  // The controls' children join the bar's own row, next to "Page 1 of 25", instead of being wrapped
+  // together onto a row of their own.
+  .controls {
+    display: contents;
+  }
+
+  .status {
+    margin-inline-end: auto;
+  }
+
+  .pages {
+    display: none;
+  }
+
+  .go-to {
+    flex: none;
   }
 }

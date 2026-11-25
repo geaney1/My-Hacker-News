@@ -1,5 +1,5 @@
-﻿import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
-import { apply, form, submit } from '@angular/forms/signals';
+﻿import { Component, inject, input, signal } from '@angular/core';
+import { apply, form } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { AuthCard } from '../../../shared/auth-card/auth-card';
 import { FormTextField } from '../../../shared/form-text-field/form-text-field';
@@ -10,13 +10,14 @@ import { authFailureMessage } from '../../../shared/auth-failure-message';
 import { StoriesStore } from '../../stories/stories.store';
 import { passwordSchema } from '../password.schema';
 import { usernameSchema } from '../username.schema';
+import { Banner } from '../../../shared/banner/banner';
+import { submitOrFocusProblem } from '../../../shared/submit-form';
 
 @Component({
   selector: 'app-log-in',
-  imports: [AuthCard, FormTextField, RouterLink],
+  imports: [Banner, AuthCard, FormTextField, RouterLink],
   templateUrl: './log-in.html',
   styleUrl: '../../../shared/auth-form.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LogIn {
   private readonly authStore = inject(AuthStore);
@@ -45,7 +46,7 @@ export class LogIn {
   protected async onSubmit(event: Event) {
     event.preventDefault();
     this.formError.set(undefined);
-    await submit(this.logInForm, async () => {
+    await submitOrFocusProblem(this.logInForm, async () => {
       const { username, password } = this.LogInModel();
       const failure = await this.authStore.logIn(username, password);
       if (failure) {

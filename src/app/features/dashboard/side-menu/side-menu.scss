@@ -4,8 +4,27 @@
   position: sticky;
   top: var(--spacing);
 
+  // On a small screen the menu is a drawer on the left, closed until the hamburger button opens it.
   @media (max-width: 48rem) {
-    position: static;
+    display: none;
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    z-index: 20;
+    box-sizing: border-box;
+    width: min(16rem, 80vw);
+    // The full height of the screen. (A top and bottom of 0 would not do: align-self: start above
+    // makes a fixed box only as tall as its content.)
+    height: 100dvh;
+    padding: calc(var(--spacing) * 1.5) var(--spacing);
+    overflow-y: auto;
+    border-inline-end: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 0 24px rgb(0 0 0 / 30%);
+
+    &.open {
+      display: block;
+    }
   }
 }
 
@@ -23,15 +42,6 @@ ul {
   .tab {
     width: 100%;
     text-align: start;
-  }
-
-  @media (max-width: 48rem) {
-    flex-direction: row;
-    flex-wrap: wrap;
-
-    .tab {
-      width: auto;
-    }
   }
 }
 

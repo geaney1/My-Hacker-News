@@ -1,33 +1,23 @@
-<!-- The content shared by the dialog and the plain card. -->
-<ng-template #card>
-  <a class="close" [routerLink]="closeTarget()" aria-label="Close">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-      <path d="M6 6l12 12M18 6L6 18" />
-    </svg>
-  </a>
-  <h2 [id]="headingId">{{ heading() }}</h2>
-  <ng-content />
-</ng-template>
-
 <!--
-  A section or a dialog, never a main: the dashboard around it already provides the page's main
-  area and its top-level heading, so the card's title is a second-level heading.
+  A dialog, never a main: the dashboard around it already provides the page's main area and its
+  top-level heading, so the card's title is a second-level heading.
 -->
-@if (modal()) {
-  <dialog
-    #dialog
-    class="auth-dialog"
-    open
-    [attr.aria-labelledby]="headingId"
-    (close)="onDialogClosed()"
-    (click)="onDialogClick($event)"
-  >
-    <div class="auth-page">
-      <ng-container [ngTemplateOutlet]="card" />
-    </div>
-  </dialog>
-} @else {
-  <section class="auth-page" [attr.aria-labelledby]="headingId">
-    <ng-container [ngTemplateOutlet]="card" />
-  </section>
-}
+<dialog
+  #dialog
+  class="auth-dialog"
+  open
+  [attr.aria-labelledby]="headingId"
+  (close)="onDialogClosed()"
+  (click)="onDialogClick($event)"
+  (mousedown)="keepFocusWhileClosing($event)"
+>
+  <div class="auth-page" [class.wide]="wide()">
+    <a class="close" [routerLink]="closeTarget()" aria-label="Close" data-tooltip="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    </a>
+    <h2 [id]="headingId">{{ heading() }}</h2>
+    <ng-content />
+  </div>
+</dialog>

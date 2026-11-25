@@ -6,6 +6,21 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    // The theme chosen in the profile (or the one the device prefers) is set before the page is
+    // painted, so a dark page does not flash white first. See ThemeStore.
+    (function () {
+      try {
+        var theme = localStorage.getItem('hacker-news.theme');
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.dataset.theme = theme;
+      } catch (error) {
+        // Storage is blocked: the light theme stays.
+      }
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

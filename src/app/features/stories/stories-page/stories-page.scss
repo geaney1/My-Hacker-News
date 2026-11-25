@@ -58,12 +58,42 @@ ul {
   // Rounded, pill-shaped fields set the filters apart from the square-ish story cards.
   input {
     padding: 0.5rem 1rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-control);
     border-radius: 999px;
     background: var(--color-surface);
     color: var(--color-text);
     font: inherit;
     font-weight: 400;
+  }
+}
+
+// A phone: the search and the minimum score are one under the other, each the full width.
+@media (max-width: 32rem) {
+  .toolbar {
+    align-items: stretch;
+  }
+
+  .filters {
+    flex: 1 1 100%;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0.5rem;
+
+    .field {
+      flex: none;
+      width: 100%;
+
+      &:first-child {
+        flex: none;
+        max-width: none;
+      }
+    }
+
+    input {
+      box-sizing: border-box;
+      width: 100%;
+    }
   }
 }
 
@@ -77,24 +107,6 @@ h2 {
   margin: 0;
   color: var(--color-text-muted);
   font-size: 0.875rem;
-}
-
-.error {
-  color: var(--color-error);
-}
-
-// Shown when Hacker News reports that stories on this page have changed since they were loaded.
-.updates-notice {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem var(--spacing);
-  margin: 0 0 var(--spacing);
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #f2dccb;
-  border-radius: var(--radius);
-  background: #fff6ee;
 }
 
 // Stories flow into as many columns as fit, so they only stack on small screens.
@@ -116,15 +128,6 @@ h2 {
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background: var(--color-surface);
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
-
-  &:hover,
-  &:focus-within {
-    border-color: var(--color-accent);
-    box-shadow: 0 2px 6px rgb(0 0 0 / 10%);
-  }
 }
 
 .story-title {
@@ -147,6 +150,14 @@ h2 {
       text-decoration: underline;
     }
   }
+}
+
+// A dead story, shown because the user has Show Dead turned on.
+.dead {
+  margin-left: 0.375rem;
+  color: var(--color-error);
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .story-meta {
@@ -173,12 +184,23 @@ h2 {
   font-size: 0.875rem;
 }
 
-// A footer bar pinned to the bottom of the screen: pushed down on short lists, and stuck to
-// the bottom edge while the stories scroll behind it on long ones.
+// A footer bar pinned to the very bottom of the screen: pushed down on short lists, and stuck to
+// the bottom edge while the stories scroll behind it on long ones. It reaches down over the page's
+// own padding, so there is no gap under it, and its bottom corners are square against the edge.
 .pagination {
   position: sticky;
-  bottom: var(--spacing);
+  bottom: 0;
   z-index: 1;
   margin-top: auto;
-  box-shadow: 0 4px 16px rgb(0 0 0 / 25%);
+  margin-bottom: calc(var(--page-padding, 1rem) * -1);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: 0 -4px 16px rgb(0 0 0 / 25%);
+
+  // A tablet or phone: the full width of the screen, edge to edge.
+  @media (max-width: 48rem) {
+    margin-inline: calc(var(--page-padding, 0.75rem) * -1);
+    border-inline: 0;
+    border-radius: 0;
+  }
 }

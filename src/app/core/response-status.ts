@@ -1,10 +1,10 @@
-import { inject, Injectable, RESPONSE_INIT } from '@angular/core';
+import { inject, RESPONSE_INIT, Service } from '@angular/core';
 
 /**
  * Sets the HTTP status of the page being server-rendered. In the browser there is no response
  * to change, so it does nothing there.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class ResponseStatus {
   private readonly responseInit = inject(RESPONSE_INIT, { optional: true });
 

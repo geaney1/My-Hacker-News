@@ -1,5 +1,5 @@
-﻿import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
-import { apply, form, required, submit, validate } from '@angular/forms/signals';
+﻿import { Component, inject, input, signal } from '@angular/core';
+import { apply, form, required, validate } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { AuthCard } from '../../../shared/auth-card/auth-card';
 import { FormTextField } from '../../../shared/form-text-field/form-text-field';
@@ -8,13 +8,14 @@ import { CreateUserModel } from '../../../models/create-user-model';
 import { authFailureMessage } from '../../../shared/auth-failure-message';
 import { passwordSchema } from '../password.schema';
 import { usernameSchema } from '../username.schema';
+import { Banner } from '../../../shared/banner/banner';
+import { submitOrFocusProblem } from '../../../shared/submit-form';
 
 @Component({
   selector: 'app-create-user',
-  imports: [AuthCard, FormTextField, RouterLink],
+  imports: [Banner, AuthCard, FormTextField, RouterLink],
   templateUrl: './create-user.html',
   styleUrl: '../../../shared/auth-form.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateUser {
   private readonly authStore = inject(AuthStore);
@@ -54,7 +55,7 @@ export class CreateUser {
   protected async onSubmit(event: Event) {
     event.preventDefault();
     this.formError.set(undefined);
-    await submit(this.createUserForm, async () => {
+    await submitOrFocusProblem(this.createUserForm, async () => {
       const { username, password } = this.createUserModel();
       const failure = await this.authStore.register(username, password);
       if (failure) {

@@ -9,8 +9,10 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## Angular Best Practices
 
+- The latest Angular features take priority: prefer the newest APIs and syntax of the installed version (Angular 22) over older equivalents. When unsure, call the Angular CLI MCP server's `get_best_practices` and `search_documentation` tools, and follow them.
 - Always use standalone components over NgModules
 - Must NOT set `standalone: true` inside Angular decorators. It's the default in Angular v20+.
+- Do NOT set `changeDetection: ChangeDetectionStrategy.OnPush` explicitly. `OnPush` is the default in Angular v22+.
 - Use signals for state management
 - Implement lazy loading for feature routes
 - Do NOT use the `@HostBinding` and `@HostListener` decorators. Put host bindings inside the `host` object of the `@Component` or `@Directive` decorator instead
@@ -26,12 +28,14 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 - Keep components small and focused on a single responsibility
 - Use `input()` and `output()` functions instead of decorators
+- Use `model()` for two-way bound properties with `[(prop)]` syntax instead of pairing `input()` with `output()`
 - Use `computed()` for derived state
-- Set `changeDetection: ChangeDetectionStrategy.OnPush` in `@Component` decorator
-- Use external HTML templates and SCSS files for components
-- Prefer Signal Forms instead of Reactive or Template-driven forms
+- Use `linkedSignal()` for state derived from multiple reactive sources that must stay synchronized
+- Use external HTML templates and SCSS files for components (a project rule: not inline, even for small components)
+- Prefer Signal Forms (`@angular/forms/signals`) instead of Reactive or Template-driven forms. They are stable in Angular v22+
 - Do NOT use `ngClass`, use `class` bindings instead
 - Do NOT use `ngStyle`, use `style` bindings instead
+- Do NOT import `CommonModule`, import only the directives and pipes the template uses, such as `AsyncPipe` or `DatePipe`
 - When using external templates/styles, use paths relative to the component TS file.
 
 ## State Management
@@ -47,10 +51,10 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
 - Use the async pipe to handle observables
 - Do not assume globals like (`new Date()`) are available.
-- Do not write arrow functions in templates (they are not supported).
+- Arrow functions with an expression body are supported in templates (Angular 22+), but keep them small. Block bodies are not supported, and complex logic belongs in the component class.
 
 ## Services
 
 - Design services around a single responsibility
-- Use the `providedIn: 'root'` option for singleton services
+- Prefer the `@Service()` decorator over `@Injectable({ providedIn: 'root' })` for new singleton services (Angular v22+)
 - Use the `inject()` function instead of constructor injection

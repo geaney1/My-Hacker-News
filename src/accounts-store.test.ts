@@ -9,7 +9,7 @@ describe('accounts store', () => {
   let store: AccountsStore;
 
   beforeAll(async () => {
-    // The store reads DATA_DIR when it is loaded, so it is set first and the store imported after.
+    // The data folder is read when the store is loaded, so it is set first and the store imported after.
     directory = mkdtempSync(join(tmpdir(), 'hn-accounts-'));
     process.env['DATA_DIR'] = directory;
     store = await import('./accounts-store');
@@ -18,6 +18,25 @@ describe('accounts store', () => {
   afterAll(() => {
     delete process.env['DATA_DIR'];
     rmSync(directory, { recursive: true, force: true });
+  });
+
+  describe('findAccount', () => {
+    it('gives the username as typed and when the account was made, whatever the case asked for', async () => {
+      const before = Date.now();
+      await store.createAccount('Finder', 'correct-horse');
+      const found = await store.findAccount('FINDER');
+      expect(found?.username).toBe('Finder');
+      expect(found?.createdAt).toBeGreaterThanOrEqual(before);
+    });
+
+    it('gives nothing but the username and the date: never the password hash or salt', async () => {
+      await store.createAccount('Private', 'correct-horse');
+      expect(Object.keys((await store.findAccount('Private')) ?? {}).sort()).toEqual(['createdAt', 'username']);
+    });
+
+    it('is null when there is no such account', async () => {
+      expect(await store.findAccount('nobody-here')).toBeNull();
+    });
   });
 
   describe('createAccount', () => {
@@ -53,7 +72,7 @@ describe('accounts store', () => {
       },
     );
 
-    it('keeps every account when sign-ups happen at the same time', async () => {
+    it('keeps every account when users are created at the same time', async () => {
       const names = Array.from({ length: 8 }, (_, index) => `Parallel${index}`);
       await Promise.all(names.map((name) => store.createAccount(name, 'correct-horse')));
       for (const name of names) {
@@ -63,12 +82,9 @@ describe('accounts store', () => {
   });
 
   describe('verifyAccount', () => {
-    it('accepts the right password, whatever the case of the username', async () => {
+    it('accepts the right password, whatever the case of the username, and gives the name as it was typed when the user was created', async () => {
       await store.createAccount('Verify', 'correct-horse');
-      expect(await store.verifyAccount('VERIFY', 'correct-horse')).toEqual({
-        username: 'Verify',
-        version: 0,
-      });
+      expect(await store.verifyAccount('VERIFY', 'correct-horse')).toBe('Verify');
     });
 
     it('rejects a wrong password, an unknown user and non-string input', async () => {
@@ -81,16 +97,12 @@ describe('accounts store', () => {
   });
 
   describe('changePassword', () => {
-    it('replaces the password and raises the session version', async () => {
+    it('replaces the password', async () => {
       await store.createAccount('Change', 'old-password-1');
-      expect(await store.changePassword('Change', 'old-password-1', 'new-password-2')).toBe(1);
+      await store.changePassword('Change', 'old-password-1', 'new-password-2');
 
       expect(await store.verifyAccount('Change', 'old-password-1')).toBeNull();
-      expect(await store.verifyAccount('Change', 'new-password-2')).toEqual({
-        username: 'Change',
-        version: 1,
-      });
-      expect(await store.getAccountVersion('Change')).toBe(1);
+      expect(await store.verifyAccount('Change', 'new-password-2')).toBe('Change');
     });
 
     it('needs the current password', async () => {
@@ -109,12 +121,6 @@ describe('accounts store', () => {
       await expect(
         store.changePassword('Rules', 'old-password-1', 'old-password-1'),
       ).rejects.toThrow(/different/);
-    });
-  });
-
-  describe('getAccountVersion', () => {
-    it('is null for an account that does not exist', async () => {
-      expect(await store.getAccountVersion('no-such-user')).toBeNull();
     });
   });
 });

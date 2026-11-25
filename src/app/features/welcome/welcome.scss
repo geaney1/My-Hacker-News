@@ -1,10 +1,31 @@
 :host {
   display: block;
-  max-width: 40rem;
+}
+
+// One card the full width of the page column, as wide as the stories page, with the words in a
+// single column that reads from top to bottom.
+article {
+  padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+
+  // A phone: less space round the words.
+  @media (max-width: 32rem) {
+    padding: var(--spacing);
+  }
 }
 
 h2 {
   margin-top: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid var(--color-accent);
+}
+
+p:last-child {
+  margin-bottom: 0;
 }
 
 a {

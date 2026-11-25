@@ -13,7 +13,3 @@ function requireLogin(wantedUrl: string) {
 }
 
 export const loggedInGuard: CanActivateFn = (_route, state) => requireLogin(state.url);
-
-/** Story lists are public, except "Submit", which needs a logged-in user. */
-export const submitListGuard: CanActivateFn = (route, state) =>
-  route.params['list'] === 'submit' ? requireLogin(state.url) : true;

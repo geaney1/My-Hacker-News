@@ -36,7 +36,13 @@ describe('auth forms', () => {
 
   const page = () => fixture.nativeElement as HTMLElement;
   const field = (id: string) => page().querySelector<HTMLInputElement>(`input#${id}`) as HTMLInputElement;
-  const submitButton = () => page().querySelector<HTMLButtonElement>('button[type="submit"]') as HTMLButtonElement;
+  // Whether the form (whichever the page has) is invalid: the button is never turned off, so this is
+  // what tells "could be sent" from "could not".
+  const formIsInvalid = () => {
+    const instance = fixture.componentInstance as unknown as Record<string, unknown>;
+    const name = Object.keys(instance).find((key) => /Form$/.test(key)) as string;
+    return (instance[name] as () => { invalid(): boolean })().invalid();
+  };
   const formError = () => page().querySelector('.form-error')?.textContent?.trim();
   const fieldError = (id: string) => page().querySelector(`#${id}-error`)?.textContent?.trim();
 
@@ -66,7 +72,8 @@ describe('auth forms', () => {
 
   afterEach(() => {
     // The story list loads in the background of these pages. It is not what is being tested.
-    http.match((request) => request.url.startsWith('/api/stories/'));
+    // Logging in also loads the user's profile in the background: not what these tests are about.
+    http.match((request) => request.url.startsWith('/api/stories/') || request.url === '/api/profile');
     http.verify();
   });
 
@@ -77,11 +84,11 @@ describe('auth forms', () => {
     });
 
     it('cannot be submitted while the fields are empty or invalid', async () => {
-      expect(submitButton().disabled).toBe(true);
+      expect(formIsInvalid()).toBe(true);
 
       await type('username', 'Anna');
       await type('password', 'short');
-      expect(submitButton().disabled).toBe(true);
+      expect(formIsInvalid()).toBe(true);
 
       await submit();
       http.expectNone('/api/auth/login');
@@ -96,7 +103,7 @@ describe('auth forms', () => {
     it('logs in with the right credentials and goes back to the story list the user had open', async () => {
       await type('username', 'Anna');
       await type('password', 'correct-horse');
-      expect(submitButton().disabled).toBe(false);
+      expect(formIsInvalid()).toBe(false);
 
       await submit();
       const request = http.expectOne('/api/auth/login');
@@ -127,7 +134,7 @@ describe('auth forms', () => {
       await settle();
 
       expect(formError()).toBe('Incorrect username or password');
-      expect(page().querySelector('.form-error')?.getAttribute('role')).toBe('alert');
+      expect(page().querySelector('.form-error [role="alert"]')?.getAttribute('role')).toBe('alert');
       expect(TestBed.inject(AuthStore).login()).toBe(false);
       expect(navigate).not.toHaveBeenCalled();
     });
@@ -208,7 +215,7 @@ describe('auth forms', () => {
       await blur('confirm-password');
 
       expect(fieldError('confirm-password')).toBe('Passwords do not match');
-      expect(submitButton().disabled).toBe(true);
+      expect(formIsInvalid()).toBe(true);
     });
 
     it('creates the account and sends the user to log in', async () => {
@@ -221,7 +228,7 @@ describe('auth forms', () => {
       await settle();
 
       expect(navigateTo).toHaveBeenCalledWith(['/log-in'], { queryParams: { returnUrl: undefined } });
-      // Signing up does not log the user in.
+      // Creating a user does not log the user in.
       expect(TestBed.inject(AuthStore).login()).toBe(false);
     });
 
@@ -246,7 +253,7 @@ describe('auth forms', () => {
       expect(navigate).not.toHaveBeenCalled();
     });
 
-    it('makes clear this is not a Hacker News account, and links to the real sign-up', () => {
+    it('makes clear this is not a Hacker News account, and links to where a real Hacker News account is made', () => {
       expect(page().textContent).toContain('It is not a Hacker News account');
       const link = page().querySelector<HTMLAnchorElement>('a[href="https://news.ycombinator.com/login"]');
       expect(link).not.toBeNull();
@@ -271,7 +278,7 @@ describe('auth forms', () => {
       await blur('new-password');
 
       expect(fieldError('new-password')).toBe('New password must be different from the current password');
-      expect(submitButton().disabled).toBe(true);
+      expect(formIsInvalid()).toBe(true);
     });
 
     it('needs the new password to be repeated correctly', async () => {
@@ -279,7 +286,7 @@ describe('auth forms', () => {
       await blur('confirm-new-password');
 
       expect(fieldError('confirm-new-password')).toBe('Passwords do not match');
-      expect(submitButton().disabled).toBe(true);
+      expect(formIsInvalid()).toBe(true);
     });
 
     it('changes the password and returns to the profile', async () => {

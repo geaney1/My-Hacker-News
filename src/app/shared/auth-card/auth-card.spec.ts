@@ -9,14 +9,13 @@ import { AuthCard } from './auth-card';
 @Component({
   imports: [AuthCard],
   template: `
-    <app-auth-card heading="Log in" [modal]="modal" [closeLink]="closeLink">
+    <app-auth-card heading="Log in" [closeLink]="closeLink">
       <input id="first-field" />
       <input id="second-field" />
     </app-auth-card>
   `,
 })
 class Host {
-  modal = true;
   closeLink: string | undefined = undefined;
 }
 
@@ -42,9 +41,8 @@ describe('AuthCard', () => {
     navigateByUrl = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
   });
 
-  async function render(options: { modal?: boolean; closeLink?: string } = {}) {
+  async function render(options: { closeLink?: string } = {}) {
     fixture = TestBed.createComponent(Host);
-    fixture.componentInstance.modal = options.modal ?? true;
     fixture.componentInstance.closeLink = options.closeLink;
     fixture.detectChanges();
     // Lets the "after first render" step run.
@@ -65,7 +63,6 @@ describe('AuthCard', () => {
       expect(dialog()).not.toBeNull();
       expect(heading.textContent).toBe('Log in');
       expect(dialog().getAttribute('aria-labelledby')).toBe(heading.id);
-      expect(page().querySelector('section.auth-page')).toBeNull();
     });
 
     it('shows the projected content', () => {
@@ -104,6 +101,20 @@ describe('AuthCard', () => {
       expect(navigateByUrl).toHaveBeenCalledWith('/top');
     });
 
+    it('leaves the focus where it is when the Close icon or the backdrop is pressed', () => {
+      for (const pressed of [closeLink(), closeLink().querySelector('path') as Element, dialog()]) {
+        const press = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+        pressed.dispatchEvent(press);
+        expect(press.defaultPrevented).toBe(true);
+      }
+    });
+
+    it('lets a press inside the form move the focus as usual', () => {
+      const press = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+      page().querySelector('#second-field')?.dispatchEvent(press);
+      expect(press.defaultPrevented).toBe(false);
+    });
+
     it('stays open when the card itself is clicked', () => {
       page().querySelector('.auth-page')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       expect(dialog().hasAttribute('open')).toBe(true);
@@ -111,23 +122,9 @@ describe('AuthCard', () => {
     });
   });
 
-  describe('as an ordinary card', () => {
-    beforeEach(() => render({ modal: false, closeLink: '/user-profile' }));
-
-    it('is a section in the page, not a dialog, and is not opened as a modal', () => {
-      expect(page().querySelector('dialog')).toBeNull();
-      const section = page().querySelector('section.auth-page') as HTMLElement;
-      expect(section.getAttribute('aria-labelledby')).toBe((page().querySelector('h2') as HTMLElement).id);
-      expect(showModal).not.toHaveBeenCalled();
-    });
-
-    it('closes to the address it was given', () => {
-      expect(closeLink().getAttribute('href')).toBe('/user-profile');
-    });
-
-    it('shows the projected content', () => {
-      expect(page().querySelector('#first-field')).not.toBeNull();
-    });
+  it('closes to the address it was given, when it is given one', async () => {
+    await render({ closeLink: '/user-profile' });
+    expect(closeLink().getAttribute('href')).toBe('/user-profile');
   });
 
   it('gives each card its own heading id', async () => {

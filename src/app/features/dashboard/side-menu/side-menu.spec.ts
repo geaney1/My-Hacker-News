@@ -1,8 +1,9 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
+import { AuthStore } from '../../../core/auth/auth.store';
 import { StoriesStore } from '../../stories/stories.store';
 import { SideMenu } from './side-menu';
 
@@ -45,9 +46,41 @@ describe('SideMenu', () => {
   const tab = (label: string) => tabs().find((link) => link.textContent?.trim() === label) as HTMLAnchorElement;
   const highlighted = () => tabs().filter((link) => link.classList.contains('active')).map((link) => link.textContent?.trim());
 
-  it('lists the story lists, without Submit while logged out', async () => {
+  it('lists the story lists, without Submit or Welcome while logged out', async () => {
     await goTo('/top');
     expect(tabs().map((link) => link.textContent?.trim())).toEqual(['Top', 'New', 'Best', 'Ask', 'Show', 'Jobs']);
+  });
+
+  describe('when logged in', () => {
+    beforeEach(async () => {
+      const login = TestBed.inject(AuthStore).logIn('Suin', 'correct-horse');
+      TestBed.inject(HttpTestingController).expectOne('/api/auth/login').flush({ username: 'Suin' });
+      await login;
+      await goTo('/top');
+    });
+
+    const submit = () => tab('Submit');
+
+    it('adds Submit and Welcome after the story lists', () => {
+      expect(tabs().map((link) => link.textContent?.trim())).toEqual([
+        'Top', 'New', 'Best', 'Ask', 'Show', 'Jobs', 'Submit', 'Welcome',
+      ]);
+    });
+
+    it('opens the Submit dialog inside the app when Submit is chosen', () => {
+      expect(submit().getAttribute('href')).toBe('/submit');
+      expect(submit().hasAttribute('target')).toBe(false);
+      expect(submit().classList.contains('external')).toBe(false);
+    });
+
+    it('keeps the list the user was on highlighted while the dialog is open, not Submit', async () => {
+      await goTo('/best');
+      stories.selectList('best');
+      await goTo('/submit');
+
+      expect(highlighted()).toEqual(['Best']);
+      expect(submit().hasAttribute('aria-current')).toBe(false);
+    });
   });
 
   describe('on a story list', () => {
@@ -73,10 +106,10 @@ describe('SideMenu', () => {
     });
   });
 
-  describe('on a story or user page opened from a list', () => {
+  describe('on a story page opened from a list', () => {
     it('keeps the list the user came from highlighted', async () => {
       await goTo('/new');
-      stories.selectList('new'); // what the stories page does when it shows a list
+      stories.selectList('new');
       await goTo('/item/50626578');
 
       expect(highlighted()).toEqual(['New']);
@@ -89,26 +122,36 @@ describe('SideMenu', () => {
 
       expect(tab('Best').hasAttribute('aria-current')).toBe(false);
     });
+  });
 
-    it('does the same on a user page', async () => {
-      await goTo('/job');
-      stories.selectList('job');
+  describe('on a user page opened from a list', () => {
+    it('keeps the list the user came from highlighted', async () => {
+      await goTo('/new');
+      stories.selectList('new'); // what the stories page does when it shows a list
       await goTo('/user/pg');
 
-      expect(highlighted()).toEqual(['Jobs']);
+      expect(highlighted()).toEqual(['New']);
+    });
+
+    it('does not claim to be the current page, since the user page is', async () => {
+      await goTo('/best');
+      stories.selectList('best');
+      await goTo('/user/pg');
+
+      expect(tab('Best').hasAttribute('aria-current')).toBe(false);
     });
 
     it('follows the list when the user comes back through another one', async () => {
       stories.selectList('ask');
-      await goTo('/item/1');
+      await goTo('/user/anna');
       expect(highlighted()).toEqual(['Ask']);
 
       stories.selectList('show');
-      await goTo('/item/2');
+      await goTo('/user/ben');
       expect(highlighted()).toEqual(['Show']);
     });
 
-    it.each(['/log-in', '/create-user'])('keeps the list highlighted on %s, which opens over it', async (url) => {
+    it.each(['/log-in', '/create-user', '/user-profile'])('keeps the list highlighted on %s, which opens over it', async (url) => {
       await goTo('/job');
       stories.selectList('job');
       await goTo(url);
@@ -118,13 +161,13 @@ describe('SideMenu', () => {
     });
 
     it('falls back to Top when the page was opened directly', async () => {
-      await goTo('/item/50626578');
+      await goTo('/user/pg');
       expect(highlighted()).toEqual(['Top']);
     });
   });
 
   describe('on other pages', () => {
-    it.each(['/welcome', '/user-profile'])('highlights no list on %s', async (url) => {
+    it.each(['/welcome'])('highlights no list on %s', async (url) => {
       stories.selectList('new');
       await goTo(url);
       expect(highlighted()).toEqual([]);

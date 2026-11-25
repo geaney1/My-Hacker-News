@@ -1,4 +1,4 @@
-/** Why a sign-up, log-in or password change did not succeed. */
+/** Why creating a user, logging in or changing a password did not succeed. */
 export type AuthFailure =
   | 'invalid-credentials'
   | 'wrong-current-password'

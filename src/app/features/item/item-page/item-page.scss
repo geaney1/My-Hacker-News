@@ -2,10 +2,6 @@
   display: block;
 }
 
-.back {
-  margin-bottom: var(--spacing);
-}
-
 .story {
   padding: var(--spacing);
   border: 1px solid var(--color-border);
@@ -52,8 +48,32 @@
   background: var(--color-surface);
 
   h3 {
-    margin: 0 0 0.5rem;
+    margin: 0;
     font-size: 1.125rem;
+  }
+}
+
+// The count on the left, the log-in prompt on the right of the same line (below it on a very
+// narrow screen).
+.comments-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem var(--spacing);
+  margin-bottom: 0.5rem;
+}
+
+.login-prompt {
+  margin: 0;
+  padding: 0.375rem 0.75rem;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+
+  a {
+    color: var(--color-accent);
+    font-weight: 600;
   }
 }
 
@@ -65,74 +85,6 @@
 
 .error {
   color: var(--color-error);
-}
-
-.add-comment {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: var(--spacing);
-
-  textarea {
-    padding: 0.625rem 0.75rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    background: var(--color-surface);
-    color: var(--color-text);
-    font: inherit;
-    resize: vertical;
-  }
-
-  .error {
-    margin: 0;
-    color: var(--color-error);
-    font-size: 0.875rem;
-  }
-}
-
-.add-comment-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 0.75rem;
-}
-
-.add-comment-button {
-  border-color: var(--color-accent);
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
-}
-
-// Posting for real happens on news.ycombinator.com, so this one is an outlined link.
-.reply-link {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-
-  &:hover {
-    background: #fff1e6;
-  }
-}
-
-.login-prompt {
-  margin: 0 0 var(--spacing);
-  padding: 0.625rem 0.75rem;
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius);
-  color: var(--color-text-muted);
-
-  a {
-    color: var(--color-accent);
-    font-weight: 600;
-  }
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
 
 .poll {
@@ -173,7 +125,7 @@
   height: 0.5rem;
   overflow: hidden;
   border-radius: 999px;
-  background: #ecece5;
+  background: var(--color-track);
 }
 
 .poll-bar-fill {

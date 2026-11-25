@@ -1,13 +1,5 @@
 ﻿import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import {
-  Injectable,
-  PLATFORM_ID,
-  REQUEST,
-  TransferState,
-  inject,
-  makeStateKey,
-  signal,
-} from '@angular/core';
+import { inject, makeStateKey, PLATFORM_ID, REQUEST, Service, signal, TransferState } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { AuthFailure } from '../../models/auth-failure';
@@ -18,10 +10,10 @@ const sessionStateKey = makeStateKey<string>('session-username');
 type SessionResponse = { username: string };
 
 /**
- * Holds the signed-in state. Accounts and sessions live on the server: signing up stores a
+ * Holds the logged-in state. Accounts and sessions live on the server: creating a user stores a
  * hashed password, and logging in sets a session cookie that this store checks on start-up.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class AuthStore {
   private readonly http = inject(HttpClient);
   private readonly transferState = inject(TransferState);
@@ -31,12 +23,12 @@ export class AuthStore {
   private readonly loggedIn = signal(false);
   private readonly currentUsername = signal('');
 
-  /** `true` while a user is signed in. */
+  /** `true` while a user is logged in. */
   readonly login = this.loggedIn.asReadonly();
   readonly username = this.currentUsername.asReadonly();
 
   /**
-   * Finds out who is signed in, from the session cookie. The server checks the cookie of the
+   * Finds out who is logged in, from the session cookie. The server checks the cookie of the
    * incoming request and hands the answer to the browser, so both render the same page.
    */
   async initialize() {
@@ -63,7 +55,7 @@ export class AuthStore {
     }
   }
 
-  /** Resolves to `undefined` on success, or the reason the sign-up failed. */
+  /** Resolves to `undefined` on success, or the reason creating the user failed. */
   async register(username: string, password: string) {
     try {
       await firstValueFrom(this.http.post('/api/auth/register', { username, password }));
@@ -92,8 +84,8 @@ export class AuthStore {
     }
   }
 
-  /** Signs out straight away, then tells the server to end the session. */
-  async signOut() {
+  /** Logs out straight away, then tells the server to end the session. */
+  async logOut() {
     this.setUser('');
     try {
       await firstValueFrom(this.http.post('/api/auth/logout', {}));

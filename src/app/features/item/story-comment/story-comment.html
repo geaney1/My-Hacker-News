@@ -1,18 +1,32 @@
-<details class="comment" open>
-  <summary>
+<article class="comment">
+  <div class="comment-header">
+    <button
+      type="button"
+      class="toggle"
+      [attr.aria-expanded]="!collapsed()"
+      [attr.aria-label]="toggleLabel()"
+      (click)="toggle()"
+    >
+      <span aria-hidden="true">{{ collapsed() ? '+' : '–' }}</span>
+    </button>
     @if (comment().by; as author) {
       <a class="author" [routerLink]="['/user', author]">{{ author }}</a>
     }
     <span class="time">{{ comment().time | timeAgo }}</span>
-  </summary>
+    @if (comment().dead) {
+      <span class="dead">[dead]</span>
+    }
+  </div>
 
-  <div class="text hn-text" [innerHTML]="comment().text"></div>
+  @if (!collapsed()) {
+    <div class="text hn-text" [innerHTML]="comment().text"></div>
 
-  @if (comment().replies.length) {
-    <ul class="replies">
-      @for (reply of comment().replies; track reply.id) {
-        <li><app-story-comment [comment]="reply" /></li>
-      }
-    </ul>
+    @if (comment().replies.length) {
+      <ul class="replies">
+        @for (reply of comment().replies; track reply.id) {
+          <li><app-story-comment [comment]="reply" /></li>
+        }
+      </ul>
+    }
   }
-</details>
+</article>

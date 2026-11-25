@@ -1,4 +1,4 @@
-﻿<app-auth-card heading="Create a new user" [modal]="true">
+﻿<app-auth-card heading="Create a new user">
   <form class="auth-form" novalidate (submit)="onSubmit($event)">
     <app-form-text-field
       fieldId="username"
@@ -29,10 +29,10 @@
     </label>
 
     @if (formError(); as message) {
-      <p class="form-error" role="alert">{{ message }}</p>
+      <app-banner class="form-error" kind="error" [compact]="true">{{ message }}</app-banner>
     }
 
-    <button type="submit" class="button primary" [disabled]="createUserForm().invalid()">
+    <button type="submit" class="button button-solid">
       Create user
     </button>
   </form>

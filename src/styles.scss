@@ -5,14 +5,84 @@
   --color-text: #1f1f1f;
   --color-text-muted: #595959;
   --color-border: #c9c9c0;
-  --color-accent: #b84300;
+  // The edge of a text box, select or other field: what shows where it is, so at least 3:1 against
+  // the page (WCAG 1.4.11). The softer border above is for cards and dividers.
+  --color-border-control: #767670;
+  --color-accent: #a83d00;
   --color-accent-contrast: #ffffff;
   --color-focus: #0b57d0;
+  // What the page behind a dialog is dimmed with.
+  --color-backdrop: rgb(31 31 31 / 45%);
+  // The card of a dialog is the colour of the page, and the boxes in it are the colour
+  // of the story cards (--color-surface).
+  --color-dialog: var(--color-background);
+  --color-dialog-border: var(--color-border);
   --color-error: #b00020;
+  --color-error-soft: #f6bfc8;
+  --color-error-border: #d4707e;
+
+  // Banners (notices across the page) are tinted more strongly than the filter and paging bars, so
+  // they stand out from the page behind them.
+  --color-banner-start: #ffdcb8;
+  --color-banner-end: #ffc994;
+  --color-banner-border: #d4904f;
+
+  // Pale and strong shades of the accent colour (the filter and paging bars, the info tips and
+  // hovering), and the colour of the empty part of a poll bar.
+  --color-accent-strong: #7d2f00;
+  --color-accent-soft: #fff1e6;
+  --color-tint: #fff6ee;
+  --color-tint-start: #fffaf6;
+  --color-tint-end: #fef0e4;
+  --color-tint-border: #f2dccb;
+  --color-track: #ecece5;
 
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --radius: 0.5rem;
   --spacing: 1rem;
+}
+
+/*
+ * The dark theme: the same tokens with other values, switched on by the theme button in the
+ * profile (see ThemeStore). Every pair is checked for WCAG AA contrast by the end-to-end tests.
+ * The accent is lighter here, so text and buttons in it show up on a dark page, and the text on an
+ * accent button is dark instead of white.
+ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  // The page is nearly black and the cards are a clearly lighter grey with a visible edge, so each
+  // card stands out from the page and from the next one.
+  --color-background: #0b0b0b;
+  --color-surface: #2f2f2f;
+  --color-text: #ececec;
+  --color-text-muted: #b3b3b3;
+  --color-border: #666666;
+  --color-border-control: #9a9a9a;
+  --color-accent: #ff9a5c;
+  --color-accent-contrast: #1a1a1a;
+  --color-focus: #8ab4f8;
+  // A dark grey wash, lighter than the dialog card (which is the colour of the page), so the card
+  // stands out from what is behind it.
+  --color-backdrop: rgb(72 72 72 / 78%);
+  --color-dialog-border: var(--color-border-control);
+  // The card is the colour of the page, and the boxes in it are the colour of the story cards.
+  --color-dialog: var(--color-background);
+  --color-error: #ff8a80;
+  --color-error-soft: #4f282d;
+  --color-error-border: #b05c67;
+
+  --color-banner-start: #5c3d2c;
+  --color-banner-end: #523827;
+  --color-banner-border: #b07a50;
+
+  --color-accent-strong: #ffb78a;
+  --color-accent-soft: #4a3326;
+  --color-tint: #33261c;
+  --color-tint-start: #3d2e23;
+  --color-tint-end: #33261c;
+  --color-tint-border: #6b4d36;
+  --color-track: #4a4a4a;
 }
 
 body {
@@ -32,11 +102,191 @@ body {
   color: var(--color-text);
   font: inherit;
   cursor: pointer;
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
+
+  // Every button grows a little when the mouse is over it, and gets an accent border. The two
+  // styled kinds below (button-outline and button-solid) add their own colours on top of this.
+  // A button that is turned off does not react to the mouse at all: no growing, no new colours.
+  &:hover:not(:disabled) {
+    transform: scale(1.1);
+    border-color: var(--color-accent);
+    // So a button that grows is not hidden under the one after it.
+    position: relative;
+    z-index: 1;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(1.02);
+  }
 
   &:disabled {
     cursor: not-allowed;
     opacity: 0.6;
   }
+}
+
+/*
+ * The two kinds of button, used with .button. Both grow a little when the mouse is over them, with a
+ * soft ring, as the avatar does:
+ *  - button-outline: the look of Log In and Log Out. An outlined button that gets a soft tint on hover. For the usual actions: the page arrows, Change password, the theme switch.
+ *  - button-solid: the look of Update. Filled with the accent colour. For the one action that
+ *    finishes a form: Update, Log in, Create user, Submit.
+ */
+.button-outline,
+.button-solid {
+  // The same shape and size, so the two kinds sit side by side without one looking bigger.
+  padding: 0.5rem 1.25rem;
+  border-width: 2px;
+  border-style: solid;
+  border-radius: var(--radius);
+  font-weight: 600;
+  transition:
+    background-color 0.15s,
+    color 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.15s;
+}
+
+.button-outline {
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+  color: var(--color-accent);
+
+  &:hover:not(:disabled) {
+    transform: scale(1.1);
+    background: var(--color-accent-soft);
+    border-color: var(--color-accent-strong);
+    color: var(--color-accent-strong);
+    box-shadow: 0 0 0 4px rgb(168 61 0 / 25%);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(1.02);
+  }
+}
+
+.button-solid {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+
+  &:hover:not(:disabled) {
+    transform: scale(1.1);
+    border-color: var(--color-accent-strong);
+    background: var(--color-accent-strong);
+    box-shadow: 0 0 0 4px rgb(168 61 0 / 25%);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .button-outline,
+  .button-solid {
+    transition: none;
+
+    &:hover,
+    &:active {
+      transform: none;
+    }
+  }
+}
+
+/*
+ * Every text box, number box, select and text area grows slightly while the mouse is over it, and
+ * stops as soon as it is clicked into (it has focus), so what is being typed in does not move.
+ * Checkboxes and radio buttons are left out (small native controls), and so is a field that is
+ * turned off, which does not react to the mouse.
+ */
+input:not([type='checkbox']):not([type='radio']),
+select,
+textarea {
+  transition: transform 0.15s;
+
+  &:hover:not(:disabled):not(:focus) {
+    transform: scale(1.03);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  input,
+  select,
+  textarea {
+    transition: none;
+
+    &:hover {
+      transform: none !important;
+    }
+  }
+}
+
+/*
+ * Links grow a little when the mouse is over them, as the buttons and the avatar do. A transform
+ * needs a box, so a link is made inline-block; it grows from its left edge.
+ *
+ * Left out, because growing them would break the layout: the buttons and the avatar (they grow on
+ * their own), the close icon of the dialogs (it grows on its own), the side menu tabs (boxes that fill
+ * their space), the skip link (it is off the screen until focused), story titles (cut off by
+ * the card they sit in), the links inside Hacker News's own text (long, and wrap over lines) and
+ * links with words beside them (see below).
+ */
+a:not(.button):not(.avatar):not(.tab):not(.close):not(.skip-link):not(.story-title a):not(h2 a):not(.hn-text a):not(p a):not(.comment-header a) {
+  display: inline-block;
+  transform-origin: left center;
+  transition: transform 0.15s;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+// A link in a line of text (in a paragraph, or a comment's author beside the time) does not grow, as
+// it would run into the words next to it. Its underline gets thicker under the mouse instead.
+p a:not(.button):hover,
+.comment-header a:hover {
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  a:hover {
+    transform: none !important;
+    transition: none;
+  }
+}
+
+/*
+ * A box that shows a bar of the accent colour on its left, and an accent border, while the mouse
+ * is over it or something inside it has focus. Used by the story cards.
+ */
+.hover-accent {
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+
+  &:hover,
+  &:focus-within {
+    border-color: var(--color-accent);
+    box-shadow:
+      -5px 0 0 var(--color-accent),
+      0 2px 6px rgb(0 0 0 / 10%);
+  }
+}
+
+/* Text for screen readers only: it takes no room on screen. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 :focus-visible {
@@ -92,4 +342,14 @@ html {
     max-width: 100%;
     height: auto;
   }
+}
+
+// A field that is turned off (for example Max Visit and Min Away while No Procrast is no) looks it.
+input:disabled,
+select:disabled,
+textarea:disabled {
+  border-style: dashed;
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
 }

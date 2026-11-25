@@ -43,5 +43,10 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
-# Local accounts and the session secret (created by the server at run time)
+# Accounts and sessions, created by the server at run time (hashed passwords).
 /data
+
+# End-to-end tests
+/e2e/.data
+/test-results
+/playwright-report

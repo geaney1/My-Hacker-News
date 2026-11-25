@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { ProfileStore } from '../profile/profile.store';
 import { HnApi } from './hn-api';
 
 describe('HnApi', () => {
@@ -17,11 +18,49 @@ describe('HnApi', () => {
 
   afterEach(() => http.verify());
 
+  describe('getStoryPage', () => {
+    const page = { total: 1, stories: [{ id: 1 }] };
+
+    it('keeps a page it has loaded, so going back to it is instant', async () => {
+      const first = api.getStoryPage('top', 1, 20);
+      http.expectOne((request) => request.url === '/api/stories/top').flush(page);
+      await first;
+
+      await api.getStoryPage('top', 1, 20);
+      http.expectNone('/api/stories/top');
+    });
+
+    it('loads the page again when Show Dead is turned on, since dead stories change it', async () => {
+      const first = api.getStoryPage('top', 1, 20);
+      http.expectOne((request) => request.url === '/api/stories/top').flush(page);
+      await first;
+
+      TestBed.inject(ProfileStore).remember({
+        about: '', email: 'a@b.co', showdead: 'yes', noprocrast: 'no', maxvisit: 20, minaway: 180, delay: 0,
+      });
+      const again = api.getStoryPage('top', 1, 20);
+      http.expectOne((request) => request.url === '/api/stories/top').flush(page);
+      await again;
+    });
+  });
+
   describe('getUpdates', () => {
     it('returns the changed items and profiles', async () => {
       const result = api.getUpdates();
       http.expectOne('/api/updates').flush({ items: [1, 2], profiles: ['anna'] });
       expect(await result).toEqual({ items: [1, 2], profiles: ['anna'] });
+    });
+  });
+
+  describe('getThread', () => {
+    it('returns the thread, or null when the item does not exist', async () => {
+      const found = api.getThread(1);
+      http.expectOne('/api/items/1/thread').flush({ item: { id: 1 }, comments: [], pollOptions: [], truncated: false });
+      expect(await found).toMatchObject({ item: { id: 1 } });
+
+      const missing = api.getThread(2);
+      http.expectOne('/api/items/2/thread').flush({}, { status: 404, statusText: 'Not Found' });
+      expect(await missing).toBeNull();
     });
   });
 
@@ -42,18 +81,6 @@ describe('HnApi', () => {
       const result = api.getUser('anna');
       http.expectOne('/api/users/anna').flush({}, { status: 502, statusText: 'Bad Gateway' });
       await expect(result).rejects.toBeTruthy();
-    });
-  });
-
-  describe('getThread', () => {
-    it('returns the thread, or null when the item does not exist', async () => {
-      const found = api.getThread(1);
-      http.expectOne('/api/items/1/thread').flush({ item: { id: 1 }, comments: [], pollOptions: [], truncated: false });
-      expect(await found).toMatchObject({ item: { id: 1 } });
-
-      const missing = api.getThread(2);
-      http.expectOne('/api/items/2/thread').flush({}, { status: 404, statusText: 'Not Found' });
-      expect(await missing).toBeNull();
     });
   });
 });

@@ -9,6 +9,10 @@
     "test": "ng test",
     "test:server": "vitest run --config vitest.server.config.mts",
     "test:all": "npm run test:server && ng test --watch=false",
+    "test:coverage": "ng test --coverage --watch=false",
+    "test:server:coverage": "vitest run --config vitest.server.config.mts --coverage",
+    "e2e": "ng build && playwright test",
+    "e2e:run": "playwright test",
     "serve:ssr:hacker-news": "node dist/hacker-news/server/server.mjs",
     "start:ssr": "ng build && node dist/hacker-news/server/server.mjs"
   },
@@ -28,7 +32,7 @@
     "@angular/router": "^22.2.0",
     "@angular/ssr": "^22.2.6",
     "express": "^5.1.0",
-    "jose": "^6.2.18",
+    "helmet": "^8.3.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -36,12 +40,15 @@
     "@angular/build": "^22.2.6",
     "@angular/cli": "^22.2.6",
     "@angular/compiler-cli": "^22.2.0",
+    "@axe-core/playwright": "^4.14.1",
+    "@playwright/test": "^1.65.1",
     "@types/express": "^5.0.1",
-    "@types/node": "^22.12.0",
+    "@types/node": "^26.6.10",
+    "@vitest/coverage-v8": "^5.1.2",
     "jsdom": "^30.0.0",
     "prettier": "^3.8.1",
-    "typescript": "~6.0.2",
-    "vitest": "^5.0.0"
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.2"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,

@@ -3,7 +3,7 @@
  * from `/v0/<name>stories`. Top and new hold up to 500 ids, best is ranked,
  * and ask, show and job hold up to 200 ids.
  */
-export type HnStoryList = 'top' | 'new' | 'best' | 'ask' | 'show' | 'job' | 'submit';
+export type HnStoryList = 'top' | 'new' | 'best' | 'ask' | 'show' | 'job';
 
 /** Every story list, used to validate the list in the URL. */
 export const hnStoryLists: readonly HnStoryList[] = [
@@ -13,5 +13,4 @@ export const hnStoryLists: readonly HnStoryList[] = [
   'ask',
   'show',
   'job',
-  'submit',
 ];

@@ -1,9 +1,36 @@
-﻿<div class="layout">
-  <app-side-menu />
+﻿<!-- First thing to Tab to: jumps over the menu to the page itself (WCAG 2.4.1). -->
+<a class="skip-link" href="#main" (click)="skipToMain($event)">Skip to main content</a>
 
-  <main class="page">
+<!-- Tells screen readers about a new page after each navigation, as nothing reloads (WCAG 4.1.3). -->
+<div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{{ announcement() }}</div>
+
+<div class="layout" (keydown.escape)="closeMenu(true)">
+  <app-side-menu [open]="menuOpen()" (chosen)="closeMenu()" />
+
+  <!-- Behind the drawer on a small screen: a click outside the menu closes it. -->
+  @if (menuOpen()) {
+    <div class="menu-backdrop" aria-hidden="true" (click)="closeMenu()"></div>
+  }
+
+  <main class="page" id="main" tabindex="-1" #main>
     <header class="page-header">
-      <h1>Hacker News</h1>
+      <div class="title">
+        <!-- The hamburger: only on a small screen, where it opens the story-list menu. -->
+        <button
+          #menuButton
+          type="button"
+          class="button button-outline menu-button"
+          aria-controls="side-menu"
+          [attr.aria-expanded]="menuOpen()"
+          (click)="toggleMenu()"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <span class="visually-hidden">Menu</span>
+        </button>
+        <h1>Hacker News</h1>
+      </div>
       @if (login()) {
         <div class="header-actions">
           <!-- Log Out comes last, so it sits where the Log In button was. -->
@@ -14,20 +41,34 @@
             ariaCurrentWhenActive="page"
             [attr.aria-label]="'Profile for ' + username()"
           >
-            {{ initial() }}
+            <span aria-hidden="true">{{ initial() }}</span>
           </a>
-          <button type="button" class="button sign-out" (click)="signOut()">Log Out</button>
+          <button type="button" class="button button-outline log-out" (click)="logOut()">Log Out</button>
         </div>
-      } @else if (!onSignInPage()) {
-        <a class="button sign-in" routerLink="/log-in">Log In</a>
+      } @else if (!onLogInPage()) {
+        <a class="button button-outline log-in" routerLink="/log-in">Log In</a>
       }
     </header>
 
-    <!-- While the log-in or create-user dialog is open, the stories stay visible behind it. -->
-    @if (onSignInPage()) {
-      <app-stories-page [list]="backgroundList()" />
+    @if (shutOut()) {
+      <app-banner class="visit-limit" kind="warning" heading="Time for a break">
+        <p>
+          You have been here for {{ maxVisit() }} {{ maxVisit() === 1 ? 'minute' : 'minutes' }}, and No Procrast is on in your profile. You can come
+          back in about {{ minutesLeft() }} {{ minutesLeft() === 1 ? 'minute' : 'minutes' }}.
+        </p>
+        <a bannerAction class="button button-outline" routerLink="/user-profile">Change your profile settings</a>
+      </app-banner>
     }
 
-    <router-outlet />
+    @if (!shutOut()) {
+      <!-- While the log-in, create-user, submit, profile or change-password dialog is open, the stories stay visible behind it. -->
+      @if (dialogOverStories()) {
+        <app-stories-page [list]="backgroundList()" />
+      }
+    }
+
+    @if (!shutOut() || onProfilePage()) {
+      <router-outlet />
+    }
   </main>
 </div>

@@ -1,14 +1,16 @@
-<section class="profile-page">
+<app-auth-card heading="Profile" [wide]="true">
   <header class="profile-header">
     <div class="avatar" aria-hidden="true">{{ initial() }}</div>
     <div class="identity">
-      <h2>{{ authStore.username() }}</h2>
+      <h3>{{ authStore.username() }}</h3>
       @if (hnUser.value(); as user) {
         <dl class="stats">
-          <div class="stat">
-            <dt>Created</dt>
-            <dd>{{ user.created | timeAgo }}</dd>
-          </div>
+          @if (user.created) {
+            <div class="stat">
+              <dt>Created</dt>
+              <dd>{{ user.created | timeAgo }}</dd>
+            </div>
+          }
           <div class="stat">
             <dt>Karma</dt>
             <dd>{{ user.karma }}</dd>
@@ -25,11 +27,15 @@
     </div>
   </header>
 
+  <!-- Labels sit above their controls. -->
   <form class="profile-form" novalidate (submit)="onSubmit($event)">
-    <section class="section" aria-labelledby="about-heading">
-      <div class="field">
-        <label for="about">About You</label>
-        <textarea id="about" rows="4" [formField]="userProfileForm.about"></textarea>
+    <section class="section" aria-label="About you">
+      <div class="setting">
+        <div class="label-row">
+          <label for="about">About You</label>
+          <app-info-tip label="About You" text="Tell people a little about yourself. This is shown on your public profile page." tipId="about-info" />
+        </div>
+        <textarea id="about" rows="4" aria-describedby="about-info" [formField]="userProfileForm.about"></textarea>
       </div>
 
       <app-form-text-field
@@ -37,26 +43,32 @@
         label="Email"
         type="email"
         autocomplete="email"
-        hint="Only admins see your email. To share it publicly, add it to the About box."
+        info="Your email address. Only admins can see it, so it is not shown on your profile. To share it publicly, put it in **About You** instead."
         [field]="userProfileForm.email"
       />
     </section>
 
-    <section class="section" aria-labelledby="preferences-heading">
-      <h2 id="preferences-heading">Preferences</h2>
+    <!-- No visible heading: the settings are named for screen readers only. -->
+    <section class="section" aria-label="Preferences">
       <div class="grid">
-        <div class="field">
-          <label for="showdead">Show Dead</label>
-          <select id="showdead" [formField]="userProfileForm.showdead">
+        <div class="setting">
+          <div class="label-row">
+            <label for="showdead">Show Dead</label>
+            <app-info-tip label="Show Dead" text="Dead stories and comments are ones Hacker News has hidden, for example because they were flagged. Choose yes to see them too." tipId="showdead-info" />
+          </div>
+          <select id="showdead" aria-describedby="showdead-info" [formField]="userProfileForm.showdead">
             @for (option of yesNoOptions; track option) {
               <option [value]="option">{{ option }}</option>
             }
           </select>
         </div>
 
-        <div class="field">
-          <label for="noprocrast">No Procrast</label>
-          <select id="noprocrast" [formField]="userProfileForm.noprocrast">
+        <div class="setting">
+          <div class="label-row">
+            <label for="noprocrast">No Procrast</label>
+            <app-info-tip label="No Procrast" text="Helps you spend less time here. Choose yes and, once a visit lasts **Max Visit** minutes, you are locked out for **Min Away** minutes." tipId="noprocrast-info" />
+          </div>
+          <select id="noprocrast" aria-describedby="noprocrast-info" [formField]="userProfileForm.noprocrast">
             @for (option of yesNoOptions; track option) {
               <option [value]="option">{{ option }}</option>
             }
@@ -67,6 +79,7 @@
           fieldId="maxvisit"
           label="Max Visit"
           type="number"
+          info="The longest you can stay in one visit, in minutes, before **No Procrast** locks you out. Only used when **No Procrast** is yes."
           [field]="userProfileForm.maxvisit"
         />
 
@@ -74,6 +87,7 @@
           fieldId="minaway"
           label="Min Away"
           type="number"
+          info="How long you are locked out for, in minutes, once **Max Visit** is reached. Staying away this long also starts a fresh visit. Only used when **No Procrast** is yes."
           [field]="userProfileForm.minaway"
         />
 
@@ -81,29 +95,28 @@
           fieldId="delay"
           label="Delay"
           type="number"
+          info="Holds back your new comments on stories submitted here for this many seconds, so other people see them later. You see yours straight away. 0 means no delay."
           [field]="userProfileForm.delay"
         />
       </div>
     </section>
 
-    <nav class="section" aria-labelledby="links-heading">
-      <ul class="links">
-        <li><a routerLink="/change-password">Change password</a></li>
-        <li><a routerLink="/top">Submissions</a></li>
-        <li><a routerLink="/top">Comments</a></li>
-        <li><a routerLink="/top">Favorite submissions</a></li>
-        <li><a routerLink="/top">Favorite comments</a></li>
-      </ul>
-      <p class="hint">Favorites are publicly visible.</p>
-    </nav>
+    @if (formError(); as message) {
+      <app-banner kind="error" [compact]="true">{{ message }}</app-banner>
+    }
 
     <div class="actions">
-      <button type="submit" class="button primary" [disabled]="userProfileForm().invalid()">
+      <button
+        type="submit"
+        class="button button-solid"
+        [disabled]="profileStore.isLoading()"
+      >
         Update
       </button>
-      @if (saved()) {
-        <p class="success" role="status">Profile updated.</p>
-      }
+      <button type="button" class="button button-outline" (click)="themeStore.toggle()">
+        <span class="visually-hidden">Switch to </span>{{ themeStore.isDark() ? 'Light theme' : 'Dark theme' }}
+      </button>
+      <a class="button button-outline" routerLink="/change-password">Change password</a>
     </div>
   </form>
-</section>
+</app-auth-card>

@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  input,
-  output,
-  signal,
-} from '@angular/core';
+import { Component, computed, effect, input, output, signal } from '@angular/core';
 import { form, FormField, max, min, validate } from '@angular/forms/signals';
 import { GoToPageModel } from '../../models/go-to-page-model';
 import { PaginationItem } from '../../models/pagination-item';
@@ -17,7 +9,6 @@ import { PaginationItem } from '../../models/pagination-item';
   imports: [FormField],
   templateUrl: './pagination.html',
   styleUrl: './pagination.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Pagination {
   readonly page = input.required<number>();
@@ -34,7 +25,7 @@ export class Pagination {
     const current = this.page();
     const last = this.totalPages();
     const visible = new Set([1, last, current - 1, current, current + 1]);
-    const pages = [...visible].filter((page) => page >= 1 && page <= last).sort((a, b) => a - b);
+    const pages = [...visible].filter((page) => page >= 1 && page <= last).sort((earlier, later) => earlier - later);
 
     const items: PaginationItem[] = [];
     pages.forEach((page, index) => {

@@ -9,4 +9,6 @@ export type HnUser = {
   about?: string;
   /** Ids of the user's stories, polls and comments. */
   submitted?: number[];
+  /** `true` for a user of this app that Hacker News does not have. `created` is 0 when not known. */
+  local?: boolean;
 };

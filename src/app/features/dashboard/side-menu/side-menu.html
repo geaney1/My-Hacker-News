@@ -1,10 +1,11 @@
-<nav class="side-menu" aria-label="Story lists">
+<nav class="side-menu" id="side-menu" aria-label="Story lists">
   <ul class="list-tabs">
-    @for (option of listOptions(); track option.value) {
+    @for (option of listOptions; track option.value) {
       <li>
         <a
           class="tab"
           [routerLink]="['/', option.value]"
+          (click)="chosen.emit()"
           [class.active]="highlightedList() === option.value"
           [attr.aria-current]="listBeingShown() === option.value ? 'page' : null"
         >
@@ -14,7 +15,17 @@
     }
     @if (login()) {
       <li>
-        <a class="tab" routerLink="/welcome" routerLinkActive="active" ariaCurrentWhenActive="page">
+        <!-- Opens the Submit dialog over the stories, so the list stays highlighted. -->
+        <a class="tab" routerLink="/submit" (click)="chosen.emit()">Submit</a>
+      </li>
+      <li>
+        <a
+          class="tab"
+          routerLink="/welcome"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          (click)="chosen.emit()"
+        >
           Welcome
         </a>
       </li>

@@ -1,14 +1,11 @@
 import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { promisify } from 'node:util';
+import { createSerialQueue, readJsonFile, writeJsonFile } from './data-files';
 import { BadRequestError } from './hn-fetch';
 
 const scryptAsync = promisify(scrypt);
 
-/** Where accounts and the session secret are kept. Set `DATA_DIR` to store them elsewhere. */
-export const dataDirectory = process.env['DATA_DIR'] ?? join(process.cwd(), 'data');
-const accountsFile = join(dataDirectory, 'users.json');
+const accountsFile = 'users.json';
 
 /** The same rules as the username and password forms in the app. */
 const usernamePattern = /^[A-Za-z0-9_-]{2,15}$/;
@@ -23,55 +20,29 @@ export class UsernameTakenError extends Error {}
 export class WrongPasswordError extends Error {}
 
 type Account = {
-  /** The username as the user typed it when they signed up. */
+  /** The username as the user typed it when they created the account. */
   username: string;
   salt: string;
   hash: string;
-  /**
-   * Goes up each time the password changes. Session tokens carry the version they were issued
-   * for, so changing the password ends every session that was started with the old one.
-   */
-  version: number;
+  /** When the account was made, in Unix milliseconds. Accounts made before this was kept have none. */
+  createdAt?: number;
 };
 
 /** Accounts by lower-case username, so `Anna` and `anna` are the same person. */
 type AccountFile = Record<string, Account>;
 
-/** What a successful log-in tells the caller about the account. */
-type VerifiedAccount = { username: string; version: number };
+const enqueue = createSerialQueue();
 
-/** Writes are queued one after another so two requests can't overwrite each other. */
-let writeQueue: Promise<unknown> = Promise.resolve();
-
-async function readAccounts() {
-  try {
-    return JSON.parse(await readFile(accountsFile, 'utf8')) as AccountFile;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return {};
-    }
-    throw error;
-  }
-}
-
-async function writeAccounts(accounts: AccountFile) {
-  await mkdir(dataDirectory, { recursive: true });
-  const temporaryFile = `${accountsFile}.tmp`;
-  await writeFile(temporaryFile, JSON.stringify(accounts, null, 2), { mode: 0o600 });
-  await rename(temporaryFile, accountsFile);
-}
+const readAccounts = () => readJsonFile<AccountFile>(accountsFile, {});
 
 /** Reads the accounts, lets `change` edit them, and saves them, one request at a time. */
-async function updateAccounts<Result>(change: (accounts: AccountFile) => Result) {
-  const result = writeQueue.then(async () => {
+function updateAccounts<Result>(change: (accounts: AccountFile) => Result) {
+  return enqueue(async () => {
     const accounts = await readAccounts();
     const changeResult = change(accounts);
-    await writeAccounts(accounts);
+    await writeJsonFile(accountsFile, accounts);
     return changeResult;
   });
-  // Keep the queue alive after a failure, so one failed request doesn't block the next.
-  writeQueue = result.catch(() => undefined);
-  return result;
 }
 
 async function hashPassword(password: string, salt: Buffer) {
@@ -116,16 +87,25 @@ export async function createAccount(usernameInput: unknown, passwordInput: unkno
       username,
       salt: salt.toString('hex'),
       hash: hash.toString('hex'),
-      version: 0,
+      createdAt: Date.now(),
     };
   });
   return username;
 }
 
+/**
+ * The public facts about an account: its username as it was typed, and when it was made. Never
+ * the password. Resolves to `null` when there is no such account.
+ */
+export async function findAccount(usernameInput: string) {
+  const account = (await readAccounts())[usernameInput.toLowerCase()];
+  return account ? { username: account.username, createdAt: account.createdAt } : null;
+}
+
 /** A fixed salt, used to spend the same time on unknown usernames as on real ones. */
 const decoySalt = randomBytes(16);
 
-/** Resolves to the account when the password is right, or `null` when it is not. */
+/** Resolves to the account's username when the password is right, or `null` when it is not. */
 export async function verifyAccount(usernameInput: unknown, passwordInput: unknown) {
   if (typeof usernameInput !== 'string' || typeof passwordInput !== 'string') {
     return null;
@@ -139,21 +119,18 @@ export async function verifyAccount(usernameInput: unknown, passwordInput: unkno
   }
   const expected = Buffer.from(account.hash, 'hex');
   return expected.length === hash.length && timingSafeEqual(expected, hash)
-    ? ({ username: account.username, version: account.version ?? 0 } satisfies VerifiedAccount)
+    ? account.username
     : null;
 }
 
-/**
- * Changes a password after checking the current one. Returns the account's new version, which
- * ends every session started before the change.
- */
+/** Changes a password after checking the current one. */
 export async function changePassword(
   usernameInput: string,
   currentPassword: unknown,
   newPasswordInput: unknown,
 ) {
-  const verified = await verifyAccount(usernameInput, currentPassword);
-  if (!verified) {
+  const username = await verifyAccount(usernameInput, currentPassword);
+  if (!username) {
     throw new WrongPasswordError();
   }
   const newPassword = validatePassword(newPasswordInput);
@@ -163,17 +140,9 @@ export async function changePassword(
 
   const salt = randomBytes(16);
   const hash = await hashPassword(newPassword, salt);
-  return updateAccounts((accounts) => {
-    const account = accounts[verified.username.toLowerCase()];
+  await updateAccounts((accounts) => {
+    const account = accounts[username.toLowerCase()];
     account.salt = salt.toString('hex');
     account.hash = hash.toString('hex');
-    account.version = (account.version ?? 0) + 1;
-    return account.version;
   });
-}
-
-/** The account's current session version, or `null` when the account does not exist. */
-export async function getAccountVersion(username: string) {
-  const account = (await readAccounts())[username.toLowerCase()];
-  return account ? (account.version ?? 0) : null;
 }

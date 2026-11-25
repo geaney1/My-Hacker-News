@@ -1,39 +1,28 @@
-import { Location } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  inject,
-  input,
-  numberAttribute,
-  resource,
-  signal,
-} from '@angular/core';
-import { form, FormField, required, submit, validate } from '@angular/forms/signals';
+import { Location, NgTemplateOutlet } from '@angular/common';
+import { Component, computed, effect, inject, input, numberAttribute, resource } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HnApi } from '../../../core/api/hn-api';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { NewCommentsStore } from '../../../core/comments/new-comments.store';
 import { ResponseStatus } from '../../../core/response-status';
 import { HnItem } from '../../../models/hn-item';
-import { NewCommentModel } from '../../../models/new-comment-model';
 import { TimeAgoPipe } from '../../../shared/time-ago.pipe';
+import { AddComment } from '../add-comment/add-comment';
 import { StoryComment } from '../story-comment/story-comment';
+import { Banner } from '../../../shared/banner/banner';
 
 @Component({
   selector: 'app-item-page',
-  imports: [FormField, RouterLink, StoryComment, TimeAgoPipe],
+  imports: [Banner, AddComment, NgTemplateOutlet, RouterLink, StoryComment, TimeAgoPipe],
   templateUrl: './item-page.html',
   styleUrl: './item-page.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ItemPage {
   private readonly hnApi = inject(HnApi);
   private readonly location = inject(Location);
   private readonly responseStatus = inject(ResponseStatus);
   private readonly newCommentsStore = inject(NewCommentsStore);
-  protected readonly authStore = inject(AuthStore);
+  protected readonly login = inject(AuthStore).login;
 
   /** The item id from the URL (`/item/:id`), bound from the route parameter. */
   readonly id = input.required({ transform: numberAttribute });
@@ -43,19 +32,8 @@ export class ItemPage {
     loader: ({ params }) => this.hnApi.getThread(params),
   });
 
-  /** Comments written in this app for this story, shown above the loaded ones. */
+  /** Comments written on this page for this Hacker News story (lost on reload), shown above the loaded ones. */
   protected readonly newComments = computed(() => this.newCommentsStore.forItem(this.id()));
-
-  protected readonly newCommentModel = signal<NewCommentModel>({ text: '' });
-
-  protected readonly newCommentForm = form(this.newCommentModel, (schemaPath) => {
-    required(schemaPath.text, { message: 'Write a comment before adding it' });
-    validate(schemaPath.text, ({ value }) =>
-      value().length > 0 && value().trim().length === 0
-        ? { kind: 'blank', message: 'Write a comment before adding it' }
-        : undefined,
-    );
-  });
 
   constructor() {
     // An item that does not exist is a 404, not a successful page.
@@ -63,14 +41,6 @@ export class ItemPage {
       if (this.thread.value() === null) {
         this.responseStatus.setNotFound();
       }
-    });
-  }
-
-  protected async onAddComment(event: Event) {
-    event.preventDefault();
-    await submit(this.newCommentForm, async () => {
-      this.newCommentsStore.add(this.id(), this.authStore.username(), this.newCommentModel().text);
-      this.newCommentForm().reset({ text: '' });
     });
   }
 

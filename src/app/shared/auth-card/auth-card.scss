@@ -5,11 +5,14 @@
 .auth-page {
   position: relative;
   max-width: 24rem;
-  margin: 1rem auto 3rem;
   padding: calc(var(--spacing) * 1.5);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-dialog-border);
   border-radius: var(--radius);
-  background: var(--color-surface);
+  background: var(--color-dialog);
+
+  &.wide {
+    max-width: 40rem;
+  }
 
   h2 {
     margin-top: 0;
@@ -25,14 +28,45 @@
   padding: 0.25rem;
   border-radius: var(--radius);
   color: inherit;
+  transition: transform 0.15s;
 
   svg {
     width: 1.5rem;
     height: 1.5rem;
   }
+
+  // A little bigger while the mouse is over it. This is the close icon of every dialog (log in,
+  // create user, change password, submit and the profile). Reduced motion turns it off, in styles.scss.
+  &:hover {
+    transform: scale(1.2);
+  }
+
+  // A small label for the icon, shown when the mouse is over it or it has the keyboard focus.
+  // It is only for sighted users: the link already has the name "Close" for screen readers.
+  &::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    right: 0;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius);
+    background: var(--color-text);
+    color: var(--color-surface);
+    font-size: 0.8rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  &:hover::after,
+  &:focus-visible::after {
+    opacity: 1;
+  }
 }
 
-// The modal version: a dialog centred over a dimmed page. The dialog itself is invisible, so a
+// The dialog, centred over a dimmed page. The dialog itself is invisible, so a
 // click on it (outside the card) can be told apart from a click on the card and closes it.
 .auth-dialog {
   max-width: none;
@@ -43,14 +77,35 @@
   background: transparent;
   color: inherit;
 
+  // Behind the dialog the page is dimmed and blurred, so it is out of the way of what is in front.
   &::backdrop {
-    background: rgb(31 31 31 / 45%);
+    background: var(--color-backdrop);
+    backdrop-filter: blur(8px);
   }
 
   .auth-page {
     width: min(24rem, calc(100vw - 2rem));
-    margin: 0;
+
+    &.wide {
+      width: min(40rem, calc(100vw - 2rem));
+    }
+
     box-sizing: border-box;
     box-shadow: 0 12px 40px rgb(0 0 0 / 30%);
+  }
+
+  // A phone: nearly the whole width and height of the screen, and less padding inside.
+  @media (max-width: 32rem) {
+    // WCAG 2.4.11: a control that gets the keyboard focus is scrolled clear of the profile's buttons,
+    // which stay at the bottom of the dialog while the settings scroll behind them.
+    scroll-padding-bottom: 9rem;
+
+    max-height: calc(100dvh - 1rem);
+
+    .auth-page,
+    .auth-page.wide {
+      width: calc(100vw - 1rem);
+      padding: var(--spacing);
+    }
   }
 }
