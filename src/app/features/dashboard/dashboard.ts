@@ -11,7 +11,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser, NgOptimizedImage } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthStore } from '../../core/auth/auth.store';
@@ -24,7 +24,15 @@ import { Banner } from '../../shared/banner/banner';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [Banner, RouterOutlet, RouterLink, RouterLinkActive, SideMenu, StoriesPage],
+  imports: [
+    Banner,
+    NgOptimizedImage,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    SideMenu,
+    StoriesPage,
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })

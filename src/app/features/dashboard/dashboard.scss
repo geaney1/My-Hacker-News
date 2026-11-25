@@ -68,6 +68,10 @@ main:focus {
   min-width: 0;
 }
 
+.logo {
+  flex: none;
+}
+
 // Only a small screen has the hamburger button (a wide one always shows the menu).
 .menu-button {
   display: none;
@@ -152,6 +156,13 @@ main:focus {
   .log-in,
   .log-out {
     padding: 0.375rem 0.75rem;
+  }
+}
+
+// The narrowest phones: no logo, so the title has room beside the account buttons.
+@media (max-width: 24rem) {
+  .logo {
+    display: none;
   }
 }
 
