@@ -2,10 +2,10 @@ import { expect, test, type Page } from '@playwright/test';
 import { createUserAndLogIn, uniqueName } from './helpers';
 
 /** Presses the mouse down on a place in an open dialog, without letting go, and measures the card. */
-async function cardWhilePressing(page: Page, x: number, y: number) {
+async function cardWhilePressing(page: Page, pointerX: number, pointerY: number) {
   const card = page.locator('dialog[open] .auth-page');
   const before = (await card.boundingBox())!;
-  await page.mouse.move(x, y);
+  await page.mouse.move(pointerX, pointerY);
   await page.mouse.down();
   await page.waitForTimeout(300);
   const during = (await card.boundingBox())!;

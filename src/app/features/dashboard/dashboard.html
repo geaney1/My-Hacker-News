@@ -6,6 +6,8 @@
   {{ announcement() }}
 </div>
 
+<!-- Not a control itself: it hears Escape from the focusable things inside it. -->
+<!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
 <div class="layout" (keydown.escape)="closeMenu(true)">
   <app-side-menu [open]="menuOpen()" (chosen)="closeMenu()" />
 

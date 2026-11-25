@@ -14,7 +14,8 @@
     "e2e": "ng build && playwright test",
     "e2e:run": "playwright test",
     "serve:ssr:hacker-news": "node dist/hacker-news/server/server.mjs",
-    "start:ssr": "ng build && node dist/hacker-news/server/server.mjs"
+    "start:ssr": "ng build && node dist/hacker-news/server/server.mjs",
+    "lint": "ng lint"
   },
   "private": true,
   "engines": {
@@ -41,13 +42,17 @@
     "@angular/cli": "^22.2.6",
     "@angular/compiler-cli": "^22.2.0",
     "@axe-core/playwright": "^4.14.1",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.65.1",
     "@types/express": "^5.0.1",
     "@types/node": "^26.6.10",
     "@vitest/coverage-v8": "^5.1.2",
+    "angular-eslint": "22.8.0",
+    "eslint": "^10.14.0",
     "jsdom": "^30.0.0",
     "prettier": "^3.8.1",
     "typescript": "~6.0.3",
+    "typescript-eslint": "8.72.2",
     "vitest": "^5.1.2"
   },
   "allowScripts": {
