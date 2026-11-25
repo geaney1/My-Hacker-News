@@ -15,7 +15,10 @@
     "e2e:run": "playwright test",
     "serve:ssr:hacker-news": "node dist/hacker-news/server/server.mjs",
     "start:ssr": "ng build && node dist/hacker-news/server/server.mjs",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "format": "prettier --write src e2e",
+    "format:check": "prettier --check src e2e",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.spec.json --noEmit && tsc -p tsconfig.server-test.json --noEmit && tsc -p tsconfig.e2e.json --noEmit"
   },
   "private": true,
   "engines": {

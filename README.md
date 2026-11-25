@@ -283,6 +283,16 @@ npm run e2e:run    # runs them against the last build
 
 They use the Microsoft Edge that is installed on the machine (set `E2E_BROWSER=chrome` for Chrome). **Hacker News is replaced by a small fake** (`e2e/fake-hn.mjs`, selected with the `HN_API_URL` setting), so the tests need no network and always see the same stories. The app's server runs on port 4901 with an empty data folder (`e2e/.data`, thrown away each run) and with the rate limits switched off (`RATE_LIMITS=off`, which is only for these tests).
 
+## Code checks
+
+```bash
+npm run format:check  # Prettier on src/ and e2e/ (npm run format fixes them)
+npm run lint          # ESLint with angular-eslint, including template accessibility rules
+npm run typecheck     # TypeScript: the app, both unit test suites and the end-to-end tests
+```
+
+The lint rules also enforce several of the project's coding rules (see `eslint.config.js`). A GitHub Actions workflow (`.github/workflows/ci.yml`) runs these checks, the build and all the tests on each push and pull request, once the repository is on GitHub.
+
 ## Additional resources
 
 For more about the Angular CLI, including detailed command references, see the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli).

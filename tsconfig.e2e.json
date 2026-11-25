@@ -1,0 +1,9 @@
+/* The Playwright end-to-end tests and their config. They are not part of the Angular build. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "files": [],
+  "include": ["playwright.config.ts", "e2e/**/*.ts"]
+}
