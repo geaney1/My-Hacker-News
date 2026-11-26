@@ -22,6 +22,26 @@ test.describe('accounts', () => {
     await expect(page.getByRole('button', { name: 'Log Out' })).toBeVisible();
   });
 
+  test('a log-out that fails says so, and leaves the user logged in', async ({ page }) => {
+    await createUserAndLogIn(page, uniqueName('gus'));
+    // The request to log out never reaches the server.
+    await page.route('**/api/auth/logout', (route) => route.abort());
+    await page.getByRole('button', { name: 'Log Out' }).click();
+
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'you are still logged in' }),
+    ).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Log Out' })).toBeVisible();
+
+    // Once the server can be reached, trying again works, and stays that way.
+    await page.unroute('**/api/auth/logout');
+    await page.getByRole('button', { name: 'Log Out' }).click();
+    await expect(page.getByRole('link', { name: 'Log In' })).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole('link', { name: 'Log In' })).toBeVisible();
+  });
+
   test('refuses a wrong password, and says so', async ({ page }) => {
     const username = uniqueName('cara');
     await createUser(page, username);
@@ -89,6 +109,8 @@ test.describe('accounts', () => {
       .getByRole('link', { name: 'Close' })
       .click();
     await page.getByRole('button', { name: 'Log Out' }).click();
+    // Leaving the page before the server has answered would cancel the log-out.
+    await expect(page.getByRole('link', { name: 'Log In' })).toBeVisible();
     await openPage(page, '/log-in');
     await page.getByLabel('Username').fill(username);
     await page.getByLabel('Password', { exact: true }).fill('a-brand-new-password');

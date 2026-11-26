@@ -149,30 +149,46 @@ describe('AuthStore', () => {
   });
 
   describe('logOut', () => {
-    it('logs out straight away, before the server has answered, and ends the session', async () => {
+    it('ends the session, and logs the user out once the server has answered', async () => {
       const login = store.logIn('Anna', 'correct-horse');
       respondWith('/api/auth/login', 200, { username: 'Anna' });
       await login;
 
       const done = store.logOut();
-      expect(store.login()).toBe(false);
-      expect(store.username()).toBe('');
+      expect(store.login()).toBe(true);
 
       const request = http.expectOne('/api/auth/logout');
       expect(request.request.method).toBe('POST');
       request.flush(null, { status: 204, statusText: 'No Content' });
-      await done;
+
+      expect(await done).toBeUndefined();
+      expect(store.login()).toBe(false);
+      expect(store.username()).toBe('');
     });
 
-    it('still logs out when the server cannot be reached', async () => {
+    it('keeps the user logged in, and says why, when the server answers with an error', async () => {
       const login = store.logIn('Anna', 'correct-horse');
       respondWith('/api/auth/login', 200, { username: 'Anna' });
       await login;
 
       const done = store.logOut();
       respondWith('/api/auth/logout', 500);
-      await expect(done).resolves.toBeUndefined();
-      expect(store.login()).toBe(false);
+
+      expect(await done).toBe('unavailable');
+      expect(store.login()).toBe(true);
+      expect(store.username()).toBe('Anna');
+    });
+
+    it('keeps the user logged in when the server cannot be reached', async () => {
+      const login = store.logIn('Anna', 'correct-horse');
+      respondWith('/api/auth/login', 200, { username: 'Anna' });
+      await login;
+
+      const done = store.logOut();
+      http.expectOne('/api/auth/logout').error(new ProgressEvent('error'));
+
+      expect(await done).toBe('unavailable');
+      expect(store.login()).toBe(true);
     });
   });
 });

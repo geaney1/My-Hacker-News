@@ -91,15 +91,19 @@ export class AuthStore {
     }
   }
 
-  /** Logs out straight away, then tells the server to end the session. */
+  /**
+   * Ends the session on the server. Resolves to `undefined` on success, or the reason the log-out
+   * failed. The user stays logged in until the server has answered: after a failure the browser
+   * still has the session cookie, so a reload would show them as logged in.
+   */
   async logOut() {
-    this.setUser('');
     try {
       await firstValueFrom(this.http.post('/api/auth/logout', {}));
-    } catch {
-      // The server could not be reached, so the session lasts until it expires there: after a
-      // reload the user would be logged in again.
+    } catch (error) {
+      return this.failureFrom(error);
     }
+    this.setUser('');
+    return undefined;
   }
 
   private setUser(username: string) {

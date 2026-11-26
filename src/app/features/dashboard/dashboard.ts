@@ -6,6 +6,7 @@ import {
   ElementRef,
   inject,
   Injector,
+  linkedSignal,
   PLATFORM_ID,
   signal,
   untracked,
@@ -95,6 +96,12 @@ export class Dashboard {
   protected readonly username = this.authStore.username;
   protected readonly initial = computed(() => this.username().charAt(0));
 
+  /** `true` after logging out failed, until it is tried again or someone else is logged in. */
+  protected readonly logOutFailed = linkedSignal({
+    source: this.username,
+    computation: () => false,
+  });
+
   private readonly currentUrl = injectCurrentUrl();
 
   private announced = false;
@@ -142,8 +149,13 @@ export class Dashboard {
     () => firstSegmentOf(this.currentUrl()) === 'user-profile',
   );
 
-  logOut() {
-    this.authStore.logOut();
+  async logOut() {
+    // Taken down first, so that a second failure is announced again.
+    this.logOutFailed.set(false);
+    if (await this.authStore.logOut()) {
+      this.logOutFailed.set(true);
+      return;
+    }
     // Leave the Welcome page, the Submit dialog and the profile pages, which need a login.
     if (
       this.router.url.startsWith('/welcome') ||

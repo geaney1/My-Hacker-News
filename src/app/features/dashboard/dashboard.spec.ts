@@ -190,6 +190,56 @@ describe('Dashboard', () => {
     });
   });
 
+  describe('logging out', () => {
+    let http: HttpTestingController;
+
+    beforeEach(async () => {
+      http = TestBed.inject(HttpTestingController);
+      const login = TestBed.inject(AuthStore).logIn('Anna', 'correct-horse');
+      http.expectOne('/api/auth/login').flush({ username: 'Anna' });
+      await login;
+      await goTo('/welcome');
+    });
+
+    const logOutButton = () => page().querySelector<HTMLButtonElement>('button.log-out');
+    const failureNotice = () => page().querySelector('.log-out-failed');
+
+    /** Presses Log Out, and has the server answer with this status. */
+    async function pressLogOut(status: number) {
+      logOutButton()!.click();
+      fixture.detectChanges();
+      http.expectOne('/api/auth/logout').flush(null, { status, statusText: String(status) });
+      await new Promise((resolve) => setTimeout(resolve));
+      TestBed.tick();
+      fixture.detectChanges();
+    }
+
+    it('leaves a page that needs a login once the server has logged the user out', async () => {
+      await pressLogOut(204);
+
+      expect(router.url).toBe('/top');
+      expect(logOutButton()).toBeNull();
+      expect(failureNotice()).toBeNull();
+    });
+
+    it('says so when it fails, and stays logged in on the same page', async () => {
+      await pressLogOut(500);
+
+      expect(failureNotice()?.textContent).toContain('you are still logged in');
+      expect(failureNotice()?.querySelector('[role="alert"]')).not.toBeNull();
+      expect(logOutButton()).not.toBeNull();
+      expect(router.url).toBe('/welcome');
+    });
+
+    it('takes the notice down when trying again works', async () => {
+      await pressLogOut(500);
+      await pressLogOut(204);
+
+      expect(failureNotice()).toBeNull();
+      expect(logOutButton()).toBeNull();
+    });
+  });
+
   it('offers a Log In button on other pages while logged out', async () => {
     await goTo('/top');
     const button = page().querySelector<HTMLAnchorElement>('a.log-in');

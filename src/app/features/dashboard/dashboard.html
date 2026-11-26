@@ -65,6 +65,12 @@
       }
     </header>
 
+    @if (logOutFailed()) {
+      <app-banner class="log-out-failed" kind="error">
+        Logging out did not work, so you are still logged in. Check your connection and try again.
+      </app-banner>
+    }
+
     @if (shutOut()) {
       <app-banner class="visit-limit" kind="warning" heading="Time for a break">
         <p>

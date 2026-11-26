@@ -60,6 +60,10 @@ main:focus {
   gap: 0.5rem;
 }
 
+.log-out-failed {
+  margin-bottom: var(--spacing);
+}
+
 // The title, with the hamburger button before it on a small screen.
 .title {
   display: flex;

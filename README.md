@@ -200,7 +200,7 @@ Accounts use the traditional model that Hacker News itself uses:
 1. **Username and password.** Creating a user and logging in send the credentials to the app's server. Passwords are never stored: each is turned into a salted `scrypt` hash, and only the hash is kept (`data/users.json`).
 2. **A session cookie.** A successful log-in makes the server create a session and send a cookie called `hn_session`. The browser sends it back automatically. The cookie holds only a random session ID, nothing about the user, and it is `HttpOnly` (scripts cannot read it) and `SameSite=Lax`.
 3. **Server-side validation.** On each request the server looks the ID up in its own session store (`data/sessions.json`, which keeps a hash of the ID, never the ID) to find out who the user is. A session lasts 14 days from its last use.
-4. **Log out.** Logging out deletes the session on the server and removes the cookie. Because the server is what decides, a copied cookie stops working at once.
+4. **Log out.** Logging out deletes the session on the server and removes the cookie. Because the server is what decides, a copied cookie stops working at once. The app shows the user as logged out only when the server has answered. If it cannot be reached, the app says that they are still logged in, so they can try again.
 
 Also: every log-in gets a brand new session ID (so an ID planted beforehand is useless), changing a password ends every session of that account and gives the current browser a new one, attempts to create a user, log in or change a password are limited to 10 a minute per address (counted together), and the server only accepts JSON for changes. The code is in `src/auth-controller.ts`, `src/sessions-store.ts` and `src/accounts-store.ts`.
 
