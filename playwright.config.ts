@@ -4,6 +4,10 @@ import { defineConfig } from '@playwright/test';
 const appPort = 4901;
 const fakeHackerNewsPort = 4900;
 
+// Playwright asks the processes it starts for coloured output (FORCE_COLOR). Where NO_COLOR is
+// set as well, each of them warns that it is ignored, so it is taken away.
+delete process.env['NO_COLOR'];
+
 /**
  * End-to-end tests: a real browser against the built app. `npm run e2e` builds the app first.
  * Hacker News is replaced by a small fake (`e2e/fake-hn.mjs`), and the app keeps its accounts,
