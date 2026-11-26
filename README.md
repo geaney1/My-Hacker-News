@@ -58,6 +58,15 @@ Browser (Angular app)  ──/api/...──▶  NestJS server (src/server.ts)  �
 - **Everything the server saves is in JSON files** in the `data/` folder, written safely (to a temporary file that is then renamed) and one write at a time. This suits one small server. See [What a production version would add](#what-a-production-version-would-add).
 - **The Angular app is signal-based and zoneless.** State lives in root-provided stores (signals, `computed`, `linkedSignal`, `resource`), forms are Signal Forms, async code uses promises, services are declared with `@Service()`, and every component has external templates and styles. Change detection is `OnPush`, the default in Angular 22, so it is not written out.
 
+### Why server-side rendering
+
+- **Content appears sooner.** The first page arrives with its content already in it, instead of an empty page that waits for the JavaScript and then for the data.
+- **Search engines and link previews can read it,** because the stories are in the HTML.
+- **Missing pages are reported properly.** A story that doesn't exist answers with a real 404 status.
+- **It uses a server the app needs anyway.** The app already has its own server to fetch from Hacker News and to save the simulated features, so the same server renders the pages.
+
+The cost: the app needs a running Node server, not just static file hosting, and code that uses browser features such as `localStorage` has to allow for running on the server.
+
 ## How the project is structured, and why
 
 ```
