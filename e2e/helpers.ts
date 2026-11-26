@@ -7,15 +7,12 @@ export function uniqueName(prefix: string) {
   return `${prefix}${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/** Waits for the app to take over the page the server sent: what is typed before then is erased. */
-export async function appIsReady(page: Page) {
-  await expect(page.locator('app-root')).not.toHaveAttribute('ngh');
-}
-
-/** Opens a page, ready to have its forms filled in. */
+/**
+ * Opens a page, ready to have its forms filled in. The server sends the page before the app in it
+ * has loaded, and what is typed until then is erased, so this waits for the network to go quiet.
+ */
 export async function openPage(page: Page, path: string) {
-  await page.goto(path);
-  await appIsReady(page);
+  await page.goto(path, { waitUntil: 'networkidle' });
 }
 
 /** Makes an account, the way a person does: the create-user dialog, then the log-in dialog. */
