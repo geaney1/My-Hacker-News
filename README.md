@@ -218,7 +218,15 @@ These settings are read from the environment:
 | `HN_API_URL` | Where Hacker News's API is (for tests; defaults to the real one). |
 | `RATE_LIMITS` | `off` switches the rate limits off. Only the end-to-end tests use it. |
 
-The running server sends security headers on every response (through `helmet`) and a Content Security Policy that lets the page run only its own scripts and styles, plus the few inline ones Angular's server rendering writes, which get a new random nonce on each request. It also blocks framing, content-type sniffing and plugins, and only allows requests to its own server. The dev server (`ng serve`) does not send them, because it needs inline scripts and a websocket that the policy would block.
+The live server adds security headers (safety rules for the browser) to everything it sends, using a tool called `helmet`. These rules tell the browser to:
+
+- **Run only the app's own scripts and styles.** This rule is part of a Content Security Policy. A few pieces of code written directly into the page are also allowed: the theme script in `index.html`, and those Angular adds when the server builds the page. Each carries a random code (a nonce) that changes on every request.
+- **Block other pages from showing the app inside a frame.**
+- **Trust the file type the server gives,** instead of guessing it.
+- **Block plugins.**
+- **Let the app request data only from its own server.**
+
+The development server (`ng serve`) does not add these rules, because it needs some inline scripts and a live connection (a websocket) that they would block.
 
 Stories and comments get their ids from counters kept in `counters.json`, so an id is never used twice, even if a story or comment is later removed.
 
@@ -244,7 +252,7 @@ The aim is WCAG 2.2 level AA. In practice:
 
 - **Keyboard.** Everything can be used with the keyboard. A "Skip to main content" link is the first Tab stop. Dialogs keep the focus inside, Escape closes them, and closing puts the focus back where it came from. Focus is always visible and is never hidden behind the profile's buttons on a phone.
 - **Screen readers.** Pages are announced by title after each navigation. Fields have labels, hints and errors that are read out. Errors are announced at once, and other notices politely. Links that open in a new tab say so.
-- **Forms never hide a button.** The Submit, Log in, Create account, Change password and Update buttons are never turned off because a form is incomplete (Update waits only while the profile is still loading). Pressing one with the form incomplete shows each problem and moves the focus to the first field to fix, so nobody is left with a button that does nothing and no word about why.
+- **Forms never hide a button.** The Submit, Log in, Create user, Change password and Update buttons are never turned off because a form is incomplete (Update waits only while the profile is still loading). Pressing one with the form incomplete shows each problem and moves the focus to the first field to fix, so nobody is left with a button that does nothing and no word about why.
 - **Contrast and size.** Text is at least 4.5:1, and icons and field borders at least 3:1. Controls are at least 24 by 24 pixels, or, for small text links, spaced far enough apart. The page does not scroll sideways at 320 px wide.
 - **Notices.** Warnings, errors and messages about a whole page or form use a shared `Banner` component with an icon, an accessible role, and a colour that stands out from the page in both themes. A problem with a single field is shown beside that field.
 
@@ -288,7 +296,7 @@ The one server file that the unit tests do not load is `server.ts` (the wiring o
 
 ### End-to-end tests
 
-The end-to-end tests drive a real browser (Playwright) against the built app. They cover reading the lists, accounts, submitting, comments, the profile and its settings, accessibility, and the phone layout.
+The end-to-end tests drive a real browser (Playwright) against the built app. They cover reading the lists, accounts, submitting, comments, the profile and its settings, accessibility, the security headers, forms sent before the app has loaded, and the phone layout.
 
 ```bash
 npm run e2e        # builds the app, then runs the tests
@@ -305,7 +313,7 @@ npm run lint          # ESLint with angular-eslint, including template accessibi
 npm run typecheck     # TypeScript: the app, both unit test suites and the end-to-end tests
 ```
 
-The lint rules also enforce several of the project's coding rules (see `eslint.config.js`). A GitHub Actions workflow (`.github/workflows/ci.yml`) runs these checks, the build and all the tests on each push and pull request, once the repository is on GitHub.
+The lint rules also enforce several of the project's coding rules (see `eslint.config.js`). A GitHub Actions workflow (`.github/workflows/ci.yml`) runs these checks, the build and all the tests on each push and pull request.
 
 ## Additional resources
 
