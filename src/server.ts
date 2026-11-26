@@ -135,6 +135,14 @@ app.get('/api/users/:id', async (request, response) => {
 });
 
 /**
+ * Any other API address does not exist: answer in JSON instead of rendering a page.
+ * This must stay after every other /api route.
+ */
+app.use('/api', (_request, response) => {
+  response.status(404).json({ message: 'Not found' });
+});
+
+/**
  * Serve static files from /browser
  */
 app.use(
