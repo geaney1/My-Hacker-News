@@ -239,6 +239,10 @@ for (const theme of ['light', 'dark'] as const) {
     });
 
     test('the text stays readable while the mouse is over links and buttons', async ({ page }) => {
+      // It hovers every link and button on seven views, and waits for each to change colour, which
+      // takes about as long as a test is normally allowed. This allows it three times as long.
+      test.slow();
+
       // Logged out: the lists, the cards, the side menu, the paging bar and the Log In button.
       await page.goto('/top');
       await expect(page.locator('article.story').first()).toBeVisible();
