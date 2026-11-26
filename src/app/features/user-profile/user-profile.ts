@@ -1,5 +1,5 @@
 import { Component, computed, inject, linkedSignal, resource, signal } from '@angular/core';
-import { disabled, email, form, FormField, min, required } from '@angular/forms/signals';
+import { disabled, email, form, FormField, FormRoot, min, required } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { AuthCard } from '../../shared/auth-card/auth-card';
 import { InfoTip } from '../../shared/info-tip/info-tip';
@@ -13,11 +13,11 @@ import { AuthStore } from '../../core/auth/auth.store';
 import { StoriesStore } from '../stories/stories.store';
 import { UserProfileModel } from '../../models/user-profile-model';
 import { Banner } from '../../shared/banner/banner';
-import { submitOrFocusProblem } from '../../shared/submit-form';
+import { submissionOrFocusProblem } from '../../shared/submit-form';
 
 @Component({
   selector: 'app-user-profile',
-  imports: [Banner, AuthCard, FormField, FormTextField, InfoTip, RouterLink, TimeAgoPipe],
+  imports: [Banner, AuthCard, FormRoot, FormField, FormTextField, InfoTip, RouterLink, TimeAgoPipe],
   templateUrl: './user-profile.html',
   styleUrl: './user-profile.scss',
 })
@@ -58,32 +58,38 @@ export class UserProfile {
   /** Why the last attempt to save failed, shown above the button. */
   protected readonly formError = signal<string | undefined>(undefined);
 
-  protected readonly userProfileForm = form(this.userProfileModel, (schemaPath) => {
-    required(schemaPath.email, { message: 'Email is required' });
-    email(schemaPath.email, { message: 'Enter a valid email address' });
-    min(schemaPath.maxvisit, 1, { message: 'Must be at least 1' });
-    min(schemaPath.minaway, 0, { message: 'Must be 0 or more' });
-    min(schemaPath.delay, 0, { message: 'Must be 0 or more' });
-    // The two lock-out settings only matter when No Procrast is yes.
-    disabled(schemaPath.maxvisit, ({ valueOf }) => valueOf(schemaPath.noprocrast) !== 'yes');
-    disabled(schemaPath.minaway, ({ valueOf }) => valueOf(schemaPath.noprocrast) !== 'yes');
-  });
+  protected readonly userProfileForm = form(
+    this.userProfileModel,
+    (schemaPath) => {
+      required(schemaPath.email, { message: 'Email is required' });
+      email(schemaPath.email, { message: 'Enter a valid email address' });
+      min(schemaPath.maxvisit, 1, { message: 'Must be at least 1' });
+      min(schemaPath.minaway, 0, { message: 'Must be 0 or more' });
+      min(schemaPath.delay, 0, { message: 'Must be 0 or more' });
+      // The two lock-out settings only matter when No Procrast is yes.
+      disabled(schemaPath.maxvisit, {
+        when: ({ valueOf }) => valueOf(schemaPath.noprocrast) !== 'yes',
+      });
+      disabled(schemaPath.minaway, {
+        when: ({ valueOf }) => valueOf(schemaPath.noprocrast) !== 'yes',
+      });
+    },
+    {
+      submission: submissionOrFocusProblem(this.formError, () => this.saveProfile()),
+    },
+  );
 
-  protected async onSubmit(event: Event) {
-    event.preventDefault();
-    this.formError.set(undefined);
-    await submitOrFocusProblem(this.userProfileForm, async () => {
-      const failure = await this.profileApi.saveProfile(this.userProfileModel());
-      if (failure) {
-        this.formError.set(failure);
-        return;
-      }
-      // Saved: the app follows the new settings at once, and the dialog closes, back to the story list the user last had open.
-      // The story pages remembered in this browser may have been made with the old settings (Show
-      // Dead changes what is on them), so they are forgotten and loaded again.
-      this.hnApi.clearStoryPageCache();
-      this.profileStore.remember(this.userProfileModel());
-      await this.router.navigateByUrl(`/${this.storiesStore.selectedList()}`);
-    });
+  private async saveProfile() {
+    const failure = await this.profileApi.saveProfile(this.userProfileModel());
+    if (failure) {
+      this.formError.set(failure);
+      return;
+    }
+    // Saved: the app follows the new settings at once, and the dialog closes, back to the story list the user last had open.
+    // The story pages remembered in this browser may have been made with the old settings (Show
+    // Dead changes what is on them), so they are forgotten and loaded again.
+    this.hnApi.clearStoryPageCache();
+    this.profileStore.remember(this.userProfileModel());
+    await this.router.navigateByUrl(`/${this.storiesStore.selectedList()}`);
   }
 }

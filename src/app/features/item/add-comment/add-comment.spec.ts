@@ -164,7 +164,7 @@ describe('AddComment', () => {
 
       it('says the comment is not saved and not posted to Hacker News', () => {
         const hint = page().querySelector('#new-comment-hint')?.textContent?.replace(/\s+/g, ' ');
-        expect(hint).toContain('until you reload it');
+        expect(hint).toContain('until you reload the page');
         expect(hint).toContain('not posted to Hacker News');
       });
 
@@ -178,6 +178,20 @@ describe('AddComment', () => {
         ]);
         expect(box().value).toBe('');
         expect(saved).not.toHaveBeenCalled();
+      });
+
+      it("holds the comment back for the Delay in the writer's profile, from someone logged out", async () => {
+        http.expectOne('/api/profile').flush({ delay: 600 });
+        await settle();
+        await write('Not yet');
+        const kept = TestBed.inject(NewCommentsStore);
+        expect(kept.forItem(hackerNewsStoryId)).toHaveLength(1);
+
+        const logout = TestBed.inject(AuthStore).logOut();
+        http.expectOne('/api/auth/logout').flush(null);
+        await logout;
+
+        expect(kept.forItem(hackerNewsStoryId)).toEqual([]);
       });
     });
   });

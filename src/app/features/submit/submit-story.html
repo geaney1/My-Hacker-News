@@ -1,5 +1,5 @@
 <app-auth-card heading="Submit a story">
-  <form class="auth-form" novalidate (submit)="onSubmit($event)">
+  <form class="auth-form" [formRoot]="submitForm">
     <app-form-text-field
       fieldId="story-title"
       label="Title"

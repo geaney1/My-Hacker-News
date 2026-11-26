@@ -1,6 +1,6 @@
 # HackerNews
 
-A reader for [Hacker News](https://news.ycombinator.com), built with Angular 22 (signals, zoneless, server-side rendering) and a small Express server. You can read the story lists, stories and their comments, and user pages. When you log in you can also submit stories, write comments, and keep a profile with settings.
+A reader for [Hacker News](https://news.ycombinator.com), built with Angular 22 (signals, zoneless, server-side rendering) and a small [NestJS](https://nestjs.com) server (running on [Fastify](https://fastify.dev)). You can read the story lists, stories and their comments, and user pages. When you log in you can also submit stories, write comments, and keep a profile with settings.
 
 **The client is designed for both desktop and mobile devices.** It is responsive, from a wide desktop screen down to a small phone (320 px wide), and it works with a mouse, a touch screen and a keyboard. See [Desktop and mobile](#desktop-and-mobile).
 
@@ -47,7 +47,7 @@ How the simulated parts show up:
 ## How the project works
 
 ```
-Browser (Angular app)  ──/api/...──▶  Express server (src/server.ts)  ──▶  Hacker News API (read-only)
+Browser (Angular app)  ──/api/...──▶  NestJS server (src/server.ts)  ───▶  Hacker News API (read-only)
         ▲                                      │
         │                                      └──▶  JSON files in data/  (accounts, sessions, profiles, stories, comments)
         └──── server-rendered first page (SSR) ◀──┘
@@ -62,7 +62,8 @@ Browser (Angular app)  ──/api/...──▶  Express server (src/server.ts)  
 
 ```
 src/
-  server.ts, *-routes.ts, *-store.ts, *-proxy.ts   The Express server (Node)
+  server.ts, api-*.ts, *-controller.ts, *-guard.ts, The server (Node): NestJS on Fastify
+  *-store.ts, *-proxy.ts
   app/                                              The Angular app (browser and server rendering)
     core/        App-wide services and stores: api/, auth/, profile/, theme/, comments/, navigation/
     features/    One folder per part of the app: dashboard, stories, item, user, user-profile,
@@ -82,7 +83,9 @@ The structure follows a few rules, each for a reason:
 - **`shared/` for reuse.** A component used by more than one feature (the banner, the dialog card, the form field, the info tip, the paging bar) lives here once, so the look and the accessibility behaviour are the same everywhere and are fixed in one place.
 - **`models/`: types in their own files.** One type per file, so they are easy to find and can be shared. Types the app uses are in `src/app/models/`, and types only the server uses are in `src/models/`. A test's own helper types stay in the test.
 - **One theme file.** All colours, spacing and shapes are tokens in `src/styles.scss`. The dark theme is a second set of the same tokens, so a component never needs to know which theme is on, and the look can be changed in one place.
-- **Server code is split by job, not in one big file.** `*-routes.ts` handles the requests, `*-store.ts` keeps the data, `*-proxy.ts` talks to Hacker News, and small helpers (`rate-limiter.ts`, `json-store.ts`, `security.ts`, `cookies.ts`) do one thing each. Most of these files have a test of the same name beside them; a few small ones are tested through the files that use them, and `server.ts` only by the end-to-end tests. The split keeps each piece small enough to understand and test alone.
+- **Server code is split by job, not in one big file.** `*-controller.ts` handles the requests, `*-guard.ts` refuses the ones that must not reach a controller (not JSON, too many attempts), `*-store.ts` keeps the data, `*-proxy.ts` talks to Hacker News, and small helpers (`rate-limiter.ts`, `json-store.ts`, `security.ts`, `cookies.ts`) do one thing each. Most of these files have a test of the same name beside them; a few small ones are tested through the files that use them, and `server.ts` only by the end-to-end tests. The split keeps each piece small enough to understand and test alone.
+- **One Fastify server, with Nest for the API.** `api-adapter.ts` sets up Fastify (the 10 KB limit on request bodies, which bodies are read, how addresses are matched), and `api-app.ts` starts Nest on it with the controllers that `api-module.ts` lists. `server.ts` then adds the security headers and the routes for everything else: a JSON 404 for unknown `/api` addresses, the built files, and the page rendering. The order does not matter, because the most specific route wins. A new controller is added to `api-module.ts`.
+- **No constructor injection by type.** The Angular build does not record the constructor types that Nest reads to inject services, so the controllers call the stores and proxies directly. A service injected into a constructor would need `@Inject(TheService)`, or it arrives as `undefined` while the build still succeeds.
 - **Tests sit beside the code they test** (`*.spec.ts` for the app, `*.test.ts` for the server). The end-to-end tests are separate because they run the whole built app in a real browser.
 - **The server is the authority.** The browser checks forms to help the user, but the server checks everything again (the length of a title, a valid link, who owns a profile, rate limits). Anything that matters is decided on the server, not in the browser.
 
@@ -177,7 +180,7 @@ The profile (about, email and preferences) is saved per account on this app's se
 | **Email** | Private: never shown to anyone. |
 | **Show Dead** | Includes dead stories and comments (marked [dead]). The server checks the saved profile. |
 | **No Procrast**, **Max Visit**, **Min Away** | With No Procrast on, the user is shut out for Min Away minutes once a visit has lasted Max Visit minutes. Max Visit and Min Away are turned off while No Procrast is no. The times are kept per user in this browser, so this is a self-imposed limit, not one the server enforces. |
-| **Delay** | Hides the user's comments on stories submitted here from everyone else for that many seconds. The user sees their own at once. 0 means no delay. |
+| **Delay** | Hides the user's new comments from everyone else for that many minutes. The user sees their own at once. 0 means no delay. It covers comments saved on this server and the temporary ones on Hacker News stories, which someone else only ever sees in the same browser after the writer logs out. |
 
 Each setting has an "i" button beside its label that explains it. One explanation shows at a time, and it hides when you press the button again, press Escape, or click elsewhere.
 
@@ -190,17 +193,19 @@ Accounts use the traditional model that Hacker News itself uses:
 3. **Server-side validation.** On each request the server looks the ID up in its own session store (`data/sessions.json`, which keeps a hash of the ID, never the ID) to find out who the user is. A session lasts 14 days from its last use.
 4. **Log out.** Logging out deletes the session on the server and removes the cookie. Because the server is what decides, a copied cookie stops working at once.
 
-Also: every log-in gets a brand new session ID (so an ID planted beforehand is useless), changing a password ends every session of that account and gives the current browser a new one, attempts to create a user, log in or change a password are limited to 10 a minute per address (counted together), and the server only accepts JSON for changes. The code is in `src/auth-routes.ts`, `src/sessions-store.ts` and `src/accounts-store.ts`.
+Also: every log-in gets a brand new session ID (so an ID planted beforehand is useless), changing a password ends every session of that account and gives the current browser a new one, attempts to create a user, log in or change a password are limited to 10 a minute per address (counted together), and the server only accepts JSON for changes. The code is in `src/auth-controller.ts`, `src/sessions-store.ts` and `src/accounts-store.ts`.
 
 ## Running it in production
 
-Build it and run the server (`npm run start:ssr`). These settings are read from the environment:
+Build it and run the server (`npm run start:ssr`). The built server loads NestJS, Fastify and `reflect-metadata` from `node_modules`, because bundling NestJS breaks it (they are listed under `externalDependencies` in `angular.json`). To run it on another machine, copy `dist/`, `package.json` and `package-lock.json` there, run `npm ci --omit=dev`, and start it with `npm run serve:ssr:hacker-news`.
+
+These settings are read from the environment:
 
 | Setting | What it does |
 | --- | --- |
 | `PORT` | The port to listen on (default 4000). |
 | `DATA_DIR` | Where accounts, sessions, stories, comments, profiles and id counters are kept (default `./data`). |
-| `TRUST_PROXY` | Set it when the server is behind a proxy that ends HTTPS (a load balancer, nginx): the number of proxies in front of it (`1`) or an address list (`loopback`). Without it Express sees plain HTTP from the proxy's address, so the session cookie is not marked `Secure` and the rate limits count every visitor as the proxy. Avoid `true`, which trusts any `X-Forwarded-For` a client sends. |
+| `TRUST_PROXY` | Set it when the server is behind a proxy that ends HTTPS (a load balancer, nginx): an address list (`loopback`) or the number of proxies in front of it (`1`). Without it the server sees plain HTTP from the proxy's address, so the session cookie is not marked `Secure` and the rate limits count every visitor as the proxy. Prefer the address list. A number does not check where a request came from, so use one only when the server cannot be reached except through the proxies. Avoid `true`, which trusts any `X-Forwarded-For` a client sends. When `X-Forwarded-Proto` lists several values, the last one counts: the one added by the nearest proxy. |
 | `HN_API_URL` | Where Hacker News's API is (for tests; defaults to the real one). |
 | `RATE_LIMITS` | `off` switches the rate limits off. Only the end-to-end tests use it. |
 
@@ -267,10 +272,10 @@ At the last measurement:
 
 | Suite | Statements | Branches | Functions | Lines |
 | --- | --- | --- | --- | --- |
-| Angular app | 90.4% | 88.7% | 86.7% | 92.9% |
-| Node server | 86.0% | 85.9% | 95.0% | 85.5% |
+| Angular app | 90.4% | 88.5% | 87.1% | 92.3% |
+| Node server | 93.5% | 92.1% | 95.5% | 93.5% |
 
-The server figure is pulled down by one file that the unit tests do not load: `server.ts` (the Express wiring). The end-to-end tests run it, but Playwright does not measure code coverage, so it is not counted in these numbers. The weakest app areas are the dashboard and the story page, which are mostly exercised by the end-to-end tests.
+The one server file that the unit tests do not load is `server.ts` (the wiring of the server). The end-to-end tests run it, but Playwright does not measure code coverage, so it is not counted in these numbers. The weakest app areas are the dashboard and the story page, which are mostly exercised by the end-to-end tests.
 
 ### End-to-end tests
 

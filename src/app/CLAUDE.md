@@ -1,6 +1,6 @@
 ## Angular code rules
 
-- Always use Signal Forms. Don't use reactive or model-driven forms.
+- Always use Signal Forms. Don't use reactive or template-driven forms.
 - Don't use RxJS and Observables unless explicitly told to. Define the API of your service layers with Promises.
 - For handling async code, prefer Promises and the async/await syntax.
 - If you run into Angular APIs that are still Observable-based, convert them to Promises using `firstValueFrom`.
@@ -24,10 +24,10 @@ Keep domain stores close to their features. Stores that the whole app needs once
 
 - Keep APIs, loading state, search term, pagination and filters in a root-injected store.
 
-## Complete store example
+## Store patterns
 
-Use writable signals for state, computed signals for filtered and paginated results, effects for persistence and
-resources for server data.
+`features/stories/stories.store.ts` is the complete example. Use writable signals for state, computed signals for
+filtered and paginated results, effects for persistence and resources for server data.
 
 - **Resource Signals:** ideal for loading top, best and new stories with automatic loading and error handling.
 - **Computed Signals:** use for filtering, sorting, pagination and derived UI state.

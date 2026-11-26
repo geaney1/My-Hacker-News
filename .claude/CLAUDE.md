@@ -49,7 +49,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 - Keep templates simple and avoid complex logic
 - Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
-- Use the async pipe to handle observables
+- Don't pass observables to templates: convert them to Promises with `firstValueFrom` (see `src/app/CLAUDE.md`)
 - Do not assume globals like (`new Date()`) are available.
 - Arrow functions with an expression body are supported in templates (Angular 22+), but keep them small. Block bodies are not supported, and complex logic belongs in the component class.
 

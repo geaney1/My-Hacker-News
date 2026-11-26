@@ -85,7 +85,7 @@ describe('thread proxy', () => {
 
     it('includes dead ones, but never deleted ones, when the viewer has Show Dead', async () => {
       serve(items);
-      const thread = await getThread(1, { showDead: true, delaySeconds: 0 });
+      const thread = await getThread(1, { showDead: true, delayMinutes: 0 });
       expect(thread?.comments.map((comment) => comment.text)).toEqual(['Alive', 'Dead']);
       expect(thread?.pollOptions.map((option) => option.text)).toEqual(['Option', 'Dead option']);
     });
@@ -93,7 +93,7 @@ describe('thread proxy', () => {
 
   it('asks for the comments of this app as the viewer, so their Delay can hide them from others', async () => {
     serve([{ id: 2_000_000_001, type: 'story', title: 'Mine' }]);
-    await getThread(2_000_000_001, { username: 'Anna', showDead: false, delaySeconds: 60 });
+    await getThread(2_000_000_001, { username: 'Anna', showDead: false, delayMinutes: 60 });
     await getThread(2_000_000_001);
     expect(local.askedFor).toEqual([
       { id: 2_000_000_001, viewer: 'Anna' },

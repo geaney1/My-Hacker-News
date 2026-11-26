@@ -1,12 +1,12 @@
 import { Component, computed, effect, input, output, signal } from '@angular/core';
-import { form, FormField, max, min, validate } from '@angular/forms/signals';
+import { form, FormField, FormRoot, max, min, validate } from '@angular/forms/signals';
 import { GoToPageModel } from '../../models/go-to-page-model';
 import { PaginationItem } from '../../models/pagination-item';
 
 /** Previous/next buttons, numbered pages and a "go to page" box. */
 @Component({
   selector: 'app-pagination',
-  imports: [FormField],
+  imports: [FormField, FormRoot],
   templateUrl: './pagination.html',
   styleUrl: './pagination.scss',
 })
@@ -41,16 +41,21 @@ export class Pagination {
   });
 
   protected readonly goToPageModel = signal<GoToPageModel>({ page: null });
-  protected readonly goToPageForm = form(this.goToPageModel, (schemaPath) => {
-    const message = () => `Enter a page from 1 to ${this.totalPages()}`;
-    min(schemaPath.page, 1, { message });
-    max(schemaPath.page, () => this.totalPages(), { message });
-    validate(schemaPath.page, ({ value }) =>
-      value() !== null && !Number.isInteger(value())
-        ? { kind: 'notWhole', message: message() }
-        : undefined,
-    );
-  });
+  protected readonly goToPageForm = form(
+    this.goToPageModel,
+    (schemaPath) => {
+      const message = () => `Enter a page from 1 to ${this.totalPages()}`;
+      min(schemaPath.page, 1, { message });
+      max(schemaPath.page, () => this.totalPages(), { message });
+      validate(schemaPath.page, ({ value }) =>
+        value() !== null && !Number.isInteger(value())
+          ? { kind: 'notWhole', message: message() }
+          : undefined,
+      );
+    },
+    // A number outside 1..totalPages is never accepted: the error under the box says why.
+    { submission: { action: async () => this.goToTypedPage() } },
+  );
 
   /** The reason the typed page number can't be used, or `undefined` when it is fine or empty. */
   protected readonly goToPageError = computed(() => {
@@ -73,11 +78,9 @@ export class Pagination {
     }
   }
 
-  protected onGoToPage(event: Event) {
-    event.preventDefault();
+  private goToTypedPage() {
     const { page } = this.goToPageModel();
-    // A number outside 1..totalPages is never accepted: the error under the box says why.
-    if (page === null || this.goToPageForm.page().invalid()) {
+    if (page === null) {
       return;
     }
     this.select(page);

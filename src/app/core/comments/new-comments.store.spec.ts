@@ -1,4 +1,6 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { AuthStore } from '../auth/auth.store';
 import { NewCommentsStore } from './new-comments.store';
 
 describe('NewCommentsStore', () => {
@@ -53,6 +55,60 @@ describe('NewCommentsStore', () => {
     const ids = [...store.forItem(1), ...store.forItem(2)].map((comment) => comment.id);
     expect(new Set(ids).size).toBe(3);
     expect(ids.every((id) => id < 0)).toBe(true);
+  });
+
+  describe("a comment inside its author's Delay", () => {
+    const viewer = signal('');
+    let held: NewCommentsStore;
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      viewer.set('Anna');
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [{ provide: AuthStore, useValue: { username: viewer } }],
+      });
+      held = TestBed.inject(NewCommentsStore);
+      held.add(1, 'Anna', 'Held back', 30); // minutes
+    });
+
+    afterEach(() => vi.useRealTimers());
+
+    it('is shown to its author straight away', () => {
+      expect(held.forItem(1)).toHaveLength(1);
+    });
+
+    it.each(['', 'Ben'])('is hidden from the viewer "%s", who did not write it', (other) => {
+      viewer.set(other);
+
+      expect(held.forItem(1)).toEqual([]);
+    });
+
+    it('is shown to everyone once the Delay has passed, and not a moment before', () => {
+      viewer.set('');
+
+      vi.advanceTimersByTime(30 * 60 * 1000 - 1);
+      expect(held.forItem(1)).toEqual([]);
+
+      vi.advanceTimersByTime(1);
+      expect(held.forItem(1)).toHaveLength(1);
+    });
+
+    it('goes on holding back a comment whose Delay is longer than a timer can wait', () => {
+      held.add(2, 'Anna', 'For months', 100_000);
+      viewer.set('');
+
+      vi.advanceTimersByTime(60 * 60 * 1000);
+
+      expect(held.forItem(2)).toEqual([]);
+    });
+
+    it('does not hold back a comment written with no Delay', () => {
+      held.add(1, 'Anna', 'At once', 0);
+      viewer.set('');
+
+      expect(held.forItem(1).map((comment) => comment.text)).toEqual(['At once']);
+    });
   });
 
   describe('turning text into comment HTML', () => {

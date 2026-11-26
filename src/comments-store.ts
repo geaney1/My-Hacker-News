@@ -58,13 +58,13 @@ export async function countLocalComments(itemId: number) {
 
 /**
  * Saves a comment by `username` on a story submitted in this app. Other people see it once
- * `delaySeconds` (the author's Delay) have passed.
+ * `delayMinutes` (the author's Delay) have passed.
  */
 export async function addLocalComment(
   username: string,
   itemId: number,
   textInput: unknown,
-  delaySeconds = 0,
+  delayMinutes = 0,
 ) {
   if (typeof textInput !== 'string' || textInput.trim() === '') {
     throw new BadRequestError('Write a comment before adding it');
@@ -92,7 +92,7 @@ export async function addLocalComment(
     username,
     text,
     submittedAt: now,
-    visibleAt: now + delaySeconds * 1000,
+    visibleAt: now + delayMinutes * 60 * 1000,
   };
   comments.push(comment);
   await commentsStore.save(comments);

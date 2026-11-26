@@ -4,6 +4,6 @@ export type Viewer = {
   username?: string;
   /** Show Dead: dead stories and comments are included. */
   showDead: boolean;
-  /** Delay: how many seconds the user's own comments stay hidden from others. */
-  delaySeconds: number;
+  /** Delay: how many minutes the user's own comments stay hidden from others. */
+  delayMinutes: number;
 };

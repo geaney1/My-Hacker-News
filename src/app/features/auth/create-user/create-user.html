@@ -1,5 +1,5 @@
 ﻿<app-auth-card heading="Create a new user">
-  <form class="auth-form" novalidate (submit)="onSubmit($event)">
+  <form class="auth-form" [formRoot]="createUserForm">
     <app-form-text-field
       fieldId="username"
       label="Username"

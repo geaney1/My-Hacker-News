@@ -150,6 +150,22 @@ test.describe('comments', () => {
     await expect(page.getByText('Gone after reload')).toBeHidden();
   });
 
+  test('a comment on a Hacker News story is counted on the list until then', async ({ page }) => {
+    await createUserAndLogIn(page, uniqueName('olga'));
+    await page.goto('/top');
+    const card = page.locator('article.story').filter({ has: page.locator('a[href="/item/101"]') });
+    const count = card.locator('a.comments-link');
+    const before = Number((await count.innerText()).match(/\d+/)?.[0]);
+
+    await count.click();
+    await page.getByLabel('Add a comment').fill('Counted on the list');
+    await page.getByRole('button', { name: 'Add comment' }).click();
+    await expect(page.getByText('Counted on the list')).toBeVisible();
+    await page.getByRole('button', { name: '← Back' }).click();
+
+    await expect(count).toHaveText(`${before + 1} comments`);
+  });
+
   test('a visitor who is not logged in is asked to log in to comment', async ({ page }) => {
     await page.goto('/item/101');
     await expect(page.getByRole('link', { name: 'Log in', exact: true })).toBeVisible();

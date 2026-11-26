@@ -166,7 +166,7 @@ test.describe('No Procrast, Max Visit and Min Away', () => {
 });
 
 test.describe('Delay', () => {
-  test('holds back new comments from other people for that many seconds, but not from the writer', async ({
+  test('holds back new comments from other people for that many minutes, but not from the writer', async ({
     page,
     browser,
   }) => {
@@ -182,9 +182,9 @@ test.describe('Delay', () => {
     await expect(page).toHaveURL(/\/item\/\d+$/);
     const storyUrl = page.url();
 
-    // A delay of an hour: the writer sees the comment, nobody else does.
+    // A delay of 60 minutes: the writer sees the comment, nobody else does.
     await page.goto('/new');
-    await saveProfile(page, author, { delay: 3600 });
+    await saveProfile(page, author, { delay: 60 });
     await page.goto(storyUrl);
     await page.getByLabel('Add a comment').fill('Held back for an hour');
     await page.getByRole('button', { name: 'Add comment' }).click();
@@ -209,6 +209,30 @@ test.describe('Delay', () => {
     await expect(visitor.getByText('Held back for an hour')).toHaveCount(0);
     await expect(visitor.getByRole('heading', { name: '1 comments' })).toBeVisible();
     await visitor.context().close();
+  });
+
+  test('holds back a comment on a Hacker News story once the writer has logged out', async ({
+    page,
+  }) => {
+    const author = uniqueName('hold');
+    await createUserAndLogIn(page, author);
+    await page.goto('/new');
+    await saveProfile(page, author, { delay: 60 });
+    await page.goto('/top');
+    await page.locator('a.comments-link[href="/item/101"]').click();
+    await page.getByLabel('Add a comment').fill('Held back on Hacker News');
+    await page.getByRole('button', { name: 'Add comment' }).click();
+    await expect(page.getByText('Held back on Hacker News')).toBeVisible();
+
+    // Logging out leaves the comment in the browser's memory, so nothing may reload the page.
+    await page.getByRole('button', { name: 'Log Out' }).click();
+    await page.goBack();
+    const count = page.locator('a.comments-link[href="/item/101"]');
+    await expect(count).toHaveText('1 comments');
+    await count.click();
+    await expect(page.getByText('A comment from Hacker News')).toBeVisible();
+    await expect(page.getByText('Held back on Hacker News')).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: '1 comments' })).toBeVisible();
   });
 });
 

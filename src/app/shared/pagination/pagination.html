@@ -63,7 +63,7 @@
       </svg>
     </button>
 
-    <form class="go-to" (submit)="onGoToPage($event)">
+    <form class="go-to" [formRoot]="goToPageForm">
       <label class="go-to-label" for="go-to-page">Go to page</label>
       <input
         id="go-to-page"

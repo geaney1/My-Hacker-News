@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AuthStore } from '../../../core/auth/auth.store';
+import { NewCommentsStore } from '../../../core/comments/new-comments.store';
 import { HnItem } from '../../../models/hn-item';
 import { StoriesPage } from './stories-page';
 
@@ -95,6 +96,19 @@ describe('StoriesPage', () => {
       )) {
         expect(link.getAttribute('href')).not.toContain('ycombinator');
       }
+    });
+
+    it('counts the comments written in this app on a Hacker News story as soon as they are', async () => {
+      const newComments = TestBed.inject(NewCommentsStore);
+      newComments.add(8863, 'anna', 'One');
+      newComments.add(8863, 'anna', 'Two');
+      newComments.add(9, 'anna', 'The first on this one');
+      await settle();
+
+      expect(card('Story 8863').querySelector('a.comments-link')?.textContent).toContain(
+        '73 comments',
+      );
+      expect(card('Story 9').querySelector('a.comments-link')?.textContent).toContain('1 comments');
     });
 
     it("uses each story's own id", () => {

@@ -38,7 +38,16 @@
             },
             "ssr": {
               "entry": "src/server.ts"
-            }
+            },
+            "externalDependencies": [
+              "@fastify/cookie",
+              "@fastify/static",
+              "@nestjs/common",
+              "@nestjs/core",
+              "@nestjs/platform-fastify",
+              "fastify",
+              "reflect-metadata"
+            ]
           },
           "configurations": {
             "production": {

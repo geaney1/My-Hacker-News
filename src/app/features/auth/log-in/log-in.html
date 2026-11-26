@@ -1,5 +1,5 @@
 ﻿<app-auth-card heading="Log in">
-  <form class="auth-form" novalidate (submit)="onSubmit($event)">
+  <form class="auth-form" [formRoot]="logInForm">
     <app-form-text-field
       fieldId="username"
       label="Username"

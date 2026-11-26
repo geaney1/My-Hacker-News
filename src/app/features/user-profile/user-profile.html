@@ -28,7 +28,7 @@
   </header>
 
   <!-- Labels sit above their controls. -->
-  <form class="profile-form" novalidate (submit)="onSubmit($event)">
+  <form class="profile-form" [formRoot]="userProfileForm">
     <section class="section" aria-label="About you">
       <div class="setting">
         <div class="label-row">
@@ -120,7 +120,7 @@
           fieldId="delay"
           label="Delay"
           type="number"
-          info="Holds back your new comments on stories submitted here for this many seconds, so other people see them later. You see yours straight away. 0 means no delay."
+          info="Holds back your new comments for this many minutes, so other people see them later. You see yours straight away. 0 means no delay."
           [field]="userProfileForm.delay"
         />
       </div>

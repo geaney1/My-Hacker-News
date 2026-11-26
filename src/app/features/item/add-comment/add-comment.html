@@ -2,7 +2,7 @@
 <ng-template #projected><ng-content /></ng-template>
 
 @if (login()) {
-  <form class="add-comment" novalidate (submit)="onAddComment($event)">
+  <form class="add-comment" [formRoot]="newCommentForm">
     <label class="visually-hidden" for="new-comment">Add a comment</label>
     <textarea
       id="new-comment"
@@ -14,8 +14,8 @@
       @if (isLocalStory()) {
         Comments on stories submitted here are saved on this app's server.
       } @else {
-        Your comment is only shown on this page until you reload it. It is not saved, and it is not
-        posted to Hacker News.
+        Your comment is only kept in this browser tab until you reload the page. It is not saved,
+        and it is not posted to Hacker News.
       }
     </p>
     @if (newCommentForm.text().touched() && newCommentForm.text().errors().length) {

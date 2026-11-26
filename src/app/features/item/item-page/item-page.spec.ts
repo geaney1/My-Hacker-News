@@ -153,7 +153,7 @@ describe('ItemPage comments', () => {
       expect(http.match((request) => request.url.endsWith('/comments'))).toHaveLength(0);
       expect(page().querySelector('.comment-list')?.textContent).toContain('Just for me');
       expect(page().querySelector('#new-comment-hint')?.textContent).toContain(
-        'until you reload it',
+        'until you reload the page',
       );
     });
   });

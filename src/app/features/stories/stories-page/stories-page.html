@@ -68,7 +68,7 @@
               @if (story.type !== 'job') {
                 ·
                 <a class="comments-link" [routerLink]="['/item', story.id]">
-                  {{ story.descendants ?? 0 }} comments
+                  {{ (story.descendants ?? 0) + newComments.forItem(story.id).length }} comments
                 </a>
               }
             </p>

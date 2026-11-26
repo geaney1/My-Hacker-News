@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input, linkedSignal } from '@angul
 import { form, FormField } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../../core/auth/auth.store';
+import { NewCommentsStore } from '../../../core/comments/new-comments.store';
 import { HnStoryList } from '../../../models/hn-story-list';
 import { Pagination } from '../../../shared/pagination/pagination';
 import { TimeAgoPipe } from '../../../shared/time-ago.pipe';
@@ -17,6 +18,9 @@ import { Banner } from '../../../shared/banner/banner';
 export class StoriesPage {
   protected readonly store = inject(StoriesStore);
   private readonly authStore = inject(AuthStore);
+
+  /** Comments written here on Hacker News stories, which the counts from the server leave out. */
+  protected readonly newComments = inject(NewCommentsStore);
 
   /** Changes when another list is chosen, or somebody logs in or out: "Go to page" is cleared. */
   protected readonly paginationResetKey = computed(

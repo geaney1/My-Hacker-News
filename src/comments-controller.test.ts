@@ -1,13 +1,10 @@
 import { mkdtempSync, rmSync } from 'node:fs';
-import type { Server } from 'node:http';
-import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import express from 'express';
 
-describe('comments routes', () => {
+describe('comments controller', () => {
   let directory: string;
-  let server: Server;
+  let api: { url: string; close: () => Promise<unknown> };
   let baseUrl: string;
   let cookie: string;
   let storyId: number;
@@ -15,27 +12,24 @@ describe('comments routes', () => {
   let resetRateLimits: () => void;
 
   beforeAll(async () => {
-    directory = mkdtempSync(join(tmpdir(), 'hn-comment-routes-'));
+    directory = mkdtempSync(join(tmpdir(), 'hn-comment-controller-'));
     process.env['DATA_DIR'] = directory;
     const { createSession } = await import('./sessions-store');
     const { addSubmission } = await import('./submissions-store');
     const comments = await import('./comments-store');
-    const routes = await import('./comments-routes');
+    const { resetCommentRateLimits } = await import('./comments-controller');
     getLocalComments = comments.getLocalComments;
-    resetRateLimits = routes.resetCommentRateLimits;
+    resetRateLimits = resetCommentRateLimits;
     cookie = `hn_session=${await createSession('Anna')}`;
     storyId = (await addSubmission('Billy', 'A story', 'https://example.com')).itemId;
 
-    const app = express();
-    app.use('/api/items', express.json({ limit: '10kb' }), routes.commentsRouter);
-    server = await new Promise<Server>((resolve) => {
-      const listening = app.listen(0, () => resolve(listening));
-    });
-    baseUrl = `http://localhost:${(server.address() as AddressInfo).port}/api/items`;
+    const { startApiServer } = await import('./api-server.testing');
+    api = await startApiServer();
+    baseUrl = `${api.url}/items`;
   });
 
   afterAll(async () => {
-    await new Promise((resolve) => server.close(resolve));
+    await api.close();
     delete process.env['DATA_DIR'];
     rmSync(directory, { recursive: true, force: true });
   });

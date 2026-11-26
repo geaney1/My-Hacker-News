@@ -1,34 +1,27 @@
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import type { Server } from 'node:http';
-import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import express from 'express';
 
 const day = 24 * 60 * 60 * 1000;
 
-describe('auth routes', () => {
+describe('auth controller', () => {
   let directory: string;
-  let server: Server;
+  let api: { url: string; close: () => Promise<unknown> };
   let baseUrl: string;
   let resetRateLimits: () => void;
 
   beforeAll(async () => {
-    directory = mkdtempSync(join(tmpdir(), 'hn-routes-'));
+    directory = mkdtempSync(join(tmpdir(), 'hn-auth-'));
     process.env['DATA_DIR'] = directory;
-    const { authRouter, resetRateLimits: reset } = await import('./auth-routes');
+    const { resetRateLimits: reset } = await import('./auth-controller');
     resetRateLimits = reset;
-
-    const app = express();
-    app.use('/api/auth', express.json({ limit: '10kb' }), authRouter);
-    server = await new Promise<Server>((resolve) => {
-      const listening = app.listen(0, () => resolve(listening));
-    });
-    baseUrl = `http://localhost:${(server.address() as AddressInfo).port}/api/auth`;
+    const { startApiServer } = await import('./api-server.testing');
+    api = await startApiServer();
+    baseUrl = `${api.url}/auth`;
   });
 
   afterAll(async () => {
-    await new Promise((resolve) => server.close(resolve));
+    await api.close();
     delete process.env['DATA_DIR'];
     rmSync(directory, { recursive: true, force: true });
   });

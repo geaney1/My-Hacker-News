@@ -13,7 +13,8 @@ module.exports = defineConfig([
       tseslint.configs.stylistic,
       angular.configs.tsRecommended,
     ],
-    processor: angular.processInlineTemplates,
+    // Lints the templates written inside TypeScript files too.
+    processor: angular.createProcessor(),
     rules: {
       '@angular-eslint/directive-selector': [
         'error',

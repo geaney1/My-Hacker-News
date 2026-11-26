@@ -1,26 +1,20 @@
+import fastifyStatic from '@fastify/static';
 import {
   AngularNodeAppEngine,
   createNodeRequestHandler,
   isMainModule,
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
-import express from 'express';
+import type { FastifyInstance } from 'fastify';
+import { existsSync } from 'node:fs';
+import type { ServerResponse } from 'node:http';
 import { join } from 'node:path';
-import { authRouter } from './auth-routes';
-import { commentsRouter } from './comments-routes';
-import { BadRequestError } from './hn-fetch';
-import { profileRouter } from './profile-routes';
+import { createApiAdapter } from './api-adapter';
+import { createApiApp } from './api-app';
 import { nonceOf, parseTrustProxy, securityHeaders, withCspNonce } from './security';
-import { getStoryPage, parseItemId } from './stories-proxy';
-import { submissionsRouter } from './submissions-routes';
-import { getThread } from './thread-proxy';
-import { viewerOf } from './viewer';
-import { getUpdates } from './updates-proxy';
-import { getUser } from './users-proxy';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
-const app = express();
 const angularApp = new AngularNodeAppEngine();
 
 /**
@@ -32,145 +26,69 @@ const runsAsServer = isMainModule(import.meta.url) || !!process.env['pm_id'];
 
 // Behind a proxy that ends HTTPS, set TRUST_PROXY (see security.ts) so cookies are marked Secure
 // and the rate limits see each visitor's own address.
-const trustProxy = parseTrustProxy(process.env['TRUST_PROXY']);
-if (trustProxy !== undefined) {
-  app.set('trust proxy', trustProxy);
-}
-app.disable('x-powered-by');
+const adapter = createApiAdapter(parseTrustProxy(process.env['TRUST_PROXY']));
 
 if (runsAsServer) {
-  app.use(...securityHeaders());
+  const addSecurityHeaders = securityHeaders();
+  // Unlike an ordinary Fastify hook, this one also covers requests the router rejects.
+  adapter.registerSecurityHook((request, response) =>
+    // `response` is Node's own, though it is only typed as far as setting headers.
+    addSecurityHeaders(request.raw, response as ServerResponse),
+  );
 }
 
 /**
- * Accounts and sessions: create a user, log in, log out and "who am I". Request bodies are small JSON.
+ * The app's own API, served by Nest (see api-module.ts). Its routes win over the more general
+ * ones below, which get every request Nest has no route for.
  */
-app.use('/api/auth', express.json({ limit: '10kb' }), authRouter);
-
-/**
- * The logged-in user's profile: read it, and save it.
- */
-app.use('/api/profile', express.json({ limit: '10kb' }), profileRouter);
-
-/**
- * Stories submitted by logged-in users, saved on this server.
- */
-app.use('/api/submissions', express.json({ limit: '10kb' }), submissionsRouter);
-
-/**
- * Loads a page of a story list in one call, instead of the browser making one request per story.
- */
-app.get('/api/stories/:list', async (request, response) => {
-  try {
-    const { page, pageSize } = request.query;
-    const { showDead } = await viewerOf(request);
-    response.json(await getStoryPage(request.params.list, page, pageSize, { showDead }));
-  } catch (error) {
-    if (error instanceof BadRequestError) {
-      response.status(400).json({ message: error.message });
-      return;
-    }
-    console.error('Failed to load stories', error);
-    response.status(502).json({ message: 'Could not load the stories' });
-  }
-});
-
-/**
- * The items and profiles that changed recently, so the app can tell when what it shows is stale.
- */
-app.get('/api/updates', async (_request, response) => {
-  try {
-    response.json(await getUpdates());
-  } catch (error) {
-    console.error('Failed to load the updates', error);
-    response.status(502).json({ message: 'Could not load the updates' });
-  }
-});
-
-/**
- * Writing a comment on a story submitted in this app. Reading comments is the thread route below.
- */
-app.use('/api/items', express.json({ limit: '10kb' }), commentsRouter);
-
-/**
- * Loads an item together with its comment tree. Answers 404 when the item does not exist.
- */
-app.get('/api/items/:id/thread', async (request, response) => {
-  try {
-    const thread = await getThread(parseItemId(request.params.id), await viewerOf(request));
-    if (!thread) {
-      response.status(404).json({ message: 'Item not found' });
-      return;
-    }
-    response.json(thread);
-  } catch (error) {
-    if (error instanceof BadRequestError) {
-      response.status(400).json({ message: error.message });
-      return;
-    }
-    console.error('Failed to load the thread', error);
-    response.status(502).json({ message: 'Could not load the comments' });
-  }
-});
-
-/**
- * Loads a user's public profile. Answers 404 when the user does not exist.
- */
-app.get('/api/users/:id', async (request, response) => {
-  try {
-    const user = await getUser(request.params.id);
-    if (!user) {
-      response.status(404).json({ message: 'User not found' });
-      return;
-    }
-    response.json(user);
-  } catch (error) {
-    if (error instanceof BadRequestError) {
-      response.status(400).json({ message: error.message });
-      return;
-    }
-    console.error('Failed to load the user', error);
-    response.status(502).json({ message: 'Could not load the user' });
-  }
-});
+await createApiApp(adapter);
+const fastify = adapter.getInstance<FastifyInstance>();
 
 /**
  * Any other API address does not exist: answer in JSON instead of rendering a page.
- * This must stay after every other /api route.
  */
-app.use('/api', (_request, response) => {
-  response.status(404).json({ message: 'Not found' });
-});
+for (const path of ['/api', '/api/*']) {
+  fastify.all(path, (_request, reply) => reply.code(404).send({ message: 'Not found' }));
+}
 
 /**
- * Serve static files from /browser
+ * Serve static files from /browser. The dev server serves them itself, and has no such folder.
  */
-app.use(
-  express.static(browserDistFolder, {
+if (existsSync(browserDistFolder)) {
+  await fastify.register(fastifyStatic, {
+    root: browserDistFolder,
+    // One route for each file, so that every other address is left for the pages.
+    wildcard: false,
     maxAge: '1y',
     index: false,
     redirect: false,
-  }),
-);
+  });
+}
 
 /**
  * Handle all other requests by rendering the Angular application.
  */
-app.use((req, res, next) => {
-  angularApp
-    .handle(req)
-    .then(async (response) => {
-      if (!response) {
-        return next();
-      }
-      // The inline scripts and styles of the rendered page get this request's nonce.
-      await writeResponseToNodeResponse(
-        runsAsServer ? await withCspNonce(response, nonceOf(res)) : response,
-        res,
-      );
-    })
-    .catch(next);
+await fastify.register(async (pages) => {
+  // Angular reads the body of a request itself, so here it is left unread. This replaces the
+  // adapter's body parsers for the page routes only.
+  pages.removeAllContentTypeParsers();
+  pages.addContentTypeParser('*', (_request, _payload, done) => done(null));
+
+  pages.all('/*', async (request, reply) => {
+    const response = await angularApp.handle(request.raw);
+    if (!response) {
+      return reply.callNotFound();
+    }
+    // The inline scripts and styles of the rendered page get this request's nonce.
+    const page = runsAsServer ? await withCspNonce(response, nonceOf(reply.raw)) : response;
+    // Angular writes the answer itself.
+    reply.hijack();
+    await writeResponseToNodeResponse(page, reply.raw);
+    return reply;
+  });
 });
+
+await fastify.ready();
 
 /**
  * Start the server if this module is the main entry point, or it is ran via PM2.
@@ -178,16 +96,16 @@ app.use((req, res, next) => {
  */
 if (runsAsServer) {
   const port = process.env['PORT'] || 4000;
-  app.listen(port, (error) => {
-    if (error) {
-      throw error;
-    }
-
-    console.log(`Node Express server listening on http://localhost:${port}`);
+  // Node's own listen, which accepts requests on every network address. Fastify's would only
+  // accept them from this machine.
+  fastify.server.listen(port, () => {
+    console.log(`Node server listening on http://localhost:${port}`);
   });
 }
 
 /**
  * Request handler used by the Angular CLI (for dev-server and during build) or Firebase Cloud Functions.
  */
-export const reqHandler = createNodeRequestHandler(app);
+export const reqHandler = createNodeRequestHandler((request, response) => {
+  fastify.server.emit('request', request, response);
+});

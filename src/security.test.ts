@@ -1,6 +1,5 @@
-import type { Server } from 'node:http';
+import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import express from 'express';
 import { addCspNonce, nonceOf, parseTrustProxy, securityHeaders, withCspNonce } from './security';
 
 describe('parseTrustProxy', () => {
@@ -12,12 +11,22 @@ describe('parseTrustProxy', () => {
     ['true', true],
     ['TRUE', true],
     ['false', false],
-    ['1', 1],
-    [' 2 ', 2],
     ['loopback', 'loopback'],
     ['10.0.0.0/8, 192.168.0.1', '10.0.0.0/8, 192.168.0.1'],
   ])('reads %j as %j', (value, expected) => {
     expect(parseTrustProxy(value)).toBe(expected);
+  });
+
+  it.each([
+    ['0', 0],
+    ['1', 1],
+    [' 2 ', 2],
+  ])('trusts as many proxies as %j says, counted from the server', (value, proxies) => {
+    const trusts = parseTrustProxy(value) as (address: string, hop: number) => boolean;
+
+    expect([0, 1, 2].map((hop) => trusts('10.0.0.1', hop))).toEqual(
+      [0, 1, 2].map((hop) => hop < proxies),
+    );
   });
 });
 
@@ -97,14 +106,13 @@ describe('securityHeaders', () => {
   let baseUrl: string;
 
   beforeAll(async () => {
-    const app = express();
-    app.use(...securityHeaders());
-    app.get('/nonce', (_request, response) => {
-      response.json({ nonce: nonceOf(response) });
+    const addSecurityHeaders = securityHeaders();
+    server = createServer((request, response) => {
+      addSecurityHeaders(request, response);
+      response.setHeader('content-type', 'application/json');
+      response.end(JSON.stringify({ nonce: nonceOf(response) }));
     });
-    server = await new Promise<Server>((resolve) => {
-      const listening = app.listen(0, () => resolve(listening));
-    });
+    await new Promise<void>((resolve) => server.listen(0, resolve));
     baseUrl = `http://localhost:${(server.address() as AddressInfo).port}`;
   });
 

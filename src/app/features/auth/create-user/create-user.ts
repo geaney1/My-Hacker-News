@@ -1,5 +1,5 @@
 ﻿import { Component, inject, input, signal } from '@angular/core';
-import { apply, form, required, validate } from '@angular/forms/signals';
+import { apply, form, FormRoot, required, validate } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { AuthCard } from '../../../shared/auth-card/auth-card';
 import { FormTextField } from '../../../shared/form-text-field/form-text-field';
@@ -9,11 +9,11 @@ import { authFailureMessage } from '../../../shared/auth-failure-message';
 import { passwordSchema } from '../password.schema';
 import { usernameSchema } from '../username.schema';
 import { Banner } from '../../../shared/banner/banner';
-import { submitOrFocusProblem } from '../../../shared/submit-form';
+import { submissionOrFocusProblem } from '../../../shared/submit-form';
 
 @Component({
   selector: 'app-create-user',
-  imports: [Banner, AuthCard, FormTextField, RouterLink],
+  imports: [Banner, AuthCard, FormRoot, FormTextField, RouterLink],
   templateUrl: './create-user.html',
   styleUrl: '../../../shared/auth-form.scss',
 })
@@ -33,18 +33,24 @@ export class CreateUser {
     confirmPassword: '',
   });
 
-  protected readonly createUserForm = form(this.createUserModel, (schemaPath) => {
-    apply(schemaPath.username, usernameSchema);
+  protected readonly createUserForm = form(
+    this.createUserModel,
+    (schemaPath) => {
+      apply(schemaPath.username, usernameSchema);
 
-    apply(schemaPath.password, passwordSchema);
+      apply(schemaPath.password, passwordSchema);
 
-    required(schemaPath.confirmPassword, { message: 'Please verify your password' });
-    validate(schemaPath.confirmPassword, ({ value, valueOf }) =>
-      value() === valueOf(schemaPath.password)
-        ? undefined
-        : { kind: 'passwordMismatch', message: 'Passwords do not match' },
-    );
-  });
+      required(schemaPath.confirmPassword, { message: 'Please verify your password' });
+      validate(schemaPath.confirmPassword, ({ value, valueOf }) =>
+        value() === valueOf(schemaPath.password)
+          ? undefined
+          : { kind: 'passwordMismatch', message: 'Passwords do not match' },
+      );
+    },
+    {
+      submission: submissionOrFocusProblem(this.formError, () => this.createUser()),
+    },
+  );
 
   protected readonly showPassword = signal(false);
 
@@ -52,17 +58,13 @@ export class CreateUser {
     this.showPassword.update((isShown) => !isShown);
   }
 
-  protected async onSubmit(event: Event) {
-    event.preventDefault();
-    this.formError.set(undefined);
-    await submitOrFocusProblem(this.createUserForm, async () => {
-      const { username, password } = this.createUserModel();
-      const failure = await this.authStore.register(username, password);
-      if (failure) {
-        this.formError.set(authFailureMessage(failure));
-        return;
-      }
-      await this.router.navigate(['/log-in'], { queryParams: { returnUrl: this.returnUrl() } });
-    });
+  private async createUser() {
+    const { username, password } = this.createUserModel();
+    const failure = await this.authStore.register(username, password);
+    if (failure) {
+      this.formError.set(authFailureMessage(failure));
+      return;
+    }
+    await this.router.navigate(['/log-in'], { queryParams: { returnUrl: this.returnUrl() } });
   }
 }

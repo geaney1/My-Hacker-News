@@ -1,9 +1,6 @@
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import type { Server } from 'node:http';
-import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import express from 'express';
 
 type Result = { status: number; body: Record<string, unknown> | null };
 
@@ -17,9 +14,9 @@ const valid = {
   delay: 5,
 };
 
-describe('profile routes', () => {
+describe('profile controller', () => {
   let directory: string;
-  let server: Server;
+  let api: { url: string; close: () => Promise<unknown> };
   let baseUrl: string;
   let billy: string;
   let anna: string;
@@ -28,20 +25,16 @@ describe('profile routes', () => {
     directory = mkdtempSync(join(tmpdir(), 'hn-profile-'));
     process.env['DATA_DIR'] = directory;
     const { createSession } = await import('./sessions-store');
-    const { profileRouter } = await import('./profile-routes');
     billy = `hn_session=${await createSession('Billy')}`;
     anna = `hn_session=${await createSession('Anna')}`;
 
-    const app = express();
-    app.use('/api/profile', express.json({ limit: '10kb' }), profileRouter);
-    server = await new Promise<Server>((resolve) => {
-      const listening = app.listen(0, () => resolve(listening));
-    });
-    baseUrl = `http://localhost:${(server.address() as AddressInfo).port}/api/profile`;
+    const { startApiServer } = await import('./api-server.testing');
+    api = await startApiServer();
+    baseUrl = `${api.url}/profile`;
   });
 
   afterAll(async () => {
-    await new Promise((resolve) => server.close(resolve));
+    await api.close();
     delete process.env['DATA_DIR'];
     rmSync(directory, { recursive: true, force: true });
   });

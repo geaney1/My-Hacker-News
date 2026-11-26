@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { Request } from 'express';
+import type { FastifyRequest } from 'fastify';
 
 const profile = {
   about: '',
@@ -16,12 +16,12 @@ const profile = {
 describe('viewerOf', () => {
   let directory: string;
   let viewerOf: (
-    request: Request,
-  ) => Promise<{ username?: string; showDead: boolean; delaySeconds: number }>;
+    request: FastifyRequest,
+  ) => Promise<{ username?: string; showDead: boolean; delayMinutes: number }>;
   let sessionCookie: string;
 
   const requestWith = (cookie?: string) =>
-    ({ headers: cookie ? { cookie } : {} }) as unknown as Request;
+    ({ headers: cookie ? { cookie } : {} }) as unknown as FastifyRequest;
 
   beforeAll(async () => {
     directory = mkdtempSync(join(tmpdir(), 'hn-viewer-'));
@@ -39,10 +39,10 @@ describe('viewerOf', () => {
   });
 
   it('is a visitor with nothing special turned on when there is no session', async () => {
-    expect(await viewerOf(requestWith())).toEqual({ showDead: false, delaySeconds: 0 });
+    expect(await viewerOf(requestWith())).toEqual({ showDead: false, delayMinutes: 0 });
     expect(await viewerOf(requestWith('hn_session=nope'))).toEqual({
       showDead: false,
-      delaySeconds: 0,
+      delayMinutes: 0,
     });
   });
 
@@ -50,7 +50,7 @@ describe('viewerOf', () => {
     expect(await viewerOf(requestWith(sessionCookie))).toEqual({
       username: 'Anna',
       showDead: true,
-      delaySeconds: 45,
+      delayMinutes: 45,
     });
   });
 
@@ -60,7 +60,7 @@ describe('viewerOf', () => {
     expect(await viewerOf(requestWith(fresh))).toEqual({
       username: 'Newbie',
       showDead: false,
-      delaySeconds: 0,
+      delayMinutes: 0,
     });
   });
 });

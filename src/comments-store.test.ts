@@ -130,10 +130,10 @@ describe('comments store', () => {
       expect(await comments.getLocalComments(storyId)).toEqual([]);
       expect(await comments.countLocalComments(storyId)).toBe(0);
 
-      vi.setSystemTime(10_000 + 59_000);
+      vi.setSystemTime(10_000 + 59 * 60 * 1000);
       expect(await comments.getLocalComments(storyId, 'Ben')).toEqual([]);
 
-      vi.setSystemTime(10_000 + 60_000);
+      vi.setSystemTime(10_000 + 60 * 60 * 1000);
       expect(
         (await comments.getLocalComments(storyId, 'Ben')).map((comment) => comment.text),
       ).toEqual(['Slow one']);

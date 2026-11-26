@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { apply, form, required, validate } from '@angular/forms/signals';
+import { apply, form, FormRoot, required, validate } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { AuthStore } from '../../core/auth/auth.store';
 import { authFailureMessage } from '../../shared/auth-failure-message';
@@ -8,11 +8,11 @@ import { FormTextField } from '../../shared/form-text-field/form-text-field';
 import { ChangePasswordModel } from '../../models/change-password-model';
 import { passwordSchema } from '../auth/password.schema';
 import { Banner } from '../../shared/banner/banner';
-import { submitOrFocusProblem } from '../../shared/submit-form';
+import { submissionOrFocusProblem } from '../../shared/submit-form';
 
 @Component({
   selector: 'app-change-password',
-  imports: [Banner, AuthCard, FormTextField],
+  imports: [Banner, AuthCard, FormRoot, FormTextField],
   templateUrl: './change-password.html',
   styleUrl: '../../shared/auth-form.scss',
 })
@@ -29,26 +29,32 @@ export class ChangePassword {
     confirmNewPassword: '',
   });
 
-  protected readonly changePasswordForm = form(this.changePasswordModel, (schemaPath) => {
-    required(schemaPath.currentPassword, { message: 'Current password is required' });
+  protected readonly changePasswordForm = form(
+    this.changePasswordModel,
+    (schemaPath) => {
+      required(schemaPath.currentPassword, { message: 'Current password is required' });
 
-    apply(schemaPath.newPassword, passwordSchema);
-    validate(schemaPath.newPassword, ({ value, valueOf }) =>
-      value() && value() === valueOf(schemaPath.currentPassword)
-        ? {
-            kind: 'samePassword',
-            message: 'New password must be different from the current password',
-          }
-        : undefined,
-    );
+      apply(schemaPath.newPassword, passwordSchema);
+      validate(schemaPath.newPassword, ({ value, valueOf }) =>
+        value() && value() === valueOf(schemaPath.currentPassword)
+          ? {
+              kind: 'samePassword',
+              message: 'New password must be different from the current password',
+            }
+          : undefined,
+      );
 
-    required(schemaPath.confirmNewPassword, { message: 'Please verify your new password' });
-    validate(schemaPath.confirmNewPassword, ({ value, valueOf }) =>
-      value() === valueOf(schemaPath.newPassword)
-        ? undefined
-        : { kind: 'passwordMismatch', message: 'Passwords do not match' },
-    );
-  });
+      required(schemaPath.confirmNewPassword, { message: 'Please verify your new password' });
+      validate(schemaPath.confirmNewPassword, ({ value, valueOf }) =>
+        value() === valueOf(schemaPath.newPassword)
+          ? undefined
+          : { kind: 'passwordMismatch', message: 'Passwords do not match' },
+      );
+    },
+    {
+      submission: submissionOrFocusProblem(this.formError, () => this.changePassword()),
+    },
+  );
 
   protected readonly showPassword = signal(false);
 
@@ -56,17 +62,13 @@ export class ChangePassword {
     this.showPassword.update((isShown) => !isShown);
   }
 
-  protected async onSubmit(event: Event) {
-    event.preventDefault();
-    this.formError.set(undefined);
-    await submitOrFocusProblem(this.changePasswordForm, async () => {
-      const { currentPassword, newPassword } = this.changePasswordModel();
-      const failure = await this.authStore.changePassword(currentPassword, newPassword);
-      if (failure) {
-        this.formError.set(authFailureMessage(failure));
-        return;
-      }
-      await this.router.navigateByUrl('/user-profile');
-    });
+  private async changePassword() {
+    const { currentPassword, newPassword } = this.changePasswordModel();
+    const failure = await this.authStore.changePassword(currentPassword, newPassword);
+    if (failure) {
+      this.formError.set(authFailureMessage(failure));
+      return;
+    }
+    await this.router.navigateByUrl('/user-profile');
   }
 }

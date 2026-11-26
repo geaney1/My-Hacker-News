@@ -1,15 +1,12 @@
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import type { Server } from 'node:http';
-import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import express from 'express';
 
 type Result = { status: number; body: Record<string, unknown> | null };
 
-describe('submissions routes', () => {
+describe('submissions controller', () => {
   let directory: string;
-  let server: Server;
+  let api: { url: string; close: () => Promise<unknown> };
   let baseUrl: string;
   let resetRateLimits: () => void;
   let cookie: string;
@@ -18,20 +15,17 @@ describe('submissions routes', () => {
     directory = mkdtempSync(join(tmpdir(), 'hn-submissions-'));
     process.env['DATA_DIR'] = directory;
     const { createSession } = await import('./sessions-store');
-    const { submissionsRouter, resetSubmissionRateLimits } = await import('./submissions-routes');
+    const { resetSubmissionRateLimits } = await import('./submissions-controller');
     resetRateLimits = resetSubmissionRateLimits;
     cookie = `hn_session=${await createSession('Suin')}`;
 
-    const app = express();
-    app.use('/api/submissions', express.json({ limit: '10kb' }), submissionsRouter);
-    server = await new Promise<Server>((resolve) => {
-      const listening = app.listen(0, () => resolve(listening));
-    });
-    baseUrl = `http://localhost:${(server.address() as AddressInfo).port}/api/submissions`;
+    const { startApiServer } = await import('./api-server.testing');
+    api = await startApiServer();
+    baseUrl = `${api.url}/submissions`;
   });
 
   afterAll(async () => {
-    await new Promise((resolve) => server.close(resolve));
+    await api.close();
     delete process.env['DATA_DIR'];
     rmSync(directory, { recursive: true, force: true });
   });
