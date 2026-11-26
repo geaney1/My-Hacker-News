@@ -41,9 +41,10 @@ const nonceSource = (_request: IncomingMessage, response: ServerResponse) =>
 
 /**
  * Gives a function that puts security headers on a response, with a Content Security Policy
- * that only lets the page run its own code and styles. The few inline scripts and styles that
- * Angular's server rendering writes into the page carry a new random nonce each time (see
- * addCspNonce), so a script injected into a page would not run.
+ * that only lets the page run its own code and styles. The few inline scripts and styles of a
+ * rendered page (the theme script in index.html, and those Angular's server rendering writes)
+ * carry a new random nonce each time (see addCspNonce), so a script injected into a page would
+ * not run.
  *
  * The rest is helmet's defaults: no sniffing of content types, no framing, strict transport
  * security, and no X-Powered-By. The upgrade-insecure-requests directive is left out so the app

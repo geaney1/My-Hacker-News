@@ -73,7 +73,8 @@ export class AuthStore {
 
   /**
    * Resolves to `undefined` when the password was changed, or the reason it was not. The server
-   * ends the account's other sessions and keeps this one going with a fresh token.
+   * ends all the account's sessions and starts a new one for this browser, so the user stays
+   * logged in.
    */
   async changePassword(currentPassword: string, newPassword: string) {
     try {
@@ -96,7 +97,8 @@ export class AuthStore {
     try {
       await firstValueFrom(this.http.post('/api/auth/logout', {}));
     } catch {
-      // The cookie simply expires on its own if the server could not be reached.
+      // The server could not be reached, so the session lasts until it expires there: after a
+      // reload the user would be logged in again.
     }
   }
 

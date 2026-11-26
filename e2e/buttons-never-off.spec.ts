@@ -3,7 +3,7 @@ import { openPage, createUserAndLogIn, uniqueName } from './helpers';
 
 // WCAG 3.3.1 / 3.3.3: a button that is turned off says nothing about why. The buttons stay available:
 // pressing one with the form incomplete shows each problem and moves the focus to the first field.
-test('log in, create account and change password keep their buttons on, and say what is missing', async ({
+test('log in, create user and change password keep their buttons on, and say what is missing', async ({
   page,
 }) => {
   await openPage(page, '/log-in');

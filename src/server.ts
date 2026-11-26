@@ -91,7 +91,7 @@ await fastify.register(async (pages) => {
 await fastify.ready();
 
 /**
- * Start the server if this module is the main entry point, or it is ran via PM2.
+ * Start the server if this module is the main entry point, or it is run by PM2.
  * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
  */
 if (runsAsServer) {

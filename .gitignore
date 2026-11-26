@@ -43,7 +43,8 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
-# Accounts and sessions, created by the server at run time (hashed passwords).
+# The server's data, created at run time: accounts (with hashed passwords), sessions, stories,
+# comments and profiles.
 /data
 
 # Secrets: settings files for a machine or a deployment, and private keys.

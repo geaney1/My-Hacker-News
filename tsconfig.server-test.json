@@ -1,4 +1,5 @@
-/* Used by editors for the server tests in src/*.test.ts. They are not part of the Angular build. */
+/* Used by editors and `npm run typecheck` for the server tests in src/*.test.ts.
+   They are not part of the Angular build. */
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {

@@ -13,7 +13,7 @@ export function createRateLimiter({ maxAttempts, windowMilliseconds }: RateLimit
   const attempts = new Map<string, { count: number; resetAt: number }>();
 
   return {
-    /** Counts one attempt for `key`. Resolves to `true` when `key` has gone over its limit. */
+    /** Counts one attempt for `key`. Returns `true` when `key` has gone over its limit. */
     isLimited(key: string) {
       if (off) {
         return false;
