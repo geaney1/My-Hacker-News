@@ -46,6 +46,17 @@ Thumbs.db
 # Accounts and sessions, created by the server at run time (hashed passwords).
 /data
 
+# Secrets: settings files for a machine or a deployment, and private keys.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Claude Code settings and instructions that are one person's own.
+.claude/settings.local.json
+CLAUDE.local.md
+
 # End-to-end tests
 /e2e/.data
 /test-results
