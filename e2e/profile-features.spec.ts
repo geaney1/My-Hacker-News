@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { saveProfile, createUserAndLogIn, submitStory, uniqueName } from './helpers';
+import { openPage, saveProfile, createUserAndLogIn, submitStory, uniqueName } from './helpers';
 
 // The settings in the profile do what their "i" explanations say. Each is tried the way a person
 // would: change the setting, press Update, and look at the app.
@@ -185,7 +185,7 @@ test.describe('Delay', () => {
     // A delay of 60 minutes: the writer sees the comment, nobody else does.
     await page.goto('/new');
     await saveProfile(page, author, { delay: 60 });
-    await page.goto(storyUrl);
+    await openPage(page, storyUrl);
     await page.getByLabel('Add a comment').fill('Held back for an hour');
     await page.getByRole('button', { name: 'Add comment' }).click();
     await expect(page.getByText('Held back for an hour')).toBeVisible();
@@ -199,7 +199,7 @@ test.describe('Delay', () => {
     // With no delay, a new comment is seen by everyone at once. The earlier one is still held back.
     await page.goto('/new');
     await saveProfile(page, author, { delay: 0 });
-    await page.goto(storyUrl);
+    await openPage(page, storyUrl);
     await page.getByLabel('Add a comment').fill('Seen straight away');
     await page.getByRole('button', { name: 'Add comment' }).click();
     await expect(page.getByText('Seen straight away')).toBeVisible();

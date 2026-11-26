@@ -21,6 +21,25 @@
         }
       })();
     </script>
+    <script>
+      // The page is shown before the app has loaded, and until then the browser would send a form
+      // itself: the page would reload and start loading again. The app sends every form, so the
+      // browser is never to. The forms also say method="post", which keeps what was typed out of
+      // the address when this script cannot run.
+      document.addEventListener(
+        'submit',
+        function (event) {
+          event.preventDefault();
+          // Until the app has taken over the page (Angular then removes "ngh"), the submission
+          // goes no further. Angular would otherwise record it and send it again once loaded,
+          // which fails: a replayed event cannot be cancelled, and the form tries to.
+          if (document.querySelector('app-root[ngh]')) {
+            event.stopPropagation();
+          }
+        },
+        true,
+      );
+    </script>
   </head>
   <body>
     <app-root></app-root>

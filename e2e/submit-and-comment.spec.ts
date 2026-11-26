@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { createUserAndLogIn, storyTitles, submitStory, uniqueName } from './helpers';
+import { openPage, createUserAndLogIn, storyTitles, submitStory, uniqueName } from './helpers';
 
 test.describe('submitting stories and questions', () => {
   test('a story with a link shows up in New, and is a story', async ({ page }) => {
@@ -140,7 +140,7 @@ test.describe('comments', () => {
     page,
   }) => {
     await createUserAndLogIn(page, uniqueName('nate'));
-    await page.goto('/item/101');
+    await openPage(page, '/item/101');
     await page.getByLabel('Add a comment').fill('Gone after reload');
     await page.getByRole('button', { name: 'Add comment' }).click();
     await expect(page.getByText('Gone after reload')).toBeVisible();

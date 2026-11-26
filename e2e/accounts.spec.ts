@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { logIn, password, createUser, createUserAndLogIn, uniqueName } from './helpers';
+import { openPage, logIn, password, createUser, createUserAndLogIn, uniqueName } from './helpers';
 
 test.describe('accounts', () => {
   test('a new user can be created, log in and log out', async ({ page }) => {
@@ -39,7 +39,7 @@ test.describe('accounts', () => {
     const username = uniqueName('dave');
     await createUser(page, username);
 
-    await page.goto('/create-user');
+    await openPage(page, '/create-user');
     await page.getByLabel('Username').fill(username);
     await page.getByLabel('Password', { exact: true }).fill(password);
     await page.getByLabel('Verify password').fill(password);
@@ -52,7 +52,7 @@ test.describe('accounts', () => {
   }) => {
     const username = uniqueName('eve');
     await createUser(page, username);
-    await page.goto('/submit');
+    await openPage(page, '/submit');
 
     await expect(page).toHaveURL(/\/log-in\?returnUrl=%2Fsubmit/);
     await logIn(page, username);
@@ -76,7 +76,7 @@ test.describe('accounts', () => {
     const username = uniqueName('finn');
     await createUserAndLogIn(page, username);
 
-    await page.goto('/change-password');
+    await openPage(page, '/change-password');
     await page.getByLabel('Current password').fill(password);
     await page.getByLabel('New password', { exact: true }).fill('a-brand-new-password');
     await page.getByLabel('Verify new password').fill('a-brand-new-password');
@@ -89,7 +89,7 @@ test.describe('accounts', () => {
       .getByRole('link', { name: 'Close' })
       .click();
     await page.getByRole('button', { name: 'Log Out' }).click();
-    await page.goto('/log-in');
+    await openPage(page, '/log-in');
     await page.getByLabel('Username').fill(username);
     await page.getByLabel('Password', { exact: true }).fill('a-brand-new-password');
     await page.getByRole('button', { name: 'Log in', exact: true }).click();

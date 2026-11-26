@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { createUserAndLogIn, submitStory, uniqueName } from './helpers';
+import { openPage, createUserAndLogIn, submitStory, uniqueName } from './helpers';
 
 /** The WCAG 2.0, 2.1 and 2.2 rules at levels A and AA (which includes colour contrast), and axe's best-practice rules. */
 const wcagAa = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'];
@@ -263,7 +263,7 @@ for (const theme of ['light', 'dark'] as const) {
       expectHoverReadable(loggedIn);
       expectHovered(loggedIn, ['Log Out', `Profile for ${username}`]);
 
-      await page.goto('/item/101');
+      await openPage(page, '/item/101');
       await expect(page.getByLabel('Add a comment')).toBeVisible();
       await page.getByLabel('Add a comment').fill('Hover over me');
       const thread = await hoverContrasts(page);
@@ -313,7 +313,7 @@ for (const theme of ['light', 'dark'] as const) {
       await expect(page.getByRole('dialog', { name: 'Log in' })).toBeVisible();
       await expectNoViolations(page);
 
-      await page.goto('/create-user');
+      await openPage(page, '/create-user');
       await page.getByLabel('Username').fill('a');
       await page.getByLabel('Username').blur();
       await expect(page.getByRole('dialog', { name: 'Create a new user' })).toBeVisible();

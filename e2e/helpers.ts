@@ -7,9 +7,20 @@ export function uniqueName(prefix: string) {
   return `${prefix}${Math.random().toString(36).slice(2, 8)}`;
 }
 
+/** Waits for the app to take over the page the server sent: what is typed before then is erased. */
+export async function appIsReady(page: Page) {
+  await expect(page.locator('app-root')).not.toHaveAttribute('ngh');
+}
+
+/** Opens a page, ready to have its forms filled in. */
+export async function openPage(page: Page, path: string) {
+  await page.goto(path);
+  await appIsReady(page);
+}
+
 /** Makes an account, the way a person does: the create-user dialog, then the log-in dialog. */
 export async function createUser(page: Page, username: string) {
-  await page.goto('/create-user');
+  await openPage(page, '/create-user');
   await page.getByLabel('Username').fill(username);
   await page.getByLabel('Password', { exact: true }).fill(password);
   await page.getByLabel('Verify password').fill(password);

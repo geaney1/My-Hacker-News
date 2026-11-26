@@ -2,7 +2,7 @@
 <ng-template #projected><ng-content /></ng-template>
 
 @if (login()) {
-  <form class="add-comment" [formRoot]="newCommentForm">
+  <form class="add-comment" method="post" [formRoot]="newCommentForm">
     <label class="visually-hidden" for="new-comment">Add a comment</label>
     <textarea
       id="new-comment"

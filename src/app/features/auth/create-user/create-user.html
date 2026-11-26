@@ -1,5 +1,5 @@
 ﻿<app-auth-card heading="Create a new user">
-  <form class="auth-form" [formRoot]="createUserForm">
+  <form class="auth-form" method="post" [formRoot]="createUserForm">
     <app-form-text-field
       fieldId="username"
       label="Username"

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { createUserAndLogIn, uniqueName } from './helpers';
+import { openPage, createUserAndLogIn, uniqueName } from './helpers';
 
 /** The live region that says the page has changed. */
 const announcer = (page: import('@playwright/test').Page) =>
@@ -86,7 +86,7 @@ test.describe('keyboard and screen reader support', () => {
   test('a field that is wrong says so, and a field that has to be filled in says that too', async ({
     page,
   }) => {
-    await page.goto('/create-user');
+    await openPage(page, '/create-user');
     const username = page.getByLabel('Username');
     await expect(username).toHaveAttribute('aria-required', 'true');
     await expect(username).not.toHaveAttribute('aria-invalid', 'true');
