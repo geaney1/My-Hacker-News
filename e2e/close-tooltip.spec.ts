@@ -4,6 +4,9 @@ test('the close icon of a dialog shows a "Close" tooltip on hover and on keyboar
   page,
 }) => {
   await page.goto('/create-user');
+  // The server sends the dialog before the app in it has loaded. As the app starts, it moves the
+  // focus to the first field, which would take it away from the Close link in the middle of the test.
+  await expect(page.getByLabel('Username')).toBeFocused();
   const close = page.getByRole('link', { name: 'Close' });
   const tooltip = () =>
     close.evaluate((element) => {

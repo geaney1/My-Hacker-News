@@ -285,6 +285,9 @@ for (const theme of ['light', 'dark'] as const) {
       await expect(
         page.getByRole('dialog', { name: 'Profile' }).getByRole('button', { name: 'Update' }),
       ).toBeEnabled();
+      // This link arrives with the user's details. The links and buttons are counted before they are
+      // hovered, so one that appeared afterwards would leave the last one out.
+      await expect(page.getByRole('link', { name: 'View public profile' })).toBeVisible();
       const profile = await hoverContrasts(page);
       expectHoverReadable(profile);
       expectHovered(profile, ['Update', 'Change password']);
