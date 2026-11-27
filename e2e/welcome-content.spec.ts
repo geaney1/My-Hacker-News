@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { createUserAndLogIn, uniqueName } from './helpers';
 
-test('the welcome page shows its text, and its three links open in a new tab', async ({ page }) => {
+test('the welcome page shows its text, and its three links go where they should', async ({
+  page,
+}) => {
   await createUserAndLogIn(page, uniqueName('welc'));
   await page.goto('/welcome');
 
@@ -16,17 +18,14 @@ test('the welcome page shows its text, and its three links open in a new tab', a
   );
   const perch = article.getByRole('link', { name: 'that (opens in a new tab)', exact: true });
   await expect(perch).toHaveAttribute('href', 'http://en.wikipedia.org/wiki/Nile_perch');
-  // All three links open in a new tab, and say so to a screen reader.
+  // The two links to other sites open in a new tab, and say so to a screen reader.
   await expect(article.getByRole('link')).toHaveCount(3);
-  await expect(article.locator('a[target="_blank"][rel="noopener"]')).toHaveCount(3);
-  await expect(article.getByRole('link', { name: /\(opens in a new tab\)$/ })).toHaveCount(3);
+  await expect(article.locator('a[target="_blank"][rel="noopener"]')).toHaveCount(2);
+  await expect(article.getByRole('link', { name: /\(opens in a new tab\)$/ })).toHaveCount(2);
 
-  // The first opens this app's Top page in the new tab, and the welcome page stays where it was.
-  const [newTab] = await Promise.all([
-    page.context().waitForEvent('page'),
-    article.getByRole('link', { name: 'Hacker News' }).click(),
-  ]);
-  await expect(newTab).toHaveURL(/\/top$/);
-  await expect(newTab.locator('article.story').first()).toBeVisible();
-  await expect(page).toHaveURL(/\/welcome$/);
+  // The first goes to this app's Top page, in the same tab.
+  await article.getByRole('link', { name: 'Hacker News', exact: true }).click();
+  await expect(page).toHaveURL(/\/top$/);
+  await expect(page.locator('article.story').first()).toBeVisible();
+  expect(page.context().pages()).toHaveLength(1);
 });

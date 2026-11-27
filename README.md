@@ -29,7 +29,7 @@ So the app is split in two:
 | Part | Is it real? | Where it comes from |
 | --- | --- | --- |
 | Story lists (Top, New, Best, Ask, Show, Jobs), stories, comments, polls, public user pages, "what changed" updates | **Real** | Read live from Hacker News, through this app's own server |
-| The welcome page | **A stored copy** | A copy of the Hacker News welcome page, written into `src/app/features/welcome/welcome.html`. It is not fetched, so it changes only when someone edits that file. Its three links open in a new tab: "Hacker News" goes to this app's Top page, and the other two to the same addresses as on Hacker News |
+| The welcome page | **A stored copy** | A copy of the Hacker News welcome page, written into `src/app/features/welcome/welcome.html`. It is not fetched, so it changes only when someone edits that file. Its "Hacker News" link goes to this app's Top page. The other two links go to the same addresses as on Hacker News, and open in a new tab |
 | Accounts, log-in, log-out, change password | **Simulated: belongs to this app only** | Saved on this app's server. They are *not* Hacker News accounts |
 | Submitting a story or a question | **Simulated** | Saved on this app's server (`data/submissions.json`). Never sent to Hacker News |
 | Writing a comment on a story that was submitted *in this app* | **Simulated** | Saved on this app's server (`data/comments.json`) |
